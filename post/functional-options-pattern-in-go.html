@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="本文译自 Functional Options Pattern in Go 版权@归原文所有.">
+<meta name="keywords" content="translation,go">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go 函数选项模式">
+<meta property="og:url" content="https://lingchao.xin/post/functional-options-pattern-in-go.html">
+<meta property="og:site_name" content="A coder @ work">
+<meta property="og:description" content="本文译自 Functional Options Pattern in Go 版权@归原文所有.">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2018-03-26T07:25:06.568Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Go 函数选项模式">
+<meta name="twitter:description" content="本文译自 Functional Options Pattern in Go 版权@归原文所有.">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="https://www.gravatar.com/avatar/f4254a13e728ba649241e5776b4884db?s=16">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="https://www.gravatar.com/avatar/f4254a13e728ba649241e5776b4884db?s=192" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="https://www.gravatar.com/avatar/f4254a13e728ba649241e5776b4884db?s=180">
+          
+        
+    
+    <!-- title -->
+    <title>Go 函数选项模式</title>
+    <!-- styles -->
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="A coder @ work" type="application/atom+xml" />
+    
+</head>
+
+<body class="max-width mx-auto px3">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Archives</a></li>
+         
+          <li><a href="https://github.com/douglarek?tab=repositories">Projects</a></li>
+         
+          <li><a href="/atom.xml">Rss</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/post/json-tips-in-go.html"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/post/gos-work-stealing-scheduler.html"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://lingchao.xin/post/functional-options-pattern-in-go.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://lingchao.xin/post/functional-options-pattern-in-go.html&text=Go 函数选项模式"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://lingchao.xin/post/functional-options-pattern-in-go.html&title=Go 函数选项模式"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lingchao.xin/post/functional-options-pattern-in-go.html&is_video=false&description=Go 函数选项模式"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Go 函数选项模式&body=Check out this article: https://lingchao.xin/post/functional-options-pattern-in-go.html"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://lingchao.xin/post/functional-options-pattern-in-go.html&title=Go 函数选项模式"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/functional-options-pattern-in-go.html&title=Go 函数选项模式"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/functional-options-pattern-in-go.html&title=Go 函数选项模式"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/functional-options-pattern-in-go.html&title=Go 函数选项模式"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/functional-options-pattern-in-go.html&name=Go 函数选项模式&description=&lt;p&gt;本文译自 &lt;a href=&#34;https://halls-of-valhalla.org/beta/articles/functional-options-pattern-in-go,54/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Functional Options Pattern in Go&lt;/a&gt; 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index my4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Go 函数选项模式
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">A coder @ work</span>
+      </span>
+      
+    <div class="postdate">
+        <time datetime="2018-02-01T04:00:04.000Z" itemprop="datePublished">2018-02-01</time>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/go/">go</a>, <a class="tag-link" href="/tags/translation/">translation</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>本文译自 <a href="https://halls-of-valhalla.org/beta/articles/functional-options-pattern-in-go,54/" target="_blank" rel="noopener">Functional Options Pattern in Go</a> 版权@归原文所有.<br><a id="more"></a></p>
+<p>Golang 开发者遇到的许多问题之一是尝试将一个函数的参数设置为可选. 这是一个非常常见的用例, 有些对象应该使用一些基本的默认设置来开箱即用, 并且你偶尔可能需要提供一些更详细的配置.</p>
+<p>在很多语言中这很容易; 在 C 族语言中, 可以使用不同数量的参数提供相同函数的多个版本; 在像 PHP 这样的语言中, 可以给参数一个默认值，并在调用方法时忽略它们. 但是在 Golang 中, 这两种方式你哪个也用不了. 那么你如何创建一个函数, 用户可以指定一些额外的配置?</p>
+<p>有很多可能的方法可以做到这一点, 但是大多数都不能满足要求, 或者需要在服务端的代码中进行额外的检查和验证, 或者通过传递额外的客户端不关心的参数来为客户端做额外的工作.</p>
+<p>我将介绍一些不同的方案, 并说明为什么每个都不是最理想的, 然后我们将建立我们自己的方式来作为最终干净的解决方案: 函数式选项模式 (Functional Options Pattern).</p>
+<p>我们来看一个例子. 比方说, 我们有一些名为 StuffClient 的服务, 它有一些东西, 并有两个配置选项(timeout 和 retries):</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">type</span> StuffClient <span class="keyword">interface</span> &#123;</span><br><span class="line">    DoStuff() error</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> stuffClient <span class="keyword">struct</span> &#123;</span><br><span class="line">    conn    Connection</span><br><span class="line">    timeout <span class="keyword">int</span></span><br><span class="line">    retries <span class="keyword">int</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>结构体 stuffClient 是私有的, 所以我们应该为它提供一些构造器:</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewStuffClient</span><span class="params">(conn Connection, timeout, retries <span class="keyword">int</span>)</span> <span class="title">StuffClient</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> &amp;stuffClient&#123;</span><br><span class="line">        conn:    conn,</span><br><span class="line">        timeout: timeout,</span><br><span class="line">        retries: retries,</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>嗯, 但是现在我们每次调用 NewStuffClient 时都要提供 timeout 和 retries. 而大多数时候我们只想使用默认值. 我们不能用不同的参数数量来定义多个版本的 NewStuffClient, 否则我们会得到一个类似 “NewStuffClient redeclared in this blockt” 的编译错误.</p>
+<p>一个方案是创建另一个不同名称的构造器:</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewStuffClient</span><span class="params">(conn Connection)</span> <span class="title">StuffClient</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> &amp;stuffClient&#123;</span><br><span class="line">        conn:    conn,</span><br><span class="line">        timeout: DEFAULT_TIMEOUT,</span><br><span class="line">        retries: DEFAULT_RETRIES,</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewStuffClientWithOptions</span><span class="params">(conn Connection, timeout, retries <span class="keyword">int</span>)</span> <span class="title">StuffClient</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> &amp;stuffClient&#123;</span><br><span class="line">        conn:    conn,</span><br><span class="line">        timeout: timeout,</span><br><span class="line">        retries: retries,</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>但是, 这有点蹩脚. 我们可以做得比这更好. 如果我们传入了一个配置对象呢:</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">type</span> StuffClientOptions <span class="keyword">struct</span> &#123;</span><br><span class="line">    Retries <span class="keyword">int</span> <span class="comment">//number of times to retry the request before giving up</span></span><br><span class="line">    Timeout <span class="keyword">int</span> <span class="comment">//connection timeout in seconds</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewStuffClient</span><span class="params">(conn Connection, options StuffClientOptions)</span> <span class="title">StuffClient</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> &amp;stuffClient&#123;</span><br><span class="line">        conn:    conn,</span><br><span class="line">        timeout: options.Timeout,</span><br><span class="line">        retries: options.Retries,</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>但是, 这也不是很好. 现在我们总是需要创建 StuffClientOptions, 并且即使我们不想指定任何选项也要传递它. 而且我们也没有自动填充默认值, 除非我们在代码中添加了一堆检查, 或者我们可以传入一个 DefaultStuffClientOptions 变量 (也不好, 因为它可以在一个地方修改导致其他地方有问题).</p>
+<p>那么解决方案是什么? 解决这个难题最好的方法是使用函数式选项模式, 利用 Go 对闭包的方便支持. 让我们继续我们上面定义的 StuffClientOptions, 但是我们会添加一些东西:</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">type</span> StuffClientOption <span class="function"><span class="keyword">func</span><span class="params">(*StuffClientOptions)</span></span></span><br><span class="line"><span class="function"><span class="title">type</span> <span class="title">StuffClientOptions</span> <span class="title">struct</span></span> &#123;</span><br><span class="line">    Retries <span class="keyword">int</span> <span class="comment">//number of times to retry the request before giving up</span></span><br><span class="line">    Timeout <span class="keyword">int</span> <span class="comment">//connection timeout in seconds</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithRetries</span><span class="params">(r <span class="keyword">int</span>)</span> <span class="title">StuffClientOption</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(o *StuffClientOptions)</span></span> &#123;</span><br><span class="line">        o.Retries = r</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithTimeout</span><span class="params">(t <span class="keyword">int</span>)</span> <span class="title">StuffClientOption</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(o *StuffClientOptions)</span></span> &#123;</span><br><span class="line">        o.Timeout = t</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>泥土般芬芳, 对吧? 究竟发生了什么? 基本上我们有我们的结构定义我们的 StuffClient 的可用选项. 另外现在我们定义了一个名为 StuffClientOption 的东东(这次是单数), 它只是一个接受我们的选项 struct 作为参数的函数. 我们已经定义了另外一些函数 WithRetries 和 WithTimeout, 它们返回一个闭包. 现在魔法降临:</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> defaultStuffClientOptions = StuffClientOptions&#123;</span><br><span class="line">    Retries: <span class="number">3</span>,</span><br><span class="line">    Timeout: <span class="number">2</span>,</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewStuffClient</span><span class="params">(conn Connection, opts ...StuffClientOption)</span> <span class="title">StuffClient</span></span> &#123;</span><br><span class="line">    options := defaultStuffClientOptions</span><br><span class="line">    <span class="keyword">for</span> _, o := <span class="keyword">range</span> opts &#123;</span><br><span class="line">        o(&amp;options)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> &amp;stuffClient&#123;</span><br><span class="line">        conn:    conn,</span><br><span class="line">        timeout: options.Timeout,</span><br><span class="line">        retries: options.Retries,</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们已经定义了一个额外的未导出(unexposed)变量, 包含我们的默认选项, 我们现在调整了我们的构造函数, 而不是接受一个可变参数. 然后, 我们遍历 StuffClientOption (单数) 列表, 并对每一项应用返回的闭包到我们的选项变量.</p>
+<p>现在我们要做的就是这样:</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line">x := NewStuffClient(Connection&#123;&#125;)</span><br><span class="line">fmt.Println(x) <span class="comment">// prints &amp;&#123;&#123;&#125; 2 3&#125;</span></span><br><span class="line">x = NewStuffClient(</span><br><span class="line">    Connection&#123;&#125;,</span><br><span class="line">    WithRetries(<span class="number">1</span>),</span><br><span class="line">)</span><br><span class="line">fmt.Println(x) <span class="comment">// prints &amp;&#123;&#123;&#125; 2 1&#125;</span></span><br><span class="line">x = NewStuffClient(</span><br><span class="line">    Connection&#123;&#125;,</span><br><span class="line">    WithRetries(<span class="number">1</span>),</span><br><span class="line">    WithTimeout(<span class="number">1</span>),</span><br><span class="line">)</span><br><span class="line">fmt.Println(x) <span class="comment">// prints &amp;&#123;&#123;&#125; 1 1&#125;</span></span><br></pre></td></tr></table></figure>
+<p>这看起来相当不错而且可用. 而关于它的好的部分是, 我们可以随时添加新的选项, 只需要对代码进行非常少量的更改. 把这些都组合起来就是这样:</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> defaultStuffClientOptions = StuffClientOptions&#123;</span><br><span class="line">    Retries: <span class="number">3</span>,</span><br><span class="line">    Timeout: <span class="number">2</span>,</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> StuffClientOption <span class="function"><span class="keyword">func</span><span class="params">(*StuffClientOptions)</span></span></span><br><span class="line"><span class="function"><span class="title">type</span> <span class="title">StuffClientOptions</span> <span class="title">struct</span></span> &#123;</span><br><span class="line">    Retries <span class="keyword">int</span> <span class="comment">//number of times to retry the request before giving up</span></span><br><span class="line">    Timeout <span class="keyword">int</span> <span class="comment">//connection timeout in seconds</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithRetries</span><span class="params">(r <span class="keyword">int</span>)</span> <span class="title">StuffClientOption</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(o *StuffClientOptions)</span></span> &#123;</span><br><span class="line">        o.Retries = r</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithTimeout</span><span class="params">(t <span class="keyword">int</span>)</span> <span class="title">StuffClientOption</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(o *StuffClientOptions)</span></span> &#123;</span><br><span class="line">        o.Timeout = t</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> StuffClient <span class="keyword">interface</span> &#123;</span><br><span class="line">    DoStuff() error</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> stuffClient <span class="keyword">struct</span> &#123;</span><br><span class="line">    conn    Connection</span><br><span class="line">    timeout <span class="keyword">int</span></span><br><span class="line">    retries <span class="keyword">int</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> Connection <span class="keyword">struct</span> &#123;&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewStuffClient</span><span class="params">(conn Connection, opts ...StuffClientOption)</span> <span class="title">StuffClient</span></span> &#123;</span><br><span class="line">    options := defaultStuffClientOptions</span><br><span class="line">    <span class="keyword">for</span> _, o := <span class="keyword">range</span> opts &#123;</span><br><span class="line">        o(&amp;options)</span><br><span class="line">    &#125;</span><br><span class="line">        <span class="keyword">return</span> &amp;stuffClient&#123;</span><br><span class="line">            conn:    conn,</span><br><span class="line">            timeout: options.Timeout,</span><br><span class="line">            retries: options.Retries,</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c stuffClient)</span> <span class="title">DoStuff</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果你想自己尝试一下, 去 <a href="https://play.golang.org/p/VcWqWcAEyz" target="_blank" rel="noopener">Go Playground</a> 吧.</p>
+<p>但是可以通过删除 StuffClientOptions 结构并直接将选项应用到我们的 StuffClient 来进一步简化.</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> defaultStuffClient = stuffClient&#123;</span><br><span class="line">    retries: <span class="number">3</span>,</span><br><span class="line">    timeout: <span class="number">2</span>,</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> StuffClientOption <span class="function"><span class="keyword">func</span><span class="params">(*stuffClient)</span></span></span><br><span class="line"><span class="function"><span class="title">func</span> <span class="title">WithRetries</span><span class="params">(r <span class="keyword">int</span>)</span> <span class="title">StuffClientOption</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(o *stuffClient)</span></span> &#123;</span><br><span class="line">        o.retries = r</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithTimeout</span><span class="params">(t <span class="keyword">int</span>)</span> <span class="title">StuffClientOption</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(o *stuffClient)</span></span> &#123;</span><br><span class="line">        o.timeout = t</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> StuffClient <span class="keyword">interface</span> &#123;</span><br><span class="line">    DoStuff() error</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> stuffClient <span class="keyword">struct</span> &#123;</span><br><span class="line">    conn    Connection</span><br><span class="line">    timeout <span class="keyword">int</span></span><br><span class="line">    retries <span class="keyword">int</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> Connection <span class="keyword">struct</span>&#123;&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewStuffClient</span><span class="params">(conn Connection, opts ...StuffClientOption)</span> <span class="title">StuffClient</span></span> &#123;</span><br><span class="line">    client := defaultStuffClient</span><br><span class="line">    <span class="keyword">for</span> _, o := <span class="keyword">range</span> opts &#123;</span><br><span class="line">        o(&amp;client)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    client.conn = conn</span><br><span class="line">    <span class="keyword">return</span> client</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c stuffClient)</span> <span class="title">DoStuff</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以在<a href="https://play.golang.org/p/Z5P5Om4KDL" target="_blank" rel="noopener">这里</a>尝试一下. 在我们的示例中, 我们只是直接将配置应用到我们的结构中, 在中间有一个额外的配置结构是没有意义的. 但是请注意, 在许多情况下, 您可能仍然想使用前面示例中的 config 结构体; 例如, 如果你的构造器使用配置选项来执行一些操作, 但不把它们存储到结构中, 或者传递到其他地方. 配置结构变体是更通用的实现.</p>
+<p>感谢 Rob Pike 和 Dave Cheney 推广这种设计模式.</p>
+
+  </div>
+</article>
+
+    <div class="blog-post-comments">
+        <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the comments.</noscript>
+        </div>
+    </div>
+
+
+
+    </div>
+    
+      <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Archives</a></li>
+         
+          <li><a href="https://github.com/douglarek?tab=repositories">Projects</a></li>
+         
+          <li><a href="/atom.xml">Rss</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://lingchao.xin/post/functional-options-pattern-in-go.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://lingchao.xin/post/functional-options-pattern-in-go.html&text=Go 函数选项模式"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://lingchao.xin/post/functional-options-pattern-in-go.html&title=Go 函数选项模式"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lingchao.xin/post/functional-options-pattern-in-go.html&is_video=false&description=Go 函数选项模式"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Go 函数选项模式&body=Check out this article: https://lingchao.xin/post/functional-options-pattern-in-go.html"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://lingchao.xin/post/functional-options-pattern-in-go.html&title=Go 函数选项模式"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/functional-options-pattern-in-go.html&title=Go 函数选项模式"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/functional-options-pattern-in-go.html&title=Go 函数选项模式"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/functional-options-pattern-in-go.html&title=Go 函数选项模式"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/functional-options-pattern-in-go.html&name=Go 函数选项模式&description=&lt;p&gt;本文译自 &lt;a href=&#34;https://halls-of-valhalla.org/beta/articles/functional-options-pattern-in-go,54/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Functional Options Pattern in Go&lt;/a&gt; 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+    
+    <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; 2018 Lingchao Xin
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Archives</a></li>
+         
+          <li><a href="https://github.com/douglarek?tab=repositories">Projects</a></li>
+         
+          <li><a href="/atom.xml">Rss</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>
+<!-- styles -->
+<link rel="stylesheet" href="/lib/font-awesome/css/fontawesome-all.min.css">
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+<!-- jquery -->
+<script src="/lib/jquery/jquery.min.js"></script>
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+<script src="/js/main.js"></script>
+<!-- search -->
+
+<!-- Google Analytics -->
+
+    <script type="text/javascript">
+        (function(i,s,o,g,r,a,m) {i['GoogleAnalyticsObject']=r;i[r]=i[r]||function() {
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+        ga('create', 'UA-47053188-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+
+<!-- Disqus Comments -->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'douglarek';
+
+        (function(){
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        }());
+    </script>
+
+

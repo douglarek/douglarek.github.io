@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>A coder @ work</title>
+  
+  
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="https://lingchao.xin/"/>
+  <updated>2018-03-26T06:02:39.963Z</updated>
+  <id>https://lingchao.xin/</id>
+  
+  <author>
+    <name>Lingchao Xin</name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>理解 Go defer, panic, recover</title>
+    <link href="https://lingchao.xin/post/go-defer-panic-and-recover.html"/>
+    <id>https://lingchao.xin/post/go-defer-panic-and-recover.html</id>
+    <published>2018-03-23T02:05:04.000Z</published>
+    <updated>2018-03-26T06:02:39.963Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;不像 Go 的其他流程控制(if, for, switch, goto, go) 一样, defer, panic 和 recover 用的比较少.&lt;br&gt;
+    
+    </summary>
+    
+    
+      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>定义 Go 模块</title>
+    <link href="https://lingchao.xin/post/vgo-module.html"/>
+    <id>https://lingchao.xin/post/vgo-module.html</id>
+    <published>2018-02-25T07:00:04.000Z</published>
+    <updated>2018-03-26T06:26:53.739Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;本文译自 &lt;a href=&quot;https://research.swtch.com/vgo-module&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Defining Go Modules&lt;/a&gt;, &lt;a href=&quot;https://lingchao.xin/tag/vgo.html&quot;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 6 部分, 版权@归原文所有.&lt;br&gt;
+    
+    </summary>
+    
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
+    
+      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+      <category term="vgo" scheme="https://lingchao.xin/tags/vgo/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>可复制, 可验证, 已验证的构建</title>
+    <link href="https://lingchao.xin/post/vgo-repro.html"/>
+    <id>https://lingchao.xin/post/vgo-repro.html</id>
+    <published>2018-02-24T11:00:04.000Z</published>
+    <updated>2018-03-26T06:26:28.219Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;本文译自 &lt;a href=&quot;https://research.swtch.com/vgo-repro&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Reproducible, Verifiable, Verified Builds&lt;/a&gt;, &lt;a href=&quot;https://lingchao.xin/tag/vgo.html&quot;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 5 部分, 版权@归原文所有.&lt;br&gt;
+    
+    </summary>
+    
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
+    
+      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+      <category term="vgo" scheme="https://lingchao.xin/tags/vgo/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>最小版本选择</title>
+    <link href="https://lingchao.xin/post/vgo-mvs.html"/>
+    <id>https://lingchao.xin/post/vgo-mvs.html</id>
+    <published>2018-02-23T11:24:04.000Z</published>
+    <updated>2018-03-26T06:29:39.668Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;本文译自 &lt;a href=&quot;https://research.swtch.com/vgo-mvs&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Minimal Version Selection&lt;/a&gt;, &lt;a href=&quot;https://lingchao.xin/tag/vgo.html&quot;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 4 部分, 版权@归原文所有.&lt;br&gt;
+    
+    </summary>
+    
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
+    
+      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+      <category term="vgo" scheme="https://lingchao.xin/tags/vgo/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>语义导入版本控制</title>
+    <link href="https://lingchao.xin/post/vgo-import.html"/>
+    <id>https://lingchao.xin/post/vgo-import.html</id>
+    <published>2018-02-22T14:01:04.000Z</published>
+    <updated>2018-03-26T06:31:15.873Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;本文译自 &lt;a href=&quot;https://research.swtch.com/vgo-import&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Semantic Import Versioning&lt;/a&gt;, &lt;a href=&quot;https://lingchao.xin/tag/vgo.html&quot;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 3 部分, 版权@归原文所有.&lt;br&gt;
+    
+    </summary>
+    
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
+    
+      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+      <category term="vgo" scheme="https://lingchao.xin/tags/vgo/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>版本化 Go 之旅</title>
+    <link href="https://lingchao.xin/post/vgo-tour.html"/>
+    <id>https://lingchao.xin/post/vgo-tour.html</id>
+    <published>2018-02-22T03:01:04.000Z</published>
+    <updated>2018-03-26T06:32:37.508Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;本文译自 &lt;a href=&quot;https://research.swtch.com/vgo-tour&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;A Tour of Versioned Go (vgo)&lt;/a&gt;, &lt;a href=&quot;https://lingchao.xin/tag/vgo.html&quot;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 2 部分, 版权@归原文所有.&lt;br&gt;
+    
+    </summary>
+    
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
+    
+      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+      <category term="vgo" scheme="https://lingchao.xin/tags/vgo/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Go += 包版本</title>
+    <link href="https://lingchao.xin/post/vgo-intro.html"/>
+    <id>https://lingchao.xin/post/vgo-intro.html</id>
+    <published>2018-02-21T07:01:04.000Z</published>
+    <updated>2018-03-26T06:34:02.173Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;本文译自 &lt;a href=&quot;https://research.swtch.com/vgo-intro&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Go += Package Versioning&lt;/a&gt;, &lt;a href=&quot;https://lingchao.xin/tag/vgo.html&quot;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 1 部分, 版权@归原文所有.&lt;br&gt;
+    
+    </summary>
+    
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
+    
+      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+      <category term="vgo" scheme="https://lingchao.xin/tags/vgo/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>开发者关系权利法案</title>
+    <link href="https://lingchao.xin/post/a-developer-relations-bill-of-rights.html"/>
+    <id>https://lingchao.xin/post/a-developer-relations-bill-of-rights.html</id>
+    <published>2018-02-19T12:01:04.000Z</published>
+    <updated>2018-03-26T06:35:21.564Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;本文译自 &lt;a href=&quot;https://medium.com/glitch/a-developer-relations-bill-of-rights-21381920e273&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;A Developer Relations Bill of Rights&lt;/a&gt; 版权@归原文所有.&lt;br&gt;
+    
+    </summary>
+    
+    
+      <category term="software development" scheme="https://lingchao.xin/tags/software-development/"/>
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Go JSON 技巧</title>
+    <link href="https://lingchao.xin/post/json-tips-in-go.html"/>
+    <id>https://lingchao.xin/post/json-tips-in-go.html</id>
+    <published>2018-02-10T06:30:04.000Z</published>
+    <updated>2018-03-26T07:23:09.958Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;相对于很多的语言来说, Go 的 JSON 解析可谓简单至极.&lt;br&gt;
+    
+    </summary>
+    
+    
+      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Go 函数选项模式</title>
+    <link href="https://lingchao.xin/post/functional-options-pattern-in-go.html"/>
+    <id>https://lingchao.xin/post/functional-options-pattern-in-go.html</id>
+    <published>2018-02-01T04:00:04.000Z</published>
+    <updated>2018-03-26T07:25:06.568Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;本文译自 &lt;a href=&quot;https://halls-of-valhalla.org/beta/articles/functional-options-pattern-in-go,54/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Functional Options Pattern in Go&lt;/a&gt; 版权@归原文所有.&lt;br&gt;
+    
+    </summary>
+    
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
+    
+      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Go work-stealing 调度器</title>
+    <link href="https://lingchao.xin/post/gos-work-stealing-scheduler.html"/>
+    <id>https://lingchao.xin/post/gos-work-stealing-scheduler.html</id>
+    <published>2018-01-31T06:35:04.000Z</published>
+    <updated>2018-03-26T09:58:28.358Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;本文译自 Rakyll 的 [scheduler] (&lt;a href=&quot;https://rakyll.org/scheduler/)版权@归原文所有&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;https://rakyll.org/scheduler/)版权@归原文所有&lt;/a&gt;.&lt;br&gt;
+    
+    </summary>
+    
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
+    
+      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Go 谚语</title>
+    <link href="https://lingchao.xin/post/go-proverbs.html"/>
+    <id>https://lingchao.xin/post/go-proverbs.html</id>
+    <published>2018-01-28T01:25:04.000Z</published>
+    <updated>2018-03-26T08:14:57.488Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;p&gt;本文译自&lt;a href=&quot;http://go-proverbs.github.io/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;go-proverbs&lt;/a&gt;, 脱胎于 Rob Pike 振奋人心的演讲视频 &lt;a
+        
+      
+    
+    </summary>
+    
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
+    
+      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Go 调度工作机制</title>
+    <link href="https://lingchao.xin/post/how-does-the-golang-scheduler-work.html"/>
+    <id>https://lingchao.xin/post/how-does-the-golang-scheduler-work.html</id>
+    <published>2018-01-27T05:25:04.000Z</published>
+    <updated>2018-03-26T09:53:01.863Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;本文是来自 Quora 上面一个 Go 相关的&lt;a href=&quot;https://www.quora.com/How-does-the-golang-scheduler-work/answer/Ian-Lance-Taylor?share=508736a1&amp;amp;srid=imO0&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;问题&lt;/a&gt;.&lt;br&gt;
+    
+    </summary>
+    
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
+    
+      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>MySQL Order By 按特定的字段值排序</title>
+    <link href="https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html"/>
+    <id>https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html</id>
+    <published>2018-01-25T03:55:04.000Z</published>
+    <updated>2018-03-26T09:33:02.106Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;本文译自(&lt;a href=&quot;https://www.electrictoolbox.com/mysql-order-specific-field-values/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Ordering by specific field values with MySQL&lt;/a&gt;)版权@归原文所有&lt;/p&gt;
+&lt;p&gt;在 SQL 查询中可能有时需要使用 ASC 或 DESC 或使用特殊排序字段才能完成的特定顺序. MySQL 有一个 ORDER BY FIELD 函数可以用来做这个.&lt;br&gt;
+    
+    </summary>
+    
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
+    
+      <category term="mysql" scheme="https://lingchao.xin/tags/mysql/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Go 命名返回值的好处</title>
+    <link href="https://lingchao.xin/post/golang-internals-part-2-nice-benefits-of-named-return-values.html"/>
+    <id>https://lingchao.xin/post/golang-internals-part-2-nice-benefits-of-named-return-values.html</id>
+    <published>2018-01-22T09:42:04.000Z</published>
+    <updated>2018-03-26T10:15:08.968Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;本文译自(&lt;a href=&quot;https://blog.minio.io/golang-internals-part-2-nice-benefits-of-named-return-values-1e95305c8687&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Golang 内幕第 2 部分: 命名返回值的好处&lt;/a&gt;)版权@归原文所有&lt;/p&gt;
+&lt;p&gt;你可能知道 Golang 提供了命名返回值的能力. 到目前为止在 &lt;a href=&quot;https://github.com/minio/minio&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;minio&lt;/a&gt; 中我们还没有使用这个功能, 但是这将会改变, 因为我们将在这个博客文章中解释一些隐藏的好处.&lt;br&gt;
+    
+    </summary>
+    
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
+    
+      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Go 没有传引用</title>
+    <link href="https://lingchao.xin/post/there-is-no-pass-by-reference-in-go.html"/>
+    <id>https://lingchao.xin/post/there-is-no-pass-by-reference-in-go.html</id>
+    <published>2018-01-15T08:05:04.000Z</published>
+    <updated>2018-03-26T07:31:48.227Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;本文译自(&lt;a href=&quot;https://dave.cheney.net/2017/04/29/there-is-no-pass-by-reference-in-go&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Go 没有传引用&lt;/a&gt;)版权@归原文所有.&lt;br&gt;
+    
+    </summary>
+    
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
+    
+      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>为什么 Go 不实现分代和紧凑 gc</title>
+    <link href="https://lingchao.xin/post/why-golang-garbage-collector-not-implement-generational-and-compact-gc.html"/>
+    <id>https://lingchao.xin/post/why-golang-garbage-collector-not-implement-generational-and-compact-gc.html</id>
+    <published>2018-01-13T08:30:04.000Z</published>
+    <updated>2018-03-26T07:35:57.258Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;本文译自 Google 论坛(&lt;a href=&quot;https://groups.google.com/forum/#!msg/golang-nuts/KJiyv2mV2pU/wdBUH1mHCAAJ&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;golang-nuts&lt;/a&gt;)版权@归原文所有.&lt;/p&gt;
+&lt;p&gt;有人在论坛里面问: 为什么 Golang 垃圾回收器不实现分代和紧凑 gc ?&lt;br&gt;
+    
+    </summary>
+    
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
+    
+      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+      <category term="gc" scheme="https://lingchao.xin/tags/gc/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Go Range 循环内幕</title>
+    <link href="https://lingchao.xin/post/go-range-loop-internals.html"/>
+    <id>https://lingchao.xin/post/go-range-loop-internals.html</id>
+    <published>2018-01-10T12:20:04.000Z</published>
+    <updated>2018-03-26T09:44:46.348Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&lt;a href=&quot;https://garbagecollected.org/2017/02/22/go-range-loop-internals/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;译文&lt;/a&gt;版权@归原文所有.&lt;/p&gt;
+&lt;p&gt;虽然他们非常方便, 但我总是发现 Go 的 Range 循环有点神秘. 我并不是第一个:&lt;br&gt;
+    
+    </summary>
+    
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
+    
+      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>2017 已逝</title>
+    <link href="https://lingchao.xin/post/2017-has-passed.html"/>
+    <id>https://lingchao.xin/post/2017-has-passed.html</id>
+    <published>2017-12-31T07:26:20.000Z</published>
+    <updated>2018-03-26T09:45:49.124Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h3 id=&quot;2017-的目标实现了吗&quot;&gt;&lt;a href=&quot;#2017-的目标实现了吗&quot; class=&quot;headerlink&quot; title=&quot;2017 的目标实现了吗&quot;&gt;&lt;/a&gt;2017 的目标实现了吗&lt;/h3&gt;
+    
+    </summary>
+    
+    
+      <category term="note" scheme="https://lingchao.xin/tags/note/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Go 服务优雅重启</title>
+    <link href="https://lingchao.xin/post/golang-graceful-restart-server.html"/>
+    <id>https://lingchao.xin/post/golang-graceful-restart-server.html</id>
+    <published>2017-07-25T06:14:04.000Z</published>
+    <updated>2018-03-26T10:01:12.033Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;很多时候对于服务升级的做法简单粗暴, 就简单的杀进程启动新的进程.&lt;br&gt;
+    
+    </summary>
+    
+    
+      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+      <category term="http" scheme="https://lingchao.xin/tags/http/"/>
+    
+  </entry>
+  
+</feed>

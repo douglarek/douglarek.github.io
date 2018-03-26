@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="在 Go 的世界里, web 框架简直多如牛毛. 前有自带电池的标准库(net/http), 后有简洁优雅的 Gin-Gonic(以下简称 Gin), 再有全栈开发一枝花 Beego, 等等不可胜数. 使用 Go 有一段时间了, web 开发一直用的 Gin. Gin 的思想和 Python 框架 Flask 有颇多相似之处, 可以称作 微框架 .">
+<meta name="keywords" content="go,gin,web">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Gin-Gonic 框架中间件原理与应用">
+<meta property="og:url" content="https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html">
+<meta property="og:site_name" content="A coder @ work">
+<meta property="og:description" content="在 Go 的世界里, web 框架简直多如牛毛. 前有自带电池的标准库(net/http), 后有简洁优雅的 Gin-Gonic(以下简称 Gin), 再有全栈开发一枝花 Beego, 等等不可胜数. 使用 Go 有一段时间了, web 开发一直用的 Gin. Gin 的思想和 Python 框架 Flask 有颇多相似之处, 可以称作 微框架 .">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="https://lingchao.xin/static/images/gin-middleware.png">
+<meta property="og:updated_time" content="2018-03-26T09:39:44.308Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Gin-Gonic 框架中间件原理与应用">
+<meta name="twitter:description" content="在 Go 的世界里, web 框架简直多如牛毛. 前有自带电池的标准库(net/http), 后有简洁优雅的 Gin-Gonic(以下简称 Gin), 再有全栈开发一枝花 Beego, 等等不可胜数. 使用 Go 有一段时间了, web 开发一直用的 Gin. Gin 的思想和 Python 框架 Flask 有颇多相似之处, 可以称作 微框架 .">
+<meta name="twitter:image" content="https://lingchao.xin/static/images/gin-middleware.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="https://www.gravatar.com/avatar/f4254a13e728ba649241e5776b4884db?s=16">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="https://www.gravatar.com/avatar/f4254a13e728ba649241e5776b4884db?s=192" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="https://www.gravatar.com/avatar/f4254a13e728ba649241e5776b4884db?s=180">
+          
+        
+    
+    <!-- title -->
+    <title>Gin-Gonic 框架中间件原理与应用</title>
+    <!-- styles -->
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="A coder @ work" type="application/atom+xml" />
+    
+</head>
+
+<body class="max-width mx-auto px3">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Archives</a></li>
+         
+          <li><a href="https://github.com/douglarek?tab=repositories">Projects</a></li>
+         
+          <li><a href="/atom.xml">Rss</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/post/golang-graceful-restart-server.html"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/post/postgresql-10-full-text-search-support-for-json-and-jsonb.html"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html&text=Gin-Gonic 框架中间件原理与应用"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html&title=Gin-Gonic 框架中间件原理与应用"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html&is_video=false&description=Gin-Gonic 框架中间件原理与应用"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Gin-Gonic 框架中间件原理与应用&body=Check out this article: https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html&title=Gin-Gonic 框架中间件原理与应用"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html&title=Gin-Gonic 框架中间件原理与应用"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html&title=Gin-Gonic 框架中间件原理与应用"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html&title=Gin-Gonic 框架中间件原理与应用"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html&name=Gin-Gonic 框架中间件原理与应用&description=&lt;p&gt;在 Go 的世界里, web 框架简直多如牛毛.&lt;/p&gt;
+&lt;p&gt;前有自带电池的标准库(&lt;code&gt;net/http&lt;/code&gt;), 后有简洁优雅的 Gin-Gonic(以下简称 &lt;code&gt;Gin&lt;/code&gt;), 再有全栈开发一枝花 Beego, 等等不可胜数.&lt;/p&gt;
+&lt;p&gt;使用 Go 有一段时间了, web 开发一直用的 &lt;code&gt;Gin&lt;/code&gt;. &lt;code&gt;Gin&lt;/code&gt; 的思想和 &lt;code&gt;Python&lt;/code&gt; 框架 &lt;code&gt;Flask&lt;/code&gt; 有颇多相似之处, 可以称作 &lt;em&gt;微框架&lt;/em&gt; .&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index my4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Gin-Gonic 框架中间件原理与应用
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">A coder @ work</span>
+      </span>
+      
+    <div class="postdate">
+        <time datetime="2017-06-18T07:00:33.000Z" itemprop="datePublished">2017-06-18</time>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/gin/">gin</a>, <a class="tag-link" href="/tags/go/">go</a>, <a class="tag-link" href="/tags/web/">web</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>在 Go 的世界里, web 框架简直多如牛毛.</p>
+<p>前有自带电池的标准库(<code>net/http</code>), 后有简洁优雅的 Gin-Gonic(以下简称 <code>Gin</code>), 再有全栈开发一枝花 Beego, 等等不可胜数.</p>
+<p>使用 Go 有一段时间了, web 开发一直用的 <code>Gin</code>. <code>Gin</code> 的思想和 <code>Python</code> 框架 <code>Flask</code> 有颇多相似之处, 可以称作 <em>微框架</em> .<br><a id="more"></a></p>
+<p>Gin 包括以下几个主要的部分:</p>
+<ul>
+<li><p>设计精巧的路由/中间件系统;</p>
+</li>
+<li><p>简单好用的核心上下文 <code>Context</code>;</p>
+</li>
+<li><p>附赠工具集(JSON/XML 响应, 数据绑定与校验等).</p>
+</li>
+</ul>
+<p>本文意在探究 <code>Gin</code> 中间件的执行原理.</p>
+<p>我们先看如下的 <code>Hello World</code> 版 <code>Gin</code> 程序：</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"log"</span></span><br><span class="line">	<span class="string">"net/http"</span></span><br><span class="line"></span><br><span class="line">	<span class="string">"github.com/gin-gonic/gin"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	r := gin.Default()</span><br><span class="line"></span><br><span class="line">	r.GET(<span class="string">"/ping"</span>, <span class="function"><span class="keyword">func</span><span class="params">(c *gin.Context)</span></span> &#123;</span><br><span class="line">		c.String(http.StatusOK, <span class="string">"%s"</span>, <span class="string">"pong!"</span>)</span><br><span class="line">	&#125;)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> err := r.Run(<span class="string">"0.0.0.0:8080"</span>); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Fatalln(err)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个简单的 <code>Gin</code> 程序默认启用了两个中间件, 分别是 <code>Logger()</code> 和 <code>Recovery()</code>.</p>
+<p>我们之前说过, <code>Context</code> 是 <code>Gin</code> 的核心, 它的构造如下:</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">type</span> Context <span class="keyword">struct</span> &#123;</span><br><span class="line">	writermem responseWriter</span><br><span class="line">	Request   *http.Request</span><br><span class="line">	Writer    ResponseWriter</span><br><span class="line"></span><br><span class="line">	Params   Params</span><br><span class="line">	handlers HandlersChain</span><br><span class="line">	index    <span class="keyword">int8</span></span><br><span class="line"></span><br><span class="line">	engine   *Engine</span><br><span class="line">	Keys     <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">interface</span>&#123;&#125;</span><br><span class="line">	Errors   errorMsgs</span><br><span class="line">	Accepted []<span class="keyword">string</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中 <code>handlers</code> 我们通过源码可以知道就是 <code>[]HandlerFunc</code>. 而它的签名正是:</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">type</span> HandlerFunc <span class="function"><span class="keyword">func</span><span class="params">(*Context)</span></span></span><br></pre></td></tr></table></figure>
+<p>所以中间件和我们普通的 <code>HandlerFunc</code> 没有任何区别对吧, 我们怎么写 <code>HandlerFunc</code> 就可以怎么写一个中间件.</p>
+<p>那么问题来了, 我们怎么解决一个请求和一个响应经过我们的中间件呢?</p>
+<p>我们来写个简单的中间件分析一下:</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line">r.Use(<span class="function"><span class="keyword">func</span><span class="params">(c *gin.Context)</span></span> &#123;</span><br><span class="line">	log.Println(<span class="string">"Request in"</span>) <span class="comment">// ①</span></span><br><span class="line">	c.Next() <span class="comment">// next handler func</span></span><br><span class="line">	log.Println(<span class="string">"Response out"</span>) <span class="comment">// ②</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>神奇的语句出现了, 没错就是 <code>c.Next()</code>, 所有中间件都有 <code>Request</code> 和 <code>Response</code> 的分水岭, 就是这个 <code>c.Next()</code>, 否则没有办法传递中间件.</p>
+<p>我们来看源码:</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Context)</span> <span class="title">Next</span><span class="params">()</span></span> &#123;</span><br><span class="line">	c.index++</span><br><span class="line">	s := <span class="keyword">int8</span>(<span class="built_in">len</span>(c.handlers))</span><br><span class="line">	<span class="keyword">for</span> ; c.index &lt; s; c.index++ &#123;</span><br><span class="line">		c.handlers[c.index](c)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>一个请求过来, <code>Gin</code> 会主动调用 <code>c.Next()</code> 一次. 因为 <code>handlers</code> 是 <code>slice</code> , 所以后来者中间件会追加到尾部.</p>
+<p>这样就形成了形如 <code>m1(m2(f()))</code> 的调用链. 正如上面数字① ② 标注的一样, 我们会依次执行如下的调用:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">m1① -&gt; m2① -&gt; f -&gt; m2② -&gt; m1②</span><br></pre></td></tr></table></figure>
+<p>我们用下面一张图来来总结这种关系:</p>
+<p><img src="/static/images/gin-middleware.png" alt="middleware stream"></p>
+
+  </div>
+</article>
+
+    <div class="blog-post-comments">
+        <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the comments.</noscript>
+        </div>
+    </div>
+
+
+
+    </div>
+    
+      <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Archives</a></li>
+         
+          <li><a href="https://github.com/douglarek?tab=repositories">Projects</a></li>
+         
+          <li><a href="/atom.xml">Rss</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html&text=Gin-Gonic 框架中间件原理与应用"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html&title=Gin-Gonic 框架中间件原理与应用"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html&is_video=false&description=Gin-Gonic 框架中间件原理与应用"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Gin-Gonic 框架中间件原理与应用&body=Check out this article: https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html&title=Gin-Gonic 框架中间件原理与应用"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html&title=Gin-Gonic 框架中间件原理与应用"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html&title=Gin-Gonic 框架中间件原理与应用"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html&title=Gin-Gonic 框架中间件原理与应用"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html&name=Gin-Gonic 框架中间件原理与应用&description=&lt;p&gt;在 Go 的世界里, web 框架简直多如牛毛.&lt;/p&gt;
+&lt;p&gt;前有自带电池的标准库(&lt;code&gt;net/http&lt;/code&gt;), 后有简洁优雅的 Gin-Gonic(以下简称 &lt;code&gt;Gin&lt;/code&gt;), 再有全栈开发一枝花 Beego, 等等不可胜数.&lt;/p&gt;
+&lt;p&gt;使用 Go 有一段时间了, web 开发一直用的 &lt;code&gt;Gin&lt;/code&gt;. &lt;code&gt;Gin&lt;/code&gt; 的思想和 &lt;code&gt;Python&lt;/code&gt; 框架 &lt;code&gt;Flask&lt;/code&gt; 有颇多相似之处, 可以称作 &lt;em&gt;微框架&lt;/em&gt; .&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+    
+    <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; 2018 Lingchao Xin
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Archives</a></li>
+         
+          <li><a href="https://github.com/douglarek?tab=repositories">Projects</a></li>
+         
+          <li><a href="/atom.xml">Rss</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>
+<!-- styles -->
+<link rel="stylesheet" href="/lib/font-awesome/css/fontawesome-all.min.css">
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+<!-- jquery -->
+<script src="/lib/jquery/jquery.min.js"></script>
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+<script src="/js/main.js"></script>
+<!-- search -->
+
+<!-- Google Analytics -->
+
+    <script type="text/javascript">
+        (function(i,s,o,g,r,a,m) {i['GoogleAnalyticsObject']=r;i[r]=i[r]||function() {
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+        ga('create', 'UA-47053188-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+
+<!-- Disqus Comments -->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'douglarek';
+
+        (function(){
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        }());
+    </script>
+
+

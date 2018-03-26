@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="本文译自 A Developer Relations Bill of Rights 版权@归原文所有.">
+<meta name="keywords" content="software development,translation">
+<meta property="og:type" content="article">
+<meta property="og:title" content="开发者关系权利法案">
+<meta property="og:url" content="https://lingchao.xin/post/a-developer-relations-bill-of-rights.html">
+<meta property="og:site_name" content="A coder @ work">
+<meta property="og:description" content="本文译自 A Developer Relations Bill of Rights 版权@归原文所有.">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="https://lingchao.xin/static/images/1_-GNpo5PEhPm-1Ns4F76t9w.png">
+<meta property="og:updated_time" content="2018-03-26T06:35:21.564Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="开发者关系权利法案">
+<meta name="twitter:description" content="本文译自 A Developer Relations Bill of Rights 版权@归原文所有.">
+<meta name="twitter:image" content="https://lingchao.xin/static/images/1_-GNpo5PEhPm-1Ns4F76t9w.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="https://www.gravatar.com/avatar/f4254a13e728ba649241e5776b4884db?s=16">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="https://www.gravatar.com/avatar/f4254a13e728ba649241e5776b4884db?s=192" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="https://www.gravatar.com/avatar/f4254a13e728ba649241e5776b4884db?s=180">
+          
+        
+    
+    <!-- title -->
+    <title>开发者关系权利法案</title>
+    <!-- styles -->
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="A coder @ work" type="application/atom+xml" />
+    
+</head>
+
+<body class="max-width mx-auto px3">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Archives</a></li>
+         
+          <li><a href="https://github.com/douglarek?tab=repositories">Projects</a></li>
+         
+          <li><a href="/atom.xml">Rss</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/post/vgo-intro.html"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/post/json-tips-in-go.html"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://lingchao.xin/post/a-developer-relations-bill-of-rights.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://lingchao.xin/post/a-developer-relations-bill-of-rights.html&text=开发者关系权利法案"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://lingchao.xin/post/a-developer-relations-bill-of-rights.html&title=开发者关系权利法案"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lingchao.xin/post/a-developer-relations-bill-of-rights.html&is_video=false&description=开发者关系权利法案"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=开发者关系权利法案&body=Check out this article: https://lingchao.xin/post/a-developer-relations-bill-of-rights.html"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://lingchao.xin/post/a-developer-relations-bill-of-rights.html&title=开发者关系权利法案"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/a-developer-relations-bill-of-rights.html&title=开发者关系权利法案"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/a-developer-relations-bill-of-rights.html&title=开发者关系权利法案"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/a-developer-relations-bill-of-rights.html&title=开发者关系权利法案"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/a-developer-relations-bill-of-rights.html&name=开发者关系权利法案&description=&lt;p&gt;本文译自 &lt;a href=&#34;https://medium.com/glitch/a-developer-relations-bill-of-rights-21381920e273&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;A Developer Relations Bill of Rights&lt;/a&gt; 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Dev-Rel-权利法案"><span class="toc-number">1.</span> <span class="toc-text">Dev Rel 权利法案</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index my4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        开发者关系权利法案
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">A coder @ work</span>
+      </span>
+      
+    <div class="postdate">
+        <time datetime="2018-02-19T12:01:04.000Z" itemprop="datePublished">2018-02-19</time>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/software-development/">software development</a>, <a class="tag-link" href="/tags/translation/">translation</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>本文译自 <a href="https://medium.com/glitch/a-developer-relations-bill-of-rights-21381920e273" target="_blank" rel="noopener">A Developer Relations Bill of Rights</a> 版权@归原文所有.<br><a id="more"></a></p>
+<p>开发者关系是任何希望建立成功的技术平台的公司中最具战略意义的角色之一.<br>然而, 大多数公司缩短了他们的 Dev Rel (译注: 开发者关系) 团队, 并危及他们在这项关键工作中的投资.</p>
+<p><img src="/static/images/1_-GNpo5PEhPm-1Ns4F76t9w.png" width="1000" height="523"></p>
+<p>十七年前, Joel Spolsky 写了 <a href="https://www.joelonsoftware.com/2000/08/09/the-joel-test-12-steps-to-better-code/" target="_blank" rel="noopener">Joel Test</a>, 这个广泛的框架主张赋予开发者权力并投资于他们的工作.<br>即使这些想法已经演变或者具体规则变得有点过时, 基本原则已经相当成熟, 并且帮助科技行业提高了生产力.<br>Joel Test 是代表制造软件的人所提倡的最有效的努力之一.</p>
+<p>本着同样的精神, 我们提出了另一个开始点来讨论如何支持一个较新的, 较少承认的, 但同样重要的社区: 开发者关系.<br>无论它被称为 <code>开发者福音主义</code>, <code>开发者体验</code>, Dev Rel, 还是其他任何名字, 该领域都包含一系列相关的战略性关键角色.<br>社区包括具有实际 <code>开发者关系</code> 头衔的人员, 以及开发者主张者, 平台或产品布道者或开发者支持等头衔.</p>
+<blockquote>
+<p>无论我们如何描述自己, Dev Rel 的工作对于任何为其生态系统提供技术平台的公司都是至关重要的.</p>
+</blockquote>
+<p>然而, 尽管 Dev Rel 如此重要, 正如我们在 <a href="https://medium.com/glitch/its-time-to-get-serious-about-developer-relations-af238c002b31" target="_blank" rel="noopener">是时候认真对待开发者关系</a> 中所说的那样, <strong>但大多数公司从根本上没有向 Dev Rel 展示它应有的尊重</strong>.<br>我们已经看到来自社区人士的有价值的努力, 如 Ashley McNamara 开始编纂应支持有效的开发者关系的<a href="https://hackernoon.com/the-best-career-advice-ive-received-so-far-is-never-turn-down-an-interview-7586ca5b7ef8" target="_blank" rel="noopener">原则</a>.<br>当然, 就我们自己而言, 我们已经建立了像 Glitch 这样的社区, 其具体目标是成为 <a href="https://glitch.com/forplatforms" target="_blank" rel="noopener">Dev Rel 的重要工具</a>.</p>
+<p>在这项工作的基础上, 并希望开始改变大多数公司不支持 Dev Rel 的现实, 下面是 Dev Rel 权利法案的第一稿.<br>我们渴望听到您对其变更和改进的建议.</p>
+<h3 id="Dev-Rel-权利法案"><a href="#Dev-Rel-权利法案" class="headerlink" title="Dev Rel 权利法案"></a>Dev Rel 权利法案</h3><p>为开发者关系工作的每个人都应该得到遵循这 10 条原则的环境的支持:</p>
+<ol>
+<li><p><a href="https://medium.com/glitch/every-dev-rel-professional-deserves-a-clear-set-of-business-goals-f91e1a558046" target="_blank" rel="noopener">一套明确的商业目标</a></p>
+</li>
+<li><p><a href="https://medium.com/glitch/dev-rel-requires-a-well-defined-place-in-the-organization-288ee75b8b1e" target="_blank" rel="noopener">组织中一个明确的地方</a></p>
+</li>
+<li><p><a href="https://medium.com/glitch/a-structured-way-to-impact-product-or-platform-f5a7c5648ac4" target="_blank" rel="noopener">影响产品或平台的结构化方式</a></p>
+</li>
+<li><p><a href="https://medium.com/glitch/dev-rel-needs-open-lines-of-communication-to-marketing-960faf2c0023" target="_blank" rel="noopener">向市场开放沟通渠道</a></p>
+</li>
+<li><p><a href="https://medium.com/glitch/dev-rel-needs-the-right-tools-specifically-designed-for-the-job-af858d770b8a" target="_blank" rel="noopener">专为这项工作设计的正确工具</a></p>
+</li>
+<li><p><a href="https://medium.com/glitch/dev-rel-requires-explicit-ethical-and-social-guidelines-9c67b3d2356c" target="_blank" rel="noopener">明确的道德和社会准则</a></p>
+</li>
+<li><p><a href="https://medium.com/glitch/dev-rel-deserves-support-for-building-inclusive-communities-5a7779543cd" target="_blank" rel="noopener">支持建设包容性社区</a></p>
+</li>
+<li><p><a href="https://medium.com/glitch/dev-rel-must-be-provided-with-a-clear-distinction-from-sales-engineering-3ba17a4cda4f" target="_blank" rel="noopener"><strong>与销售工程的明显区别</strong></a></p>
+</li>
+<li><p><a href="https://medium.com/glitch/dev-rel-must-be-supported-with-ongoing-investment-in-professional-development-19ba90326b7a" target="_blank" rel="noopener">持续的专业发展资源</a></p>
+</li>
+<li><p><a href="https://medium.com/glitch/dev-rel-success-requires-an-ongoing-connection-to-a-community-of-peers-ed660b40b62" target="_blank" rel="noopener">连接到同行社区</a></p>
+</li>
+</ol>
+<p>我们将深入探讨这些关键概念的愿景, 这些概念使 Dev Rel 获得成功, <strong>但我们希望听到社区中关心开发者关系的未来的每个人的意见</strong>.<br>我们确信 Dev Rel 中的每个人都可以想到我们错过的一个区域, 或者您在职业生涯中遇到的一个特别的痛点.</p>
+<p>我们相信, 我们有信心能够争取为 Dev Rel 获得投资, 资源, 支持和战略重点, 从而推动行业向前发展.</p>
+
+  </div>
+</article>
+
+    <div class="blog-post-comments">
+        <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the comments.</noscript>
+        </div>
+    </div>
+
+
+
+    </div>
+    
+      <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Archives</a></li>
+         
+          <li><a href="https://github.com/douglarek?tab=repositories">Projects</a></li>
+         
+          <li><a href="/atom.xml">Rss</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Dev-Rel-权利法案"><span class="toc-number">1.</span> <span class="toc-text">Dev Rel 权利法案</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://lingchao.xin/post/a-developer-relations-bill-of-rights.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://lingchao.xin/post/a-developer-relations-bill-of-rights.html&text=开发者关系权利法案"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://lingchao.xin/post/a-developer-relations-bill-of-rights.html&title=开发者关系权利法案"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lingchao.xin/post/a-developer-relations-bill-of-rights.html&is_video=false&description=开发者关系权利法案"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=开发者关系权利法案&body=Check out this article: https://lingchao.xin/post/a-developer-relations-bill-of-rights.html"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://lingchao.xin/post/a-developer-relations-bill-of-rights.html&title=开发者关系权利法案"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/a-developer-relations-bill-of-rights.html&title=开发者关系权利法案"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/a-developer-relations-bill-of-rights.html&title=开发者关系权利法案"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/a-developer-relations-bill-of-rights.html&title=开发者关系权利法案"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/a-developer-relations-bill-of-rights.html&name=开发者关系权利法案&description=&lt;p&gt;本文译自 &lt;a href=&#34;https://medium.com/glitch/a-developer-relations-bill-of-rights-21381920e273&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;A Developer Relations Bill of Rights&lt;/a&gt; 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+    
+    <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; 2018 Lingchao Xin
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Archives</a></li>
+         
+          <li><a href="https://github.com/douglarek?tab=repositories">Projects</a></li>
+         
+          <li><a href="/atom.xml">Rss</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>
+<!-- styles -->
+<link rel="stylesheet" href="/lib/font-awesome/css/fontawesome-all.min.css">
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+<!-- jquery -->
+<script src="/lib/jquery/jquery.min.js"></script>
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+<script src="/js/main.js"></script>
+<!-- search -->
+
+<!-- Google Analytics -->
+
+    <script type="text/javascript">
+        (function(i,s,o,g,r,a,m) {i['GoogleAnalyticsObject']=r;i[r]=i[r]||function() {
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+        ga('create', 'UA-47053188-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+
+<!-- Disqus Comments -->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'douglarek';
+
+        (function(){
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        }());
+    </script>
+
+

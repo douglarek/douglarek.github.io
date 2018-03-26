@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="本文译自(Ordering by specific field values with MySQL)版权@归原文所有 在 SQL 查询中可能有时需要使用 ASC 或 DESC 或使用特殊排序字段才能完成的特定顺序. MySQL 有一个 ORDER BY FIELD 函数可以用来做这个.">
+<meta name="keywords" content="translation,mysql">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL Order By 按特定的字段值排序">
+<meta property="og:url" content="https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html">
+<meta property="og:site_name" content="A coder @ work">
+<meta property="og:description" content="本文译自(Ordering by specific field values with MySQL)版权@归原文所有 在 SQL 查询中可能有时需要使用 ASC 或 DESC 或使用特殊排序字段才能完成的特定顺序. MySQL 有一个 ORDER BY FIELD 函数可以用来做这个.">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2018-03-26T09:33:02.106Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MySQL Order By 按特定的字段值排序">
+<meta name="twitter:description" content="本文译自(Ordering by specific field values with MySQL)版权@归原文所有 在 SQL 查询中可能有时需要使用 ASC 或 DESC 或使用特殊排序字段才能完成的特定顺序. MySQL 有一个 ORDER BY FIELD 函数可以用来做这个.">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="https://www.gravatar.com/avatar/f4254a13e728ba649241e5776b4884db?s=16">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="https://www.gravatar.com/avatar/f4254a13e728ba649241e5776b4884db?s=192" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="https://www.gravatar.com/avatar/f4254a13e728ba649241e5776b4884db?s=180">
+          
+        
+    
+    <!-- title -->
+    <title>MySQL Order By 按特定的字段值排序</title>
+    <!-- styles -->
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="A coder @ work" type="application/atom+xml" />
+    
+</head>
+
+<body class="max-width mx-auto px3">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Archives</a></li>
+         
+          <li><a href="https://github.com/douglarek?tab=repositories">Projects</a></li>
+         
+          <li><a href="/atom.xml">Rss</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/post/how-does-the-golang-scheduler-work.html"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/post/golang-internals-part-2-nice-benefits-of-named-return-values.html"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html&text=MySQL Order By 按特定的字段值排序"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html&title=MySQL Order By 按特定的字段值排序"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html&is_video=false&description=MySQL Order By 按特定的字段值排序"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=MySQL Order By 按特定的字段值排序&body=Check out this article: https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html&title=MySQL Order By 按特定的字段值排序"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html&title=MySQL Order By 按特定的字段值排序"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html&title=MySQL Order By 按特定的字段值排序"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html&title=MySQL Order By 按特定的字段值排序"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html&name=MySQL Order By 按特定的字段值排序&description=&lt;p&gt;本文译自(&lt;a href=&#34;https://www.electrictoolbox.com/mysql-order-specific-field-values/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Ordering by specific field values with MySQL&lt;/a&gt;)版权@归原文所有&lt;/p&gt;
+&lt;p&gt;在 SQL 查询中可能有时需要使用 ASC 或 DESC 或使用特殊排序字段才能完成的特定顺序. MySQL 有一个 ORDER BY FIELD 函数可以用来做这个.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#测试数据"><span class="toc-number">1.</span> <span class="toc-text">测试数据</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#按特定字段值排序"><span class="toc-number">2.</span> <span class="toc-text">按特定字段值排序</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#疑难杂症"><span class="toc-number">3.</span> <span class="toc-text">疑难杂症</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#解决问题的方法"><span class="toc-number">4.</span> <span class="toc-text">解决问题的方法</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index my4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        MySQL Order By 按特定的字段值排序
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">A coder @ work</span>
+      </span>
+      
+    <div class="postdate">
+        <time datetime="2018-01-25T03:55:04.000Z" itemprop="datePublished">2018-01-25</time>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/mysql/">mysql</a>, <a class="tag-link" href="/tags/translation/">translation</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>本文译自(<a href="https://www.electrictoolbox.com/mysql-order-specific-field-values/" target="_blank" rel="noopener">Ordering by specific field values with MySQL</a>)版权@归原文所有</p>
+<p>在 SQL 查询中可能有时需要使用 ASC 或 DESC 或使用特殊排序字段才能完成的特定顺序. MySQL 有一个 ORDER BY FIELD 函数可以用来做这个.<br><a id="more"></a></p>
+<h3 id="测试数据"><a href="#测试数据" class="headerlink" title="测试数据"></a>测试数据</h3><p>本文中的示例数据使用我的示例 <a href="https://www.electrictoolbox.com/mysql-example-table/" target="_blank" rel="noopener">fruit</a> 表. 这是一个有点简单的表, 但它可以用来很好地说明这篇文章中的观点.</p>
+<h3 id="按特定字段值排序"><a href="#按特定字段值排序" class="headerlink" title="按特定字段值排序"></a>按特定字段值排序</h3><p>fruit 表有一个 name 字段, 具有以下特定的值: 苹果(Apple), 香蕉(Banana), 橘子(Orange), 梨(Pear). 每个特定的值都有一系列的品种.</p>
+<p>比方说, 为了论证的缘故, 我们要按香蕉, 苹果, 梨, 橘子等特定的顺序排列数据, 然后再按品种排序.<br>使用普通的 ORDER BY 子句不可能这样做, 因为这个字段的升序或降序排序不起作用. 我们要么需要某种形式的排序列或进行其他选择.</p>
+<p>在 ORDER BY 子句中使用 FIELD 函数可以实现这一点. 它的工作方式是指定要排序的列, 然后按顺序排序它们的值. 例如:</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> fruit</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> <span class="keyword">FIELD</span>(<span class="keyword">name</span>, <span class="string">'Banana'</span>, <span class="string">'Apple'</span>, <span class="string">'Pear'</span>, <span class="string">'Orange'</span>), variety;</span><br></pre></td></tr></table></figure>
+<p>来自示例表的结果数据如下所示:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">+----------+--------+---------------------+</span><br><span class="line">| fruit_id | name   | variety             |</span><br><span class="line">+----------+--------+---------------------+</span><br><span class="line">|       11 | Banana | Burro               |</span><br><span class="line">|       12 | Banana | Cavendish           |</span><br><span class="line">|       10 | Banana | Plantain            |</span><br><span class="line">|        6 | Apple  | Cox&apos;s Orange Pippin |</span><br><span class="line">|        7 | Apple  | Granny Smith        |</span><br><span class="line">|        1 | Apple  | Red Delicious       |</span><br><span class="line">|        8 | Pear   | Anjou               |</span><br><span class="line">|        4 | Pear   | Bartlett            |</span><br><span class="line">|        2 | Pear   | Comice              |</span><br><span class="line">|        5 | Orange | Blood               |</span><br><span class="line">|        3 | Orange | Navel               |</span><br><span class="line">|        9 | Orange | Valencia            |</span><br><span class="line">+----------+--------+---------------------+</span><br></pre></td></tr></table></figure>
+<h3 id="疑难杂症"><a href="#疑难杂症" class="headerlink" title="疑难杂症"></a>疑难杂症</h3><p>使用此功能时有一个小小的 <code>疑难杂症</code>. 列中不在 FIELD 函数中的任何值将在指定的值之前或多或少随机出现. 例如, 只指定苹果和香蕉:</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> fruit</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> <span class="keyword">FIELD</span>(<span class="keyword">name</span>, <span class="string">'Banana'</span>, <span class="string">'Apple'</span>) <span class="keyword">DESC</span>, variety;</span><br></pre></td></tr></table></figure>
+<p>这导致:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">+----------+--------+---------------------+</span><br><span class="line">| fruit_id | name   | variety             |</span><br><span class="line">+----------+--------+---------------------+</span><br><span class="line">|        6 | Apple  | Cox&apos;s Orange Pippin |</span><br><span class="line">|        7 | Apple  | Granny Smith        |</span><br><span class="line">|        1 | Apple  | Red Delicious       |</span><br><span class="line">|       11 | Banana | Burro               |</span><br><span class="line">|       12 | Banana | Cavendish           |</span><br><span class="line">|       10 | Banana | Plantain            |</span><br><span class="line">|        8 | Pear   | Anjou               |</span><br><span class="line">|        4 | Pear   | Bartlett            |</span><br><span class="line">|        5 | Orange | Blood               |</span><br><span class="line">|        2 | Pear   | Comice              |</span><br><span class="line">|        3 | Orange | Navel               |</span><br><span class="line">|        9 | Orange | Valencia            |</span><br><span class="line">+----------+--------+---------------------+</span><br></pre></td></tr></table></figure>
+<h3 id="解决问题的方法"><a href="#解决问题的方法" class="headerlink" title="解决问题的方法"></a>解决问题的方法</h3><p>虽然通常只有在确切的列已知的情况下才使用此函数, 但解决方法是颠倒指定字段的顺序并按降序对其排序, 然后在同一个字段上进行第二次排序.</p>
+<p>下面的例子, 不管它看起来如何，实际上按照香蕉, 苹果, 然后按照升序排列:</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> fruit</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> <span class="keyword">FIELD</span>(<span class="keyword">name</span>, <span class="string">'Apple'</span>, <span class="string">'Banana'</span>) <span class="keyword">DESC</span>, <span class="keyword">name</span>, variety;</span><br></pre></td></tr></table></figure>
+<p>这导致:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">+----------+--------+---------------------+</span><br><span class="line">| fruit_id | name   | variety             |</span><br><span class="line">+----------+--------+---------------------+</span><br><span class="line">|       11 | Banana | Burro               |</span><br><span class="line">|       12 | Banana | Cavendish           |</span><br><span class="line">|       10 | Banana | Plantain            |</span><br><span class="line">|        6 | Apple  | Cox&apos;s Orange Pippin |</span><br><span class="line">|        7 | Apple  | Granny Smith        |</span><br><span class="line">|        1 | Apple  | Red Delicious       |</span><br><span class="line">|        5 | Orange | Blood               |</span><br><span class="line">|        3 | Orange | Navel               |</span><br><span class="line">|        9 | Orange | Valencia            |</span><br><span class="line">|        8 | Pear   | Anjou               |</span><br><span class="line">|        4 | Pear   | Bartlett            |</span><br><span class="line">|        2 | Pear   | Comice              |</span><br><span class="line">+----------+--------+---------------------+</span><br></pre></td></tr></table></figure>
+<p>如果一组特定的行需要显示在结果集中的其他行之前, 这可能是一个有用的解决方案, 但是当使用 ASC 或 DESC 排序顺序时, 通常不会出现在第一行.</p>
+
+  </div>
+</article>
+
+    <div class="blog-post-comments">
+        <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the comments.</noscript>
+        </div>
+    </div>
+
+
+
+    </div>
+    
+      <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Archives</a></li>
+         
+          <li><a href="https://github.com/douglarek?tab=repositories">Projects</a></li>
+         
+          <li><a href="/atom.xml">Rss</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#测试数据"><span class="toc-number">1.</span> <span class="toc-text">测试数据</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#按特定字段值排序"><span class="toc-number">2.</span> <span class="toc-text">按特定字段值排序</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#疑难杂症"><span class="toc-number">3.</span> <span class="toc-text">疑难杂症</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#解决问题的方法"><span class="toc-number">4.</span> <span class="toc-text">解决问题的方法</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html&text=MySQL Order By 按特定的字段值排序"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html&title=MySQL Order By 按特定的字段值排序"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html&is_video=false&description=MySQL Order By 按特定的字段值排序"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=MySQL Order By 按特定的字段值排序&body=Check out this article: https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html&title=MySQL Order By 按特定的字段值排序"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html&title=MySQL Order By 按特定的字段值排序"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html&title=MySQL Order By 按特定的字段值排序"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html&title=MySQL Order By 按特定的字段值排序"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html&name=MySQL Order By 按特定的字段值排序&description=&lt;p&gt;本文译自(&lt;a href=&#34;https://www.electrictoolbox.com/mysql-order-specific-field-values/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Ordering by specific field values with MySQL&lt;/a&gt;)版权@归原文所有&lt;/p&gt;
+&lt;p&gt;在 SQL 查询中可能有时需要使用 ASC 或 DESC 或使用特殊排序字段才能完成的特定顺序. MySQL 有一个 ORDER BY FIELD 函数可以用来做这个.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+    
+    <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; 2018 Lingchao Xin
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Archives</a></li>
+         
+          <li><a href="https://github.com/douglarek?tab=repositories">Projects</a></li>
+         
+          <li><a href="/atom.xml">Rss</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>
+<!-- styles -->
+<link rel="stylesheet" href="/lib/font-awesome/css/fontawesome-all.min.css">
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+<!-- jquery -->
+<script src="/lib/jquery/jquery.min.js"></script>
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+<script src="/js/main.js"></script>
+<!-- search -->
+
+<!-- Google Analytics -->
+
+    <script type="text/javascript">
+        (function(i,s,o,g,r,a,m) {i['GoogleAnalyticsObject']=r;i[r]=i[r]||function() {
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+        ga('create', 'UA-47053188-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+
+<!-- Disqus Comments -->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'douglarek';
+
+        (function(){
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        }());
+    </script>
+
+

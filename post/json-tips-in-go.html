@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="相对于很多的语言来说, Go 的 JSON 解析可谓简单至极.">
+<meta name="keywords" content="go">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go JSON 技巧">
+<meta property="og:url" content="https://lingchao.xin/post/json-tips-in-go.html">
+<meta property="og:site_name" content="A coder @ work">
+<meta property="og:description" content="相对于很多的语言来说, Go 的 JSON 解析可谓简单至极.">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2018-03-26T07:23:09.958Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Go JSON 技巧">
+<meta name="twitter:description" content="相对于很多的语言来说, Go 的 JSON 解析可谓简单至极.">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="https://www.gravatar.com/avatar/f4254a13e728ba649241e5776b4884db?s=16">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="https://www.gravatar.com/avatar/f4254a13e728ba649241e5776b4884db?s=192" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="https://www.gravatar.com/avatar/f4254a13e728ba649241e5776b4884db?s=180">
+          
+        
+    
+    <!-- title -->
+    <title>Go JSON 技巧</title>
+    <!-- styles -->
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="A coder @ work" type="application/atom+xml" />
+    
+</head>
+
+<body class="max-width mx-auto px3">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Archives</a></li>
+         
+          <li><a href="https://github.com/douglarek?tab=repositories">Projects</a></li>
+         
+          <li><a href="/atom.xml">Rss</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/post/a-developer-relations-bill-of-rights.html"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/post/functional-options-pattern-in-go.html"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://lingchao.xin/post/json-tips-in-go.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://lingchao.xin/post/json-tips-in-go.html&text=Go JSON 技巧"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://lingchao.xin/post/json-tips-in-go.html&title=Go JSON 技巧"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lingchao.xin/post/json-tips-in-go.html&is_video=false&description=Go JSON 技巧"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Go JSON 技巧&body=Check out this article: https://lingchao.xin/post/json-tips-in-go.html"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://lingchao.xin/post/json-tips-in-go.html&title=Go JSON 技巧"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/json-tips-in-go.html&title=Go JSON 技巧"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/json-tips-in-go.html&title=Go JSON 技巧"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/json-tips-in-go.html&title=Go JSON 技巧"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/json-tips-in-go.html&name=Go JSON 技巧&description=&lt;p&gt;相对于很多的语言来说, Go 的 JSON 解析可谓简单至极.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#问题"><span class="toc-number">1.</span> <span class="toc-text">问题</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#结论"><span class="toc-number">2.</span> <span class="toc-text">结论</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index my4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Go JSON 技巧
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">A coder @ work</span>
+      </span>
+      
+    <div class="postdate">
+        <time datetime="2018-02-10T06:30:04.000Z" itemprop="datePublished">2018-02-10</time>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/go/">go</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>相对于很多的语言来说, Go 的 JSON 解析可谓简单至极.<br><a id="more"></a></p>
+<h4 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h4><p>通常情况下, 我们在 Go 中经常这样进行 JSON 的解码:</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">"encoding/json"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// jsonText comes from http://json.org/example.html</span></span><br><span class="line"><span class="keyword">var</span> jsonText = []<span class="keyword">byte</span>(<span class="string">`</span></span><br><span class="line"><span class="string">&#123;</span></span><br><span class="line"><span class="string">   "glossary":&#123;</span></span><br><span class="line"><span class="string">      "title":"example glossary",</span></span><br><span class="line"><span class="string">      "GlossDiv":&#123;</span></span><br><span class="line"><span class="string">         "title":"S",</span></span><br><span class="line"><span class="string">         "GlossList":&#123;</span></span><br><span class="line"><span class="string">            "GlossEntry":&#123;</span></span><br><span class="line"><span class="string">               "ID":"SGML",</span></span><br><span class="line"><span class="string">               "SortAs":"SGML",</span></span><br><span class="line"><span class="string">               "GlossTerm":"Standard Generalized Markup Language",</span></span><br><span class="line"><span class="string">               "Acronym":"SGML",</span></span><br><span class="line"><span class="string">               "Abbrev":"ISO 8879:1986",</span></span><br><span class="line"><span class="string">               "GlossDef":&#123;</span></span><br><span class="line"><span class="string">                  "para":"A meta-markup language, used to create markup languages such as DocBook.",</span></span><br><span class="line"><span class="string">                  "GlossSeeAlso":[</span></span><br><span class="line"><span class="string">                     "GML",</span></span><br><span class="line"><span class="string">                     "XML"</span></span><br><span class="line"><span class="string">                  ]</span></span><br><span class="line"><span class="string">               &#125;,</span></span><br><span class="line"><span class="string">               "GlossSee":"markup"</span></span><br><span class="line"><span class="string">            &#125;</span></span><br><span class="line"><span class="string">         &#125;</span></span><br><span class="line"><span class="string">      &#125;</span></span><br><span class="line"><span class="string">   &#125;</span></span><br><span class="line"><span class="string">&#125;`</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> glossary <span class="keyword">struct</span> &#123;</span><br><span class="line">	Glossary <span class="keyword">struct</span> &#123;</span><br><span class="line">		Title    <span class="keyword">string</span> <span class="string">`json:"title"`</span></span><br><span class="line">		GlossDiv <span class="keyword">struct</span> &#123;</span><br><span class="line">			Title     <span class="keyword">string</span> <span class="string">`json:"title"`</span></span><br><span class="line">			GlossList <span class="keyword">struct</span> &#123;</span><br><span class="line">				GlossEntry <span class="keyword">struct</span> &#123;</span><br><span class="line">					ID        <span class="keyword">string</span> <span class="string">`json:"ID"`</span></span><br><span class="line">					SortAs    <span class="keyword">string</span> <span class="string">`json:"SortAs"`</span></span><br><span class="line">					GlossTerm <span class="keyword">string</span> <span class="string">`json:"GlossTerm"`</span></span><br><span class="line">					Acronym   <span class="keyword">string</span> <span class="string">`json:"Acronym"`</span></span><br><span class="line">					Abbrev    <span class="keyword">string</span> <span class="string">`json:"Abbrev"`</span></span><br><span class="line">					GlossDef  <span class="keyword">struct</span> &#123;</span><br><span class="line">						Para         <span class="keyword">string</span>   <span class="string">`json:"para"`</span></span><br><span class="line">						GlossSeeAlso []<span class="keyword">string</span> <span class="string">`json:"GlossSeeAlso"`</span></span><br><span class="line">					&#125; <span class="string">`json:"GlossDef"`</span></span><br><span class="line">					GlossSee <span class="keyword">string</span> <span class="string">`json:"GlossSee"`</span></span><br><span class="line">				&#125; <span class="string">`json:"GlossEntry"`</span></span><br><span class="line">			&#125; <span class="string">`json:"GlossList"`</span></span><br><span class="line">		&#125; <span class="string">`json:"GlossDiv"`</span></span><br><span class="line">	&#125; <span class="string">`json:"glossary"`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> g glossary</span><br><span class="line">	json.Unmarshal(jsonText, &amp;g)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样的解码对于我们日常使用好像也没什么问题, 起码能用 ?<br>对于一段 JSON, 我们解码的时候未必需要立即解码所有的部分, 什么意思呢 ?</p>
+<p>拿上面的例子代码来说, 我们解码 jsonText , 可能仅需要马上使用 Title 和 GlossDiv.Title .<br>那么对于这种情况我们怎么做合适呢 ?</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">"encoding/json"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// jsonText comes from http://json.org/example.html</span></span><br><span class="line"><span class="keyword">var</span> jsonText = []<span class="keyword">byte</span>(<span class="string">`</span></span><br><span class="line"><span class="string">&#123;</span></span><br><span class="line"><span class="string">   ... // 此处省略, 同上</span></span><br><span class="line"><span class="string">&#125;`</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> glossarySectional <span class="keyword">struct</span> &#123;</span><br><span class="line">	Glossary <span class="keyword">struct</span> &#123;</span><br><span class="line">		Title    <span class="keyword">string</span> <span class="string">`json:"title"`</span></span><br><span class="line">		GlossDiv <span class="keyword">struct</span> &#123;</span><br><span class="line">			Title     <span class="keyword">string</span>          <span class="string">`json:"title"`</span></span><br><span class="line">			GlossList json.RawMessage <span class="string">`json:"GlossList"`</span> <span class="comment">// diff: delay JSON decoding</span></span><br><span class="line">		&#125; <span class="string">`json:"GlossDiv"`</span></span><br><span class="line">	&#125; <span class="string">`json:"glossary"`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> g glossarySectional</span><br><span class="line">	json.Unmarshal(jsonText, &amp;g)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>没错, 魔法就在 <code>GlossList json.RawMessage</code> . 我们看相关<a href="https://golang.org/pkg/encoding/json/#RawMessage" target="_blank" rel="noopener">文档</a>怎么说:</p>
+<blockquote>
+<p>RawMessage is a raw encoded JSON value. It implements Marshaler and Unmarshaler and can be used to delay JSON decoding or precompute a JSON encoding.</p>
+</blockquote>
+<p>一目了然, RawMessage 起到了延迟解码一个 JSON 值的作用. 那么你可能会说, 这有啥用呢 ?</p>
+<p>这对于普通的解码可能问题不大, 但是对于一些像消息传递(Kafka 这种), 细微的延迟可能会造成很大的影响.<br>我们可以通过简单的 benchmark 测试一下这细微的差别:</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 其他代码略 ... 完整代码参见: http://bit.ly/2skxY9L .</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">benchmarkJSONUnmarshal</span><span class="params">(f <span class="keyword">func</span>()</span>, <span class="title">b</span> *<span class="title">testing</span>.<span class="title">B</span>)</span> &#123;</span><br><span class="line">	<span class="keyword">for</span> n := <span class="number">0</span>; n &lt; b.N; n++ &#123;</span><br><span class="line">		f()</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">BenchmarkJSONUnmarshal_0</span><span class="params">(b *testing.B)</span></span> &#123;</span><br><span class="line">	benchmarkJSONUnmarshal(<span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		<span class="keyword">var</span> g glossary</span><br><span class="line">		json.Unmarshal(jsonText, &amp;g)</span><br><span class="line">	&#125;, b)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">BenchmarkJSONUnmarshal_1</span><span class="params">(b *testing.B)</span></span> &#123;</span><br><span class="line">	benchmarkJSONUnmarshal(<span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		<span class="keyword">var</span> g glossarySectional</span><br><span class="line">		json.Unmarshal(jsonText, &amp;g)</span><br><span class="line">	&#125;, b)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们通过运行 <code>go test -run=NONE -bench=. ./...</code> 可以得出(不同环境有略微差别):</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">BenchmarkJSONUnmarshal_0-8   	  200000	     10565 ns/op</span><br><span class="line">BenchmarkJSONUnmarshal_1-8   	  200000	      7699 ns/op</span><br></pre></td></tr></table></figure>
+<p>差别幅度:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">benchmark                    old ns/op     new ns/op     delta</span><br><span class="line">BenchmarkJSONUnmarshal-8     10298         7591          -26.29%</span><br></pre></td></tr></table></figure>
+<p>可以看得出这个差别还是很大的, 特别是当 JSON 本身体量很大的时候.</p>
+<h4 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h4><p>对于一些关乎性能的 JSON 解析的处理, 我们可以通过 <code>json.RawMessage</code> 进行性能的提升.</p>
+
+  </div>
+</article>
+
+    <div class="blog-post-comments">
+        <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the comments.</noscript>
+        </div>
+    </div>
+
+
+
+    </div>
+    
+      <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Archives</a></li>
+         
+          <li><a href="https://github.com/douglarek?tab=repositories">Projects</a></li>
+         
+          <li><a href="/atom.xml">Rss</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#问题"><span class="toc-number">1.</span> <span class="toc-text">问题</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#结论"><span class="toc-number">2.</span> <span class="toc-text">结论</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://lingchao.xin/post/json-tips-in-go.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://lingchao.xin/post/json-tips-in-go.html&text=Go JSON 技巧"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://lingchao.xin/post/json-tips-in-go.html&title=Go JSON 技巧"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lingchao.xin/post/json-tips-in-go.html&is_video=false&description=Go JSON 技巧"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Go JSON 技巧&body=Check out this article: https://lingchao.xin/post/json-tips-in-go.html"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://lingchao.xin/post/json-tips-in-go.html&title=Go JSON 技巧"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/json-tips-in-go.html&title=Go JSON 技巧"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/json-tips-in-go.html&title=Go JSON 技巧"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/json-tips-in-go.html&title=Go JSON 技巧"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/json-tips-in-go.html&name=Go JSON 技巧&description=&lt;p&gt;相对于很多的语言来说, Go 的 JSON 解析可谓简单至极.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+    
+    <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; 2018 Lingchao Xin
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Archives</a></li>
+         
+          <li><a href="https://github.com/douglarek?tab=repositories">Projects</a></li>
+         
+          <li><a href="/atom.xml">Rss</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>
+<!-- styles -->
+<link rel="stylesheet" href="/lib/font-awesome/css/fontawesome-all.min.css">
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+<!-- jquery -->
+<script src="/lib/jquery/jquery.min.js"></script>
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+<script src="/js/main.js"></script>
+<!-- search -->
+
+<!-- Google Analytics -->
+
+    <script type="text/javascript">
+        (function(i,s,o,g,r,a,m) {i['GoogleAnalyticsObject']=r;i[r]=i[r]||function() {
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+        ga('create', 'UA-47053188-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+
+<!-- Disqus Comments -->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'douglarek';
+
+        (function(){
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        }());
+    </script>
+
+

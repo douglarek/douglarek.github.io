@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="本文译自 Defining Go Modules, Go &amp;amp; Versioning 的第 6 部分, 版权@归原文所有.">
+<meta name="keywords" content="translation,go,vgo">
+<meta property="og:type" content="article">
+<meta property="og:title" content="定义 Go 模块">
+<meta property="og:url" content="https://lingchao.xin/post/vgo-module.html">
+<meta property="og:site_name" content="A coder @ work">
+<meta property="og:description" content="本文译自 Defining Go Modules, Go &amp;amp; Versioning 的第 6 部分, 版权@归原文所有.">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="https://lingchao.xin/static/images/gitmod-1@2x.png">
+<meta property="og:image" content="https://lingchao.xin/static/images/gitmod-2@2x.png">
+<meta property="og:updated_time" content="2018-03-26T06:26:53.739Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="定义 Go 模块">
+<meta name="twitter:description" content="本文译自 Defining Go Modules, Go &amp;amp; Versioning 的第 6 部分, 版权@归原文所有.">
+<meta name="twitter:image" content="https://lingchao.xin/static/images/gitmod-1@2x.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="https://www.gravatar.com/avatar/f4254a13e728ba649241e5776b4884db?s=16">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="https://www.gravatar.com/avatar/f4254a13e728ba649241e5776b4884db?s=192" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="https://www.gravatar.com/avatar/f4254a13e728ba649241e5776b4884db?s=180">
+          
+        
+    
+    <!-- title -->
+    <title>定义 Go 模块</title>
+    <!-- styles -->
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="A coder @ work" type="application/atom+xml" />
+    
+</head>
+
+<body class="max-width mx-auto px3">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Archives</a></li>
+         
+          <li><a href="https://github.com/douglarek?tab=repositories">Projects</a></li>
+         
+          <li><a href="/atom.xml">Rss</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/post/go-defer-panic-and-recover.html"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/post/vgo-repro.html"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://lingchao.xin/post/vgo-module.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://lingchao.xin/post/vgo-module.html&text=定义 Go 模块"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://lingchao.xin/post/vgo-module.html&title=定义 Go 模块"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lingchao.xin/post/vgo-module.html&is_video=false&description=定义 Go 模块"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=定义 Go 模块&body=Check out this article: https://lingchao.xin/post/vgo-module.html"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://lingchao.xin/post/vgo-module.html&title=定义 Go 模块"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/vgo-module.html&title=定义 Go 模块"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/vgo-module.html&title=定义 Go 模块"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/vgo-module.html&title=定义 Go 模块"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/vgo-module.html&name=定义 Go 模块&description=&lt;p&gt;本文译自 &lt;a href=&#34;https://research.swtch.com/vgo-module&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Defining Go Modules&lt;/a&gt;, &lt;a href=&#34;https://lingchao.xin/tag/vgo.html&#34;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 6 部分, 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#版本化发布"><span class="toc-number">1.</span> <span class="toc-text">版本化发布</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#go-mod-文件"><span class="toc-number">2.</span> <span class="toc-text">go.mod 文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#从代码库到模块"><span class="toc-number">3.</span> <span class="toc-text">从代码库到模块</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#多模块代码库"><span class="toc-number">4.</span> <span class="toc-text">多模块代码库</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#已过时的版本"><span class="toc-number">5.</span> <span class="toc-text">已过时的版本</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#发布"><span class="toc-number">6.</span> <span class="toc-text">发布</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#代码托管网站"><span class="toc-number">7.</span> <span class="toc-text">代码托管网站</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#模块档案"><span class="toc-number">8.</span> <span class="toc-text">模块档案</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#下载协议"><span class="toc-number">9.</span> <span class="toc-text">下载协议</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#代理服务器"><span class="toc-number">10.</span> <span class="toc-text">代理服务器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Vendoring-的结束"><span class="toc-number">11.</span> <span class="toc-text">Vendoring 的结束</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#接下来呢"><span class="toc-number">12.</span> <span class="toc-text">接下来呢 ?</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index my4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        定义 Go 模块
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">A coder @ work</span>
+      </span>
+      
+    <div class="postdate">
+        <time datetime="2018-02-25T07:00:04.000Z" itemprop="datePublished">2018-02-25</time>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/go/">go</a>, <a class="tag-link" href="/tags/translation/">translation</a>, <a class="tag-link" href="/tags/vgo/">vgo</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>本文译自 <a href="https://research.swtch.com/vgo-module" target="_blank" rel="noopener">Defining Go Modules</a>, <a href="https://lingchao.xin/tag/vgo.html">Go &amp; Versioning</a> 的第 6 部分, 版权@归原文所有.<br><a id="more"></a></p>
+<p>正如在<a href="https://lingchao.xin/post/vgo-intro.html">概述文章</a>中介绍的, Go 模块是作为一个版本化的软件包集合单元, 连同列出其他所需模块的 go.mod 文件.<br>转向模块是我们重新审视和修正 go 命令如何管理源代码的许多细节的机会.<br>在我们打算使用模块弃用当前的 <code>go get</code> 模型时, 10 年已经过去了.<br>我们需要确保模块设计将在未来十年为我们提供良好的服务. 尤其是:</p>
+<ul>
+<li>我们希望鼓励更多的开发人员为他们的软件包打标签(tag), 而不是期望用户只会选择一个对他们来说看起来很好的提交哈希.<br>标记显式发布清楚地表明了对别人有用的以及正在开发的东西. 同时, 它仍然可以 - 尽管可能不方便 - 请求特定的提交.</li>
+<li>我们想脱离版本控制工具如 bzr, fossil, git, hg, 以及 svn 来下载源代码. 因为这些破坏了生态系统: 例如, 使用 Bazaar 或 Fossil 开发的软件包对于不能或不选择安装这些工具的用户而言是不可用的.<br>版本控制工具也是<a href="https://golang.org/issue/22131" target="_blank" rel="noopener">激动人心的</a> <a href="https://www.mercurial-scm.org/wiki/WhatsNew/Archive#Mercurial_3.2.3_.282014-12-18.29" target="_blank" rel="noopener">安全</a> <a href="https://git-blame.blogspot.com/2014/12/git-1856-195-205-214-and-221-and.html" target="_blank" rel="noopener">问题</a>的来源.<br>将它们移到安全边界之外是一件好事.</li>
+<li>我们希望允许在单个源代码库中开发多个模块, 但版本保持独立.<br>尽管大多数开发人员可能会继续使用每个代码库作为一个模块, 但大型项目可能会因在一个代码库中拥有多个模块而受益.<br>例如, 我们希望将 <code>golang.org/x/text</code> 保留为单个代码库, 但能够将从既定软件包分离出去的实验性新软件包分别版本化.</li>
+<li>我们希望让个人和公司能够轻松地将缓存代理放在 <code>go get</code> 之前进行下载, 无论是否可用(使用本地副本以确保明天下载依然工作)或是否安全(包在公司使用之前进行验证).</li>
+<li>我们希望在将来的某个时候, 为 Go 社区引入一个共享代理, 类似于 Rust, Node 和其他语言所使用的代理. 同时, 设计必须在没有假设代理或注册的情况下运行良好.</li>
+<li>我们希望消除 vendor 目录. 它们是为了可重复性和可用性而推出的, 但我们现在拥有更好的机制.<br>可重现性由正确的版本控制处理, 可用性由缓存代理处理.</li>
+</ul>
+<p>这篇文章介绍了解决这些问题的 vgo 设计的部分内容. 这里的一切都是初步的: 如果我们发现它不正确, 我们会改变设计.</p>
+<h3 id="版本化发布"><a href="#版本化发布" class="headerlink" title="版本化发布"></a>版本化发布</h3><p>抽象界限让项目规模化. 最初, 所有的 Go 软件包都可以被所有其他的 Go 软件包导入.<br>我们在 Go 1.4 中引入了内部(internal)目录约定, 以消除开发人员选择构造一个包含多个软件包的程序的问题, 因为需要担心其他用户导入内部辅助软件包, 这些辅助软件包并不公用.</p>
+<p>Go 社区现在与代码库提交有类似的可见性问题.<br>今天, 用户通过提交标识符(通常是 Git 哈希) 来识别包版本是非常普遍的, 其结果是, 将工作组织为一系列提交的开发人员需要担心, 至少在他们的想法背后, 用户固定的这些提交可能并不为公开使用. (译注: 作者的意思是说对于 Git 这种来说某一个 commit 有可能只是实验性质的提交, 本质上说不是为了公用.)<br>我们需要改变 Go 开源社区的期许, 以确立作者标签发布和用户所喜欢的规范.</p>
+<p>我不认同这一点: 用户应该从作者发布的版本中进行选择, 而不是从 Git 历史记录中挑选单独的提交, 这一点尤其有争议.<br>困难的部分正在改变规范. 我们需要让作者易于标记提交并方便用户使用这些标记.</p>
+<p>作者今天共享代码的最常用方式是代码托管网站, 尤其是 GitHub. 对于 GitHub 上的代码, 所有作者需要做的是标记提交并推送标签.<br>我们还计划提供一个工具(可能称为 <code>go release</code>)来比较不同版本的模块在类型级别的 API 兼容性, 以捕获类型系统中可见的意外破坏性更改, 以及帮助作者在发布的时候做出决定是次要版本(因为它增加了新的 API 或更改了许多行代码)还是只是一个补丁版本.</p>
+<p>对于用户来说, vgo 本身完全是根据标签版本来运作的. 然而, 我们知道, 至少在从旧实践向新实践过渡的过程中, 也许无限期地作为引导新项目的一种方式, 为了允许指定提交, 必须有一个逃生舱口. (译注: 原文作者戏虐的说法, 其实就是变通方案.) 这在 vgo 中是可能的, 但它的设计是为了让用户更倾向于明确标记的版本.</p>
+<p>具体来说, vgo 理解特殊的伪版本 <code>v0.0.0-yyyymmddhhmmss-commit</code> 引用给定的提交标识符, 它通常是一个缩短的 Git 哈希, 并且必须具有与(UTC)时间戳匹配的提交时间.<br>这种形式是 <code>v0.0.0</code> 预发布的有效语义版本字符串. 例如, 节选自 Gopkg.toml 的一段:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[[projects]]</span><br><span class="line">  name = &quot;google.golang.org/appengine&quot;</span><br><span class="line">  packages = [</span><br><span class="line">    &quot;internal&quot;,</span><br><span class="line">    &quot;internal/base&quot;,</span><br><span class="line">    &quot;internal/datastore&quot;,</span><br><span class="line">    &quot;internal/log&quot;,</span><br><span class="line">    &quot;internal/remote_api&quot;,</span><br><span class="line">    &quot;internal/urlfetch&quot;,</span><br><span class="line">    &quot;urlfetch&quot;</span><br><span class="line">  ]</span><br><span class="line">  revision = &quot;150dc57a1b433e64154302bdc40b6bb8aefa313a&quot;</span><br><span class="line">  version = &quot;v1.0.0&quot;</span><br><span class="line"></span><br><span class="line">[[projects]]</span><br><span class="line">  branch = &quot;master&quot;</span><br><span class="line">  name = &quot;github.com/google/go-github&quot;</span><br><span class="line">  packages = [&quot;github&quot;]</span><br><span class="line">  revision = &quot;922ceac0585d40f97d283d921f872fc50480e06e&quot;</span><br></pre></td></tr></table></figure>
+<p>对应于这些 go.mod 行:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">require (</span><br><span class="line">	&quot;google.golang.org/appengine&quot; v1.0.0</span><br><span class="line">	&quot;github.com/google/go-github&quot; v0.0.0-20180116225909-922ceac0585d</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>选择伪版本形式以便标准的 semver 优先级规则按提交时间比较两个伪版本, 因为时间戳编码使字符串比较匹配时间比较.<br>这种形式还可以确保 vgo 始终优先使用带标签的语义版本而不使用未标记的伪版本, 即使 v0.0.1 非常旧, 它的优先级比任何 v0.0.0 预发布版本都要高. (还要注意, 这与dep向项目添加新依赖项时所做的选择相匹配.)<br>当然, 伪版本字符串很难使用: 它们在 go.mod 文件里, 也可以 <code>vgo list -m</code> 输出.<br>所有这些不便之处都有助于鼓励作者和用户更喜欢明确标记的版本, 有点像不得不写 <code>import &quot;unsafe&quot;</code> 这种额外的步骤一样鼓励开发人员倾向于编写安全的代码.</p>
+<h3 id="go-mod-文件"><a href="#go-mod-文件" class="headerlink" title="go.mod 文件"></a>go.mod 文件</h3><p>模块版本由源文件树定义. go.mod 文件描述了该模块, 并且还指出了根目录. 当 vgo 运行在一个目录中时, 它会查看当前目录, 然后查找连续父目录, 以找到标记根目录的 go.mod.</p>
+<p>文件格式是面向行的, 只通过 “//“ 注释. 每行保存单个指令, 该指令是单个动词(module, require, exclude, 或者 replace, 由<a href="https://research.swtch.com/vgo-mvs" target="_blank" rel="noopener">最小版本选择</a>所定义), 随后是参数:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">module &quot;my/thing&quot;</span><br><span class="line">require &quot;other/thing&quot; v1.0.2</span><br><span class="line">require &quot;new/thing&quot; v2.3.4</span><br><span class="line">exclude &quot;old/thing&quot; v1.2.3</span><br><span class="line">replace &quot;bad/thing&quot; v1.4.5 =&gt; &quot;good/thing&quot; v1.4.5</span><br></pre></td></tr></table></figure>
+<p>顶头的动词可以从临近的行里分解出来, 自成一个块, 就像 Go 导入包一样:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">require (</span><br><span class="line">	&quot;new/thing&quot; v2.3.4</span><br><span class="line">	&quot;old/thing&quot; v1.2.3</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>我对文件格式的目标是 (1) 清晰和简单, (2) 易于人们阅读, 编辑, 操作和比较, (3) 易于 vgo 等程序读取, 修改和回写, 保留评论和总体结构, 以及 (4) 有限的未来增长空间.<br>我看了 JSON, TOML, XML 和 YAML, 但他们没有一个似乎同时拥有这四个属性.<br>例如, Gopkg.toml 上面使用的方法为每个依赖书写三行, 这使得它们更难以浏览, 排序和比较.<br>相反, 我设计了一个最小格式, 让人联想到 Go程序的头部, 但希望没有足够接近让人困惑. 我改写了一个已存在的注释友好的解析器.</p>
+<p>最终集成的 go 命令可能会更改文件格式, 甚至采用更标准的框架, 但对于兼容性, 我们将保持继续阅读今天 go.mod 文件的能力, 就如同 vgo 还可以从 GLOCKFILE, <code>Godeps/Godeps.json</code>, <code>Gopkg.lock</code>, <code>dependencies.tsv</code>, <code>glide.lock</code>, <code>vendor.conf</code>, <code>vendor.yml</code>, <code>vendor/manifest</code>, 以及 <code>vendor/vendor.json</code> 文件中读取依赖信息一样.</p>
+<h3 id="从代码库到模块"><a href="#从代码库到模块" class="headerlink" title="从代码库到模块"></a>从代码库到模块</h3><p>开发人员在版本控制系统中工作, 显然 vgo 必须尽可能简单.<br>例如, 期望开发人员自己准备模块存档(archives)是不合理的. 相反, vgo 可以按照一些基本的, 不显眼的约定, 从任何版本控制库直接导出模块.</p>
+<p>首先, 创建一个代码库并用类似于 v0.1.0 这样的一个 semver 格式标记一个提交, 就足够了.<br>顶头的 v 是必需的, 并且还需要三个数字. 虽然 vgo 它自己接受命令行中 v0.1 的简写形式, 但规范形式 v0.1.0 必须在代码库标记中使用, 以避免歧义.<br>只有标签是必需的. 为了不使用 vgo 的时候也可以使用提交, 在这一点上一个 go.mod 文件要求并不严格.<br>创建新的标记提交可创建新的模块版本. 简单.</p>
+<p>当开发人员到达 v2 时, 语义导入版本控制意味着 <code>/v2/</code> 在模块根前缀的末尾添加了一个导入路径: <code>my/thing/v2/sub/pkg</code>.<br>正如<a href="https://research.swtch.com/vgo-import" target="_blank" rel="noopener">前面的文章</a>中所述, 这个约束有很好的理由, 但是它仍然偏离现有的工具.<br>意识到这一点, vgo 如果不先检查 go.mod 文件中有主版本的模块路径声明(例如, <code>module &quot;my/thing/v2&quot;</code>) 就不会使用源码库中的 v2 或更高标记版本.<br>Vgo 使用该声明作为作者使用语义导入版本控制来命名该模块中的包的证据.<br>这对多包模块来说尤其重要, 因为模块中的导入路径必须包含 <code>/v2/</code> 元素以避免引用回 v1 模块.</p>
+<p>我们预计大多数开发人员会更喜欢遵循通常的 “主分支” 约定, 其中不同的主版本存在于不同的分支中. 在这种情况下, v2 分支中的根目录将有一个表明 v2 的 go.mod, 如下所示:</p>
+<p><img src="/static/images/gitmod-1@2x.png" width="591px" height="416px"></p>
+<p>这大致是大多数开发人员已在工作的(流程).<br>在图中, v1.0.0 标签指向一个早于 vgo 的提交. 它根本没有 go.mod 文件, 而且工作正常.<br>在提交标记 v1.0.1 中, 作者添加了一个 go.mod <code>module &quot;my/thing&quot;</code>.<br>然而, 在那个提交之后, 作者分叉了一个新的 v2 开发分支.<br>除了任何更改代码提示 V2 (包括更换 bar 用 quux)时, go.mod 在新的分支更新为 <code>module &quot;my/thing/v2&quot;</code>. 分支可以独立前进.<br>事实上, vgo 真的不知道分支(的存在),. 它只是将标签解析为提交, 然后在提交中查看 go.mod 文件.<br>同样, 该 go.mod 文件是 v2 及更高版本所必需的, 以便 vgo 可以使用该文件中的 module 行作为代码使用了语义导入版本控制的标志, 所以 foo 导入的是 <code>my/thing/v2/foo/quux</code>, 不是 <code>my/thing/foo/quux</code>.</p>
+<p>作为替代方案, vgo 还支持 “主子目录” 约定, 在子目录中开发了 V1 以上的主要版本:</p>
+<p><img src="/static/images/gitmod-2@2x.png" width="376px" height="768px"></p>
+<p>在这种情况下, v2.0.0 不是通过将整个树分叉为单独的分支而是通过将其复制到子目录中来创建的. 再次 go.mod 更新为 <code>&quot;my/thing/v2&quot;</code>.<br>之后, v1.x.x 标记指向根目录文件的提交, 不包含 <code>v2/</code>, 而 v2.x.x 标记仅指向 <code>v2/</code> 子目录的提交.<br>go.mod 文件可以使 vgo 区分这两种情况. 将 v1.x.x 和 v2.x.x 标记指向相同的提交也是有意义的: 它们将处理提交的不同子树.</p>
+<p>我们期望开发者可能会强烈地选择一种或另一种约定. vgo 同时支持这两种. 请注意, 对于 v2 以上的主版本, 主子目录方案可能会为 <code>go get</code> 用户提供优雅的过渡.<br>另一方面, dep 或 vendoring 工具的用户应该能够使用任何约定之一来使用代码库. 当然, 我们会确保 dep 可以.</p>
+<h3 id="多模块代码库"><a href="#多模块代码库" class="headerlink" title="多模块代码库"></a>多模块代码库</h3><p>开发人员也可能发现在单个源代码库中维护一组模块是很有用的. 我们想让 vgo 支持这种可能性.<br>总的来说, 不同的开发人员, 团队, 项目和公司应用源代码控制的方式已经有很大差异, 我们认为将 “单一代码库等同于一个模块” 这样的单一映射强加给所有开发人员并不是很有成效.<br>在这方面有一定的灵活性也应该有助于 vgo 适应围绕源码控制的最佳实践不断变化.</p>
+<p>在主子目录约定中, <code>v2/</code> 包含模块 <code>&quot;my/thing/v2&quot;</code>.<br>一个自然的扩展允许没有为主版本命名的子目录.<br>例如, 我们可以添加一个 <code>blue/</code> 包含 <code>&quot;my/thing/blue&quot;</code> 模块的子目录, 并由具有该模块路径 <code>blue/go.mod</code> 的文件确认.<br>在这种情况下, 处理该模块的源代码控制提交标签将采用这种形式 <code>blue/v1.x.x</code>.<br>同样, 标签 <code>blue/v2.x.x</code> 将处理 <code>blue/v2/</code> 子目录. <code>blue/go.mod</code> 文件的存在将 <code>blue/</code> 树从外部 <code>my/thing</code> 模块中排除.</p>
+<p>在 Go 项目中, 我们打算探索使用这个约定来允许像 <code>golang.org/x/text</code> 这样的代码库定义多个独立的模块.<br>这让我们保留了粗粒度源码控制的便利, 但仍然在不同的时间将不同的子树提升到 v1.</p>
+<h3 id="已过时的版本"><a href="#已过时的版本" class="headerlink" title="已过时的版本"></a>已过时的版本</h3><p>作者还需要能够弃用一个版本, 以表明它不应该再被使用.<br>这还没有在 vgo 原型中实现, 但它可以工作的一种方式是在代码托管站点上定义一个标记 <code>v1.0.0+deprecated</code> (理想情况下指向与 v1.0.0 相同的提交)将表明该提交已被弃用.<br>当然重要的是不要完全删除标签, 因为这会破坏构建.<br>弃用的模块会以某种方式在 <code>vgo list -m -u</code> 输出中高亮显示(“显示我的模块和有关更新的信息”), 以便用户知道要更新.</p>
+<p>另外, 因为程序可以在运行时访问自己的模块列表和版本, 所以程序也可以配置为根据某些选定的权限检查自己的模块版本, 并在运行弃用版本时以某种方式自行报告.<br>同样, 这里的细节还没有解决, 但是一旦开发人员和工具共享描述版本的词汇表, 这就是一个很好的例子.</p>
+<h3 id="发布"><a href="#发布" class="headerlink" title="发布"></a>发布</h3><p>给定一个源代码控制库, 开发人员需要能够以 vgo 可以使用的形式发布它.<br>在一般情况下, 我们将提供一个命令, 作者运行它们将其源代码控制代码库转换为通过任何静态文件 web 服务器提供给 vgo 使用的文件树.<br>与当前 <code>go get</code> 类似, vgo 需要一个带有 <code>&lt;meta&gt;</code> 标签的页面来帮助将模块名称转换为该模块的文件树.<br>例如, 要查找 <code>swtch.com/testmod</code>, vgo 命令将这样获取通常的页面:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ curl -sSL &apos;https://swtch.com/testmod?go-get=1&apos;</span><br><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;meta name=&quot;go-import&quot; content=&quot;swtch.com/testmod mod https://storage.googleapis.com/gomodules/rsc&quot;&gt;</span><br><span class="line">Nothing to see here.</span><br><span class="line">$</span><br></pre></td></tr></table></figure>
+<p>mod 服务器类型表明模块通过该基本 URL 上的文件数提供. <code>storage.googleapis.com/gomodules/rsc</code> 中这个简单案例中的相关文件是:</p>
+<ul>
+<li><a href="https://storage.googleapis.com/gomodules/rsc/swtch.com/testmod/@v/list" target="_blank" rel="noopener">.../swtch.com/testmod/@v/list</a></li>
+<li><a href="https://storage.googleapis.com/gomodules/rsc/swtch.com/testmod/@v/v1.0.0.info" target="_blank" rel="noopener">.../swtch.com/testmod/@v/v1.0.0.info</a></li>
+<li><a href="https://storage.googleapis.com/gomodules/rsc/swtch.com/testmod/@v/v1.0.0.mod" target="_blank" rel="noopener">.../swtch.com/testmod/@v/v1.0.0.mod</a></li>
+<li><a href="https://storage.googleapis.com/gomodules/rsc/swtch.com/testmod/@v/v1.0.0.zip" target="_blank" rel="noopener">.../swtch.com/testmod/@v/v1.0.0.zip</a></li>
+</ul>
+<p>这些 URL 的确切含义在后面的 “下载协议” 一节中讨论.</p>
+<h3 id="代码托管网站"><a href="#代码托管网站" class="headerlink" title="代码托管网站"></a>代码托管网站</h3><p>对于代码托管网站上巨大数量的开发, 我们希望 vgo 尽可能顺利地融入进来.<br>而不希望开发人员在其他地方发布模块, 然后让 vgo 支持使用基于 HTTP 的API 直接从这些站点读取所需信息.<br>一般来说, 档案下载可以比现有版本控制签出快得多.<br>例如, 在使用千兆互联网连接的笔记本电脑上工作时, 需要 10 秒钟将 <a href="https://github.com/cockroachdb/cockroach" target="_blank" rel="noopener">CockroachDB 源码树</a>作为 GitHub 的 zip 文件下载, 但需要大约 4 分钟的时间进行 <code>git clone</code>.<br>网站只需提供一个可以通过简单的 <code>HTTP GET</code> 获取的任何形式的存档.<br>例如, Gerrit 服务器仅支持下载 <code>gzipped</code> 归档文件. Vgo 将下载的档案转换为标准形式.</p>
+<p>最初的原型只包括对 GitHub 和 Go 项目的 Gerrit 服务器的支持, 但是在进入 Go 主工具链之前, 我们也会增加对 Bitbucket 和其他主要托管站点的支持.</p>
+<p>通过轻量级代码库约定(主要与开发人员已经在做的事情相匹配)以及对已知代码托管站点的支持相结合, 我们预计大多数开源活动都不会受到向模块转移的影响，而只是简单地在每个代码库里面添加 go.mod.</p>
+<p>使用旧版本 <code>go get</code> (直接使用 git 和其他源码控制工具)的公司需要进行调整.<br>也许编写一个满足 vgo 期望但使用版本控制工具的代理是有意义的. 然后, 公司可以运行其中的一种产生类似使用开源托管站点的体验.</p>
+<h3 id="模块档案"><a href="#模块档案" class="headerlink" title="模块档案"></a>模块档案</h3><p>从代码库到模块的映射有点复杂, 因为开发人员使用源代码控制的方式各不相同.<br>最终目标是将所有复杂性映射到代理或其他代码使用者(例如 <code>godoc.org</code> 或任何代码检查工具)使用的 Go 模块的通用单一格式.</p>
+<p>vgo 原型中的标准格式是 zip 档案, 其中所有路径都以模块路径和版本开头. 例如, 运行 <code>rsc.io/quoteV1.5.2</code> 的 <code>vgo get</code> 后, 你可以在 vgo 的下载缓存里找到 zip 文件:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ unzip -l $GOPATH/src/v/cache/rsc.io/quote/@v/v1.5.2.zip</span><br><span class="line">     1479  00-00-1980 00:00   rsc.io/quote@v1.5.2/LICENSE</span><br><span class="line">      131  00-00-1980 00:00   rsc.io/quote@v1.5.2/README.md</span><br><span class="line">      240  00-00-1980 00:00   rsc.io/quote@v1.5.2/buggy/buggy_test.go</span><br><span class="line">       55  00-00-1980 00:00   rsc.io/quote@v1.5.2/go.mod</span><br><span class="line">      793  00-00-1980 00:00   rsc.io/quote@v1.5.2/quote.go</span><br><span class="line">      917  00-00-1980 00:00   rsc.io/quote@v1.5.2/quote_test.go</span><br><span class="line">$</span><br></pre></td></tr></table></figure>
+<p>我使用了 zip, 因为它是精心指定的, 广泛支持的, 并且如果需要可以干净地扩展, 并允许随机访问单个文件. (相比之下, tar 文件是另一个显而易见的选择, 但是都不满足这些特点.)</p>
+<h3 id="下载协议"><a href="#下载协议" class="headerlink" title="下载协议"></a>下载协议</h3><p>要下载有关模块的信息以及模块本身, vgo原型仅发出简单的 <code>HTTP GET</code> 请求. 一个关键的设计目标是使得可以从静态托管站点提供模块, 因此请求没有 URL 查询参数.</p>
+<p>正如我们前面看到的, 自定义域可以指定模块托管在特定的基本 URL.<br>像 vgo 今天实现的那样(但是, vgo 的所有这些可能会发生变化), 该模块托管服务器必须提供四种请求格式:*</p>
+<ul>
+<li><code>GET baseURL/module/@v/list</code> 获取所有已知版本的列表, 每行一个.</li>
+<li><code>GET baseURL/module/@v/version.info</code> 获取有关该版本的 JSON 格式的元数据.</li>
+<li><code>GET baseURL/module/@v/version.mod</code> 获取该版本的 go.mod 文件.</li>
+<li><code>GET baseURL/module/@v/version.zip</code> 获取该版本的 zip 文件.</li>
+</ul>
+<p>以 <code>version.info</code> 形式提供的 JSON 信息可能会演化, 但现在它对应于此结构:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">type RevInfo struct &#123;</span><br><span class="line">	Version string    // version string</span><br><span class="line">	Name    string    // complete ID in underlying repository</span><br><span class="line">	Short   string    // shortened ID, for use in pseudo-version</span><br><span class="line">	Time    time.Time // commit time</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>vgo list -m -u</code> 命令通过使用 Time 字段显示每个可用更新的提交时间.</p>
+<p>一个通用的模块托管服务器也可以有选择地响应非 semver 版本的 <code>version.info</code> 请求. 像这样的 vgo 命令:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">vgo get my/thing/v2@1459def</span><br></pre></td></tr></table></figure>
+<p>将获取 <code>1459def.info</code> 并使用 Time 和 Short 字段派生伪版本.</p>
+<p>还有两种可选的请求形式:</p>
+<ul>
+<li><code>GET baseURL/module/@t/yyyymmddhhmmss</code> 在给定的时间戳之前返回或返回最新版本的 <code>.info</code> JSON.</li>
+<li><code>GET baseURL/module/@t/yyyymmddhhmmss/branch</code> 同上, 但将搜索限制在给定分支上的提交.</li>
+</ul>
+<p>这些支持在 vgo 使用未标记的提交. 如果 vgo 正在添加一个模块却根本找不到标签提交, 它将使用第一种形式来查找截至目前的最新提交.<br>它在查找可用更新时也是如此, 假定仍然没有标记提交. 分支限制形式用于 <code>gopkg.in</code> 的内部模拟. 这些形式也支持命令行语法:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">vgo get my/thing/v2@2018-02-01T15:34:45</span><br><span class="line">vgo get my/thing/v2@2018-02-01T15:34:45@branch</span><br></pre></td></tr></table></figure>
+<p>这可能是一个失误, 但他们在今天的原型, 所以我提到他们.</p>
+<h3 id="代理服务器"><a href="#代理服务器" class="headerlink" title="代理服务器"></a>代理服务器</h3><p>个人和公司都可能更喜欢从代理服务器下载 Go 模块, 无论是为了效率, 可用性, 安全性, 许可证合规性还是任何其他原因.<br>如前两节所述, 使用标准的 Go 模块格式和标准的下载协议使得引入对代理的支持变得微不足道.<br>如果 $GOPROXY 设置了环境变量, vgo 则从给定的基础 URL 获取服务器中的所有模块, 而不是从其通常的位置获取. 为了便于调试, <code>$GOPROXY</code> 甚至可以是指向本地文件树的 file:/// URL.</p>
+<p>我们打算编写一个基于 vgo 本地缓存的基本代理服务器, 根据需要下载新模块.<br>在一组计算机中共享这样的代理将有助于减少来自代理用户的冗余下载, 但更重要的是确保将来的可用性, 即使原始副本消失.<br>代理也可以选择不允许下载新模块. 在此模式下, 代理会将可用模块限制到代理管理员列入白名单的那些模块. 这两种代理模式都是企业环境中经常需要的功能.</p>
+<p>也许有一天, 建立 <code>go get</code> 默认使用的分布式代理服务器集合是有意义, 以确保全球 Go 开发者的模块可用性和快速下载. 但还没准备好. 今天, 我们专注于确保 <code>go get</code> 无需假设任何类型的集中式代理服务器即可运行.</p>
+<h3 id="Vendoring-的结束"><a href="#Vendoring-的结束" class="headerlink" title="Vendoring 的结束"></a>Vendoring 的结束</h3><p>Vendor 目录有两个目的. 首先, 他们通过其内容指定在 <code>go build</code> 过程中使用的依赖关系的确切版本. 其次, 即使原始副本消失, 它们也可确保这些依赖项的可用性.<br>另一方面，vendor 目录也很难管理和膨胀它们出现的代码库. 通过 go.mod 文件指定要在 <code>vgo build</code> 使用的依赖关系的确切版本, 以及代理服务器确保可用性, vendor 目录现在几乎完全是冗余的.<br>但是, 它们可以为最终目的服务: 实现向新版本世界的平稳过渡.</p>
+<p>在构建模块时 vgo (和稍后 go) 将完全忽略 vendored 的依赖; 这些依赖也不会包含在模块的 zip 文件中.<br>为了能够让作者迁移到 vgo 与 go.mod, 同时仍然支持没有完成转换的用户, 新的 <code>vgo vendor</code> 命令通过填充模块的 vendor 目录中用户使用的包来产生基于 vgo 的构建.</p>
+<h3 id="接下来呢"><a href="#接下来呢" class="headerlink" title="接下来呢 ?"></a>接下来呢 ?</h3><p>这里的细节可能会被修改, 但今天的 go.mod 文件将被任何未来的工具所理解. 请开始使用发布标签标记你的软件包; 请添加 go.mod 文件使你的项目有意义.</p>
+<p>本系列的下一篇文章将介绍对 go 工具命令行体验的更改.</p>
+
+  </div>
+</article>
+
+    <div class="blog-post-comments">
+        <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the comments.</noscript>
+        </div>
+    </div>
+
+
+
+    </div>
+    
+      <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Archives</a></li>
+         
+          <li><a href="https://github.com/douglarek?tab=repositories">Projects</a></li>
+         
+          <li><a href="/atom.xml">Rss</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#版本化发布"><span class="toc-number">1.</span> <span class="toc-text">版本化发布</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#go-mod-文件"><span class="toc-number">2.</span> <span class="toc-text">go.mod 文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#从代码库到模块"><span class="toc-number">3.</span> <span class="toc-text">从代码库到模块</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#多模块代码库"><span class="toc-number">4.</span> <span class="toc-text">多模块代码库</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#已过时的版本"><span class="toc-number">5.</span> <span class="toc-text">已过时的版本</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#发布"><span class="toc-number">6.</span> <span class="toc-text">发布</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#代码托管网站"><span class="toc-number">7.</span> <span class="toc-text">代码托管网站</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#模块档案"><span class="toc-number">8.</span> <span class="toc-text">模块档案</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#下载协议"><span class="toc-number">9.</span> <span class="toc-text">下载协议</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#代理服务器"><span class="toc-number">10.</span> <span class="toc-text">代理服务器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Vendoring-的结束"><span class="toc-number">11.</span> <span class="toc-text">Vendoring 的结束</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#接下来呢"><span class="toc-number">12.</span> <span class="toc-text">接下来呢 ?</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://lingchao.xin/post/vgo-module.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://lingchao.xin/post/vgo-module.html&text=定义 Go 模块"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://lingchao.xin/post/vgo-module.html&title=定义 Go 模块"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lingchao.xin/post/vgo-module.html&is_video=false&description=定义 Go 模块"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=定义 Go 模块&body=Check out this article: https://lingchao.xin/post/vgo-module.html"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://lingchao.xin/post/vgo-module.html&title=定义 Go 模块"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/vgo-module.html&title=定义 Go 模块"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/vgo-module.html&title=定义 Go 模块"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/vgo-module.html&title=定义 Go 模块"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/vgo-module.html&name=定义 Go 模块&description=&lt;p&gt;本文译自 &lt;a href=&#34;https://research.swtch.com/vgo-module&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Defining Go Modules&lt;/a&gt;, &lt;a href=&#34;https://lingchao.xin/tag/vgo.html&#34;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 6 部分, 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+    
+    <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; 2018 Lingchao Xin
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Archives</a></li>
+         
+          <li><a href="https://github.com/douglarek?tab=repositories">Projects</a></li>
+         
+          <li><a href="/atom.xml">Rss</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>
+<!-- styles -->
+<link rel="stylesheet" href="/lib/font-awesome/css/fontawesome-all.min.css">
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+<!-- jquery -->
+<script src="/lib/jquery/jquery.min.js"></script>
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+<script src="/js/main.js"></script>
+<!-- search -->
+
+<!-- Google Analytics -->
+
+    <script type="text/javascript">
+        (function(i,s,o,g,r,a,m) {i['GoogleAnalyticsObject']=r;i[r]=i[r]||function() {
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+        ga('create', 'UA-47053188-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+
+<!-- Disqus Comments -->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'douglarek';
+
+        (function(){
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        }());
+    </script>
+
+
