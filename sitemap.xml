@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html</loc>
+    
+    <lastmod>2018-03-27T02:41:44.175Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://lingchao.xin/post/go-proverbs.html</loc>
     
     <lastmod>2018-03-27T02:37:19.606Z</lastmod>
@@ -117,13 +124,6 @@
     <loc>https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html</loc>
     
     <lastmod>2018-03-26T09:39:44.308Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html</loc>
-    
-    <lastmod>2018-03-26T09:33:02.106Z</lastmod>
     
   </url>
   
