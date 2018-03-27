@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://lingchao.xin/post/vgo-tour.html</loc>
+    
+    <lastmod>2018-03-27T02:20:11.809Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://lingchao.xin/post/go-defer-panic-and-recover.html</loc>
     
     <lastmod>2018-03-27T02:10:29.283Z</lastmod>
@@ -166,13 +173,6 @@
     <loc>https://lingchao.xin/post/vgo-intro.html</loc>
     
     <lastmod>2018-03-26T06:34:02.173Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://lingchao.xin/post/vgo-tour.html</loc>
-    
-    <lastmod>2018-03-26T06:32:37.508Z</lastmod>
     
   </url>
   
