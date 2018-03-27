@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://lingchao.xin/post/go-range-loop-internals.html</loc>
+    
+    <lastmod>2018-03-27T02:46:14.728Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html</loc>
     
     <lastmod>2018-03-27T02:41:44.175Z</lastmod>
@@ -103,13 +110,6 @@
     <loc>https://lingchao.xin/post/2017-has-passed.html</loc>
     
     <lastmod>2018-03-26T09:45:49.124Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://lingchao.xin/post/go-range-loop-internals.html</loc>
-    
-    <lastmod>2018-03-26T09:44:46.348Z</lastmod>
     
   </url>
   
