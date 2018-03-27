@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://lingchao.xin/"/>
-  <updated>2018-03-27T02:10:29.283Z</updated>
+  <updated>2018-03-27T14:04:25.882Z</updated>
   <id>https://lingchao.xin/</id>
   
   <author>
@@ -15,6 +15,26 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Go 中的同步队列</title>
+    <link href="https://lingchao.xin/post/synchronization-queues-in-golang.html"/>
+    <id>https://lingchao.xin/post/synchronization-queues-in-golang.html</id>
+    <published>2018-03-27T13:14:05.000Z</published>
+    <updated>2018-03-27T14:04:25.882Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;本文译自 &lt;a href=&quot;https://medium.com/golangspec/synchronization-queues-in-golang-554f8e3a31a4&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Synchronization queues in Golang&lt;/a&gt; 版权@归原文所有.&lt;br&gt;
+    
+    </summary>
+    
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
+    
+      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+  </entry>
   
   <entry>
     <title>理解 Go defer, panic, recover</title>
@@ -411,26 +431,6 @@
     
     
       <category term="note" scheme="https://lingchao.xin/tags/note/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Go 服务优雅重启</title>
-    <link href="https://lingchao.xin/post/golang-graceful-restart-server.html"/>
-    <id>https://lingchao.xin/post/golang-graceful-restart-server.html</id>
-    <published>2017-07-25T06:14:04.000Z</published>
-    <updated>2018-03-26T10:01:12.033Z</updated>
-    
-    <summary type="html">
-    
-      &lt;p&gt;很多时候对于服务升级的做法简单粗暴, 就简单的杀进程启动新的进程.&lt;br&gt;
-    
-    </summary>
-    
-    
-      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
-    
-      <category term="http" scheme="https://lingchao.xin/tags/http/"/>
     
   </entry>
   
