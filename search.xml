@@ -395,9 +395,9 @@
       
         <tags>
             
-            <tag> translation </tag>
-            
             <tag> database </tag>
+            
+            <tag> translation </tag>
             
             <tag> postgresql </tag>
             
