@@ -4,7 +4,7 @@
   <url>
     <loc>https://lingchao.xin/post/sicp-quickstart.html</loc>
     
-    <lastmod>2018-04-06T14:10:02.000Z</lastmod>
+    <lastmod>2018-04-06T14:10:40.000Z</lastmod>
     
   </url>
   
@@ -23,14 +23,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html</loc>
+    <loc>https://lingchao.xin/post/vgo-intro.html</loc>
     
     <lastmod>2018-03-27T15:36:03.933Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/vgo-intro.html</loc>
+    <loc>https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html</loc>
     
     <lastmod>2018-03-27T15:36:03.933Z</lastmod>
     
@@ -58,14 +58,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/gos-work-stealing-scheduler.html</loc>
+    <loc>https://lingchao.xin/post/go-proverbs.html</loc>
     
     <lastmod>2018-03-27T15:36:03.931Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/go-proverbs.html</loc>
+    <loc>https://lingchao.xin/post/gos-work-stealing-scheduler.html</loc>
     
     <lastmod>2018-03-27T15:36:03.931Z</lastmod>
     
@@ -79,14 +79,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/search/index.html</loc>
+    <loc>https://lingchao.xin/post/why-golang-garbage-collector-not-implement-generational-and-compact-gc.html</loc>
     
     <lastmod>2018-03-26T13:28:33.292Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/why-golang-garbage-collector-not-implement-generational-and-compact-gc.html</loc>
+    <loc>https://lingchao.xin/search/index.html</loc>
     
     <lastmod>2018-03-26T13:28:33.292Z</lastmod>
     
@@ -128,14 +128,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/the-past-2016.html</loc>
+    <loc>https://lingchao.xin/post/there-is-no-pass-by-reference-in-go.html</loc>
     
     <lastmod>2018-03-26T13:28:33.287Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/there-is-no-pass-by-reference-in-go.html</loc>
+    <loc>https://lingchao.xin/post/the-past-2016.html</loc>
     
     <lastmod>2018-03-26T13:28:33.287Z</lastmod>
     
@@ -205,14 +205,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/emacs-is-a-habit.html</loc>
+    <loc>https://lingchao.xin/post/conditional-expressions-in-postgres.html</loc>
     
     <lastmod>2018-03-26T13:28:33.282Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/conditional-expressions-in-postgres.html</loc>
+    <loc>https://lingchao.xin/post/emacs-is-a-habit.html</loc>
     
     <lastmod>2018-03-26T13:28:33.282Z</lastmod>
     
