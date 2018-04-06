@@ -4,7 +4,7 @@
   <url>
     <loc>https://lingchao.xin/post/sicp-quickstart.html</loc>
     
-    <lastmod>2018-04-06T14:09:41.000Z</lastmod>
+    <lastmod>2018-04-06T14:10:02.000Z</lastmod>
     
   </url>
   
@@ -184,6 +184,13 @@
   </url>
   
   <url>
+    <loc>https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html</loc>
+    
+    <lastmod>2018-03-26T13:28:33.283Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://lingchao.xin/post/functional-options-pattern-in-go.html</loc>
     
     <lastmod>2018-03-26T13:28:33.283Z</lastmod>
@@ -191,9 +198,9 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html</loc>
+    <loc>https://lingchao.xin/post/a-developer-relations-bill-of-rights.html</loc>
     
-    <lastmod>2018-03-26T13:28:33.283Z</lastmod>
+    <lastmod>2018-03-26T13:28:33.282Z</lastmod>
     
   </url>
   
@@ -206,13 +213,6 @@
   
   <url>
     <loc>https://lingchao.xin/post/conditional-expressions-in-postgres.html</loc>
-    
-    <lastmod>2018-03-26T13:28:33.282Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://lingchao.xin/post/a-developer-relations-bill-of-rights.html</loc>
     
     <lastmod>2018-03-26T13:28:33.282Z</lastmod>
     
