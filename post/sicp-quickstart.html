@@ -14,7 +14,7 @@
 <meta property="og:site_name" content="Coding talks">
 <meta property="og:description" content="买了很久的 SICP (英文: Structure and Interpretation of Computer Programs, 中文译作: 计算机程序的构造和解释)一直在吃灰, 趁着假期捡起来. 一种 Scheme 实现刷 SICP 不局限于特定的 Scheme 实现, 虽然 MIT-Scheme 是 MIT 出的. 然而 MIT 自己都废掉了它而指定 DrScheme 为默认课程支持版本.">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2018-04-06T14:13:58.000Z">
+<meta property="og:updated_time" content="2018-04-06T14:15:09.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="SICP 准备">
 <meta name="twitter:description" content="买了很久的 SICP (英文: Structure and Interpretation of Computer Programs, 中文译作: 计算机程序的构造和解释)一直在吃灰, 趁着假期捡起来. 一种 Scheme 实现刷 SICP 不局限于特定的 Scheme 实现, 虽然 MIT-Scheme 是 MIT 出的. 然而 MIT 自己都废掉了它而指定 DrScheme 为默认课程支持版本.">
@@ -142,7 +142,7 @@
 <h3 id="一种-Scheme-实现"><a href="#一种-Scheme-实现" class="headerlink" title="一种 Scheme 实现"></a>一种 Scheme 实现</h3><p>刷 SICP 不局限于特定的 Scheme 实现, 虽然 MIT-Scheme 是 MIT 出的. 然而 MIT 自己都废掉了它而指定 DrScheme 为默认课程支持版本. 本文基于的 Scheme 实现是 <a href="http://www.call-cc.org/" target="_blank" rel="noopener">Chicken</a>.</p>
 <p>macOS 下安装很简单:</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ brew install chicken</span><br></pre></td></tr></table></figure>
-<h3 id="一个编辑器"><a href="#一个编辑器" class="headerlink" title="一个编辑器"></a>一个编辑器</h3><p>对于Scheme来说, 恐怕支持最好的就是Emacs了. 同样本文基于Emacs的定制配置版本 <a href="https://github.com/syl20bnr/spacemacs" target="_blank" rel="noopener">Spacemacs</a>.</p>
+<h3 id="一个编辑器"><a href="#一个编辑器" class="headerlink" title="一个编辑器"></a>一个编辑器</h3><p>对于Scheme来说, 恐怕支持最好的就是 Emacs 了. 同样本文基于 Emacs 的定制配置版本 <a href="https://github.com/syl20bnr/spacemacs" target="_blank" rel="noopener">Spacemacs</a>.</p>
 <p>Spacemacs 本身就有一个 Scheme 的 Layer 可供使用, 我使用了一个基于它, 自己定制的 Layer(<a href="https://github.com/douglarek/.spacemacs.d/tree/master/layers/x-scheme" target="_blank" rel="noopener">x-scheme</a>).</p>
 <p>x-scheme 依赖于 <a href="https://github.com/jaor/geiser" target="_blank" rel="noopener">Geiser</a> 提供 REPL 等各种便利的功能, 它使用了 Chicken 的某些扩展, 可以通过以下命令安装:</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ chicken-install chicken-doc apropos sicp <span class="comment"># 包含 sicp 支持</span></span><br><span class="line">$ <span class="built_in">cd</span> `csi -p <span class="string">'(chicken-home)'</span>`</span><br><span class="line">$ curl http://3e8.org/pub/chicken-doc/chicken-doc-repo.tgz | tar zx</span><br></pre></td></tr></table></figure>
