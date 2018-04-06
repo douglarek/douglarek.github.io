@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://lingchao.xin/"/>
-  <updated>2018-04-02T15:10:45.000Z</updated>
+  <updated>2018-04-06T14:06:00.000Z</updated>
   <id>https://lingchao.xin/</id>
   
   <author>
@@ -15,6 +15,32 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>SICP 准备</title>
+    <link href="https://lingchao.xin/post/sicp-quickstart.html"/>
+    <id>https://lingchao.xin/post/sicp-quickstart.html</id>
+    <published>2018-04-06T13:11:49.000Z</published>
+    <updated>2018-04-06T14:06:00.000Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;p&gt;买了很久的SICP(英文: &lt;a href=&quot;https://mitpress.mit.edu/sites/default/files/sicp/full-text/book/book.html&quot; target=&quot;_blank&quot;
+        
+      
+    
+    </summary>
+    
+    
+      <category term="sicp" scheme="https://lingchao.xin/tags/sicp/"/>
+    
+      <category term="scheme" scheme="https://lingchao.xin/tags/scheme/"/>
+    
+  </entry>
   
   <entry>
     <title>Go 中的内存泄漏</title>
@@ -420,27 +446,6 @@
       <category term="go" scheme="https://lingchao.xin/tags/go/"/>
     
       <category term="gc" scheme="https://lingchao.xin/tags/gc/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Go Range 循环内幕</title>
-    <link href="https://lingchao.xin/post/go-range-loop-internals.html"/>
-    <id>https://lingchao.xin/post/go-range-loop-internals.html</id>
-    <published>2018-01-10T12:20:04.000Z</published>
-    <updated>2018-03-27T15:36:03.931Z</updated>
-    
-    <summary type="html">
-    
-      &lt;p&gt;&lt;a href=&quot;https://garbagecollected.org/2017/02/22/go-range-loop-internals/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;译文&lt;/a&gt;版权@归原文所有.&lt;/p&gt;
-&lt;p&gt;虽然他们非常方便, 但我总是发现 Go 的 Range 循环有点神秘. 我并不是第一个:&lt;br&gt;
-    
-    </summary>
-    
-    
-      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
-    
-      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
     
   </entry>
   
