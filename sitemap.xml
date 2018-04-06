@@ -4,7 +4,7 @@
   <url>
     <loc>https://lingchao.xin/post/sicp-quickstart.html</loc>
     
-    <lastmod>2018-04-06T14:15:09.000Z</lastmod>
+    <lastmod>2018-04-06T14:15:40.000Z</lastmod>
     
   </url>
   
@@ -58,14 +58,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/go-proverbs.html</loc>
+    <loc>https://lingchao.xin/post/gos-work-stealing-scheduler.html</loc>
     
     <lastmod>2018-03-27T15:36:03.931Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/gos-work-stealing-scheduler.html</loc>
+    <loc>https://lingchao.xin/post/go-proverbs.html</loc>
     
     <lastmod>2018-03-27T15:36:03.931Z</lastmod>
     
@@ -121,7 +121,7 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/there-is-no-pass-by-reference-in-go.html</loc>
+    <loc>https://lingchao.xin/post/the-past-2016.html</loc>
     
     <lastmod>2018-03-26T13:28:33.287Z</lastmod>
     
@@ -135,14 +135,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/the-past-2016.html</loc>
+    <loc>https://lingchao.xin/post/there-is-no-pass-by-reference-in-go.html</loc>
     
     <lastmod>2018-03-26T13:28:33.287Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/postgresql-aggregate-functions.html</loc>
+    <loc>https://lingchao.xin/post/make-a-dynamic-class-in-python.html</loc>
     
     <lastmod>2018-03-26T13:28:33.286Z</lastmod>
     
@@ -156,7 +156,7 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/make-a-dynamic-class-in-python.html</loc>
+    <loc>https://lingchao.xin/post/postgresql-aggregate-functions.html</loc>
     
     <lastmod>2018-03-26T13:28:33.286Z</lastmod>
     
@@ -170,6 +170,13 @@
   </url>
   
   <url>
+    <loc>https://lingchao.xin/post/golang-internals-part-2-nice-benefits-of-named-return-values.html</loc>
+    
+    <lastmod>2018-03-26T13:28:33.284Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://lingchao.xin/post/golang-graceful-restart-server.html</loc>
     
     <lastmod>2018-03-26T13:28:33.284Z</lastmod>
@@ -177,9 +184,9 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/golang-internals-part-2-nice-benefits-of-named-return-values.html</loc>
+    <loc>https://lingchao.xin/post/functional-options-pattern-in-go.html</loc>
     
-    <lastmod>2018-03-26T13:28:33.284Z</lastmod>
+    <lastmod>2018-03-26T13:28:33.283Z</lastmod>
     
   </url>
   
@@ -191,9 +198,9 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/functional-options-pattern-in-go.html</loc>
+    <loc>https://lingchao.xin/post/a-developer-relations-bill-of-rights.html</loc>
     
-    <lastmod>2018-03-26T13:28:33.283Z</lastmod>
+    <lastmod>2018-03-26T13:28:33.282Z</lastmod>
     
   </url>
   
@@ -206,13 +213,6 @@
   
   <url>
     <loc>https://lingchao.xin/post/conditional-expressions-in-postgres.html</loc>
-    
-    <lastmod>2018-03-26T13:28:33.282Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://lingchao.xin/post/a-developer-relations-bill-of-rights.html</loc>
     
     <lastmod>2018-03-26T13:28:33.282Z</lastmod>
     
