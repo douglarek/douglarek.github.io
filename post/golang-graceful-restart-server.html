@@ -14,7 +14,7 @@
 <meta property="og:site_name" content="Coding talks">
 <meta property="og:description" content="很多时候对于服务升级的做法简单粗暴, 就简单的杀进程启动新的进程.">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2018-03-26T10:01:12.033Z">
+<meta property="og:updated_time" content="2018-04-12T10:30:44.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Go 服务优雅重启">
 <meta name="twitter:description" content="很多时候对于服务升级的做法简单粗暴, 就简单的杀进程启动新的进程.">
@@ -157,7 +157,7 @@
 </ul>
 <p>对于上面的原理看似简单, 其实是分成了两个大的要点:</p>
 <ul>
-<li><p>新老进程同时监听同一端口, 这个很简单, Go 很早旧支持;</p>
+<li><p>新老进程同时监听同一端口, 这个很简单, Go 很早就支持;</p>
 </li>
 <li><p>如何等待旧的请求完成, 这个在 Go 1.8 (新增了Server.Shutdown) 之前是需要费一番功夫的.</p>
 </li>
