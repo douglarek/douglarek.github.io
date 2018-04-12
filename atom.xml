@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://lingchao.xin/"/>
-  <updated>2018-04-06T14:15:40.000Z</updated>
+  <updated>2018-04-12T05:06:14.000Z</updated>
   <id>https://lingchao.xin/</id>
   
   <author>
@@ -17,11 +17,36 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>Go errors 堆栈</title>
+    <link href="https://lingchao.xin/post/go-errors-stack-traces.html"/>
+    <id>https://lingchao.xin/post/go-errors-stack-traces.html</id>
+    <published>2018-04-12T02:10:21.000Z</published>
+    <updated>2018-04-12T05:06:14.000Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;p&gt;Error 作为值相对于 C 语言来说, 在处理传统的逻辑错误上确实略高一筹. 至少一个 func 返回 error, 我们知道需要处理并且偶尔会进行传递, 而不是干巴巴等着运行时崩溃.&lt;/p&gt;
+&lt;h3 id=&quot;Errors-也是值&quot;&gt;&lt;a
+        
+      
+    
+    </summary>
+    
+    
+      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+  </entry>
+  
+  <entry>
     <title>SICP 准备</title>
     <link href="https://lingchao.xin/post/sicp-quickstart.html"/>
     <id>https://lingchao.xin/post/sicp-quickstart.html</id>
     <published>2018-04-06T13:11:49.000Z</published>
-    <updated>2018-04-06T14:15:40.000Z</updated>
+    <updated>2018-04-08T05:16:11.529Z</updated>
     
     <summary type="html">
     
@@ -47,7 +72,7 @@
     <link href="https://lingchao.xin/post/memory-leaking.html"/>
     <id>https://lingchao.xin/post/memory-leaking.html</id>
     <published>2018-04-02T06:58:32.000Z</published>
-    <updated>2018-04-02T15:10:45.000Z</updated>
+    <updated>2018-04-08T05:16:11.528Z</updated>
     
     <summary type="html">
     
@@ -75,7 +100,7 @@
     <link href="https://lingchao.xin/post/synchronization-queues-in-golang.html"/>
     <id>https://lingchao.xin/post/synchronization-queues-in-golang.html</id>
     <published>2018-03-27T13:14:05.000Z</published>
-    <updated>2018-03-30T17:21:51.335Z</updated>
+    <updated>2018-03-28T03:12:45.906Z</updated>
     
     <summary type="html">
     
@@ -95,7 +120,7 @@
     <link href="https://lingchao.xin/post/go-defer-panic-and-recover.html"/>
     <id>https://lingchao.xin/post/go-defer-panic-and-recover.html</id>
     <published>2018-03-23T02:05:04.000Z</published>
-    <updated>2018-03-27T15:36:03.930Z</updated>
+    <updated>2018-03-27T02:10:29.283Z</updated>
     
     <summary type="html">
     
@@ -113,7 +138,7 @@
     <link href="https://lingchao.xin/post/vgo-module.html"/>
     <id>https://lingchao.xin/post/vgo-module.html</id>
     <published>2018-02-25T07:00:04.000Z</published>
-    <updated>2018-03-26T13:28:33.289Z</updated>
+    <updated>2018-03-26T06:26:53.739Z</updated>
     
     <summary type="html">
     
@@ -135,7 +160,7 @@
     <link href="https://lingchao.xin/post/vgo-repro.html"/>
     <id>https://lingchao.xin/post/vgo-repro.html</id>
     <published>2018-02-24T11:00:04.000Z</published>
-    <updated>2018-03-26T13:28:33.291Z</updated>
+    <updated>2018-03-26T06:26:28.219Z</updated>
     
     <summary type="html">
     
@@ -157,7 +182,7 @@
     <link href="https://lingchao.xin/post/vgo-mvs.html"/>
     <id>https://lingchao.xin/post/vgo-mvs.html</id>
     <published>2018-02-23T11:24:04.000Z</published>
-    <updated>2018-03-26T13:28:33.290Z</updated>
+    <updated>2018-03-26T06:29:39.668Z</updated>
     
     <summary type="html">
     
@@ -179,7 +204,7 @@
     <link href="https://lingchao.xin/post/vgo-import.html"/>
     <id>https://lingchao.xin/post/vgo-import.html</id>
     <published>2018-02-22T14:01:04.000Z</published>
-    <updated>2018-03-26T13:28:33.288Z</updated>
+    <updated>2018-03-26T06:31:15.873Z</updated>
     
     <summary type="html">
     
@@ -201,7 +226,7 @@
     <link href="https://lingchao.xin/post/vgo-tour.html"/>
     <id>https://lingchao.xin/post/vgo-tour.html</id>
     <published>2018-02-22T03:01:04.000Z</published>
-    <updated>2018-03-27T15:36:03.933Z</updated>
+    <updated>2018-03-27T02:20:11.809Z</updated>
     
     <summary type="html">
     
@@ -223,7 +248,7 @@
     <link href="https://lingchao.xin/post/vgo-intro.html"/>
     <id>https://lingchao.xin/post/vgo-intro.html</id>
     <published>2018-02-21T07:01:04.000Z</published>
-    <updated>2018-03-27T15:36:03.933Z</updated>
+    <updated>2018-03-27T02:26:00.761Z</updated>
     
     <summary type="html">
     
@@ -245,7 +270,7 @@
     <link href="https://lingchao.xin/post/a-developer-relations-bill-of-rights.html"/>
     <id>https://lingchao.xin/post/a-developer-relations-bill-of-rights.html</id>
     <published>2018-02-19T12:01:04.000Z</published>
-    <updated>2018-03-26T13:28:33.282Z</updated>
+    <updated>2018-03-26T06:35:21.564Z</updated>
     
     <summary type="html">
     
@@ -265,7 +290,7 @@
     <link href="https://lingchao.xin/post/json-tips-in-go.html"/>
     <id>https://lingchao.xin/post/json-tips-in-go.html</id>
     <published>2018-02-10T06:30:04.000Z</published>
-    <updated>2018-03-27T15:36:03.932Z</updated>
+    <updated>2018-03-27T02:27:50.718Z</updated>
     
     <summary type="html">
     
@@ -283,7 +308,7 @@
     <link href="https://lingchao.xin/post/functional-options-pattern-in-go.html"/>
     <id>https://lingchao.xin/post/functional-options-pattern-in-go.html</id>
     <published>2018-02-01T04:00:04.000Z</published>
-    <updated>2018-03-26T13:28:33.283Z</updated>
+    <updated>2018-03-26T07:25:06.568Z</updated>
     
     <summary type="html">
     
@@ -303,7 +328,7 @@
     <link href="https://lingchao.xin/post/gos-work-stealing-scheduler.html"/>
     <id>https://lingchao.xin/post/gos-work-stealing-scheduler.html</id>
     <published>2018-01-31T06:35:04.000Z</published>
-    <updated>2018-03-27T15:36:03.931Z</updated>
+    <updated>2018-03-27T02:31:19.426Z</updated>
     
     <summary type="html">
     
@@ -323,7 +348,7 @@
     <link href="https://lingchao.xin/post/go-proverbs.html"/>
     <id>https://lingchao.xin/post/go-proverbs.html</id>
     <published>2018-01-28T01:25:04.000Z</published>
-    <updated>2018-03-27T15:36:03.931Z</updated>
+    <updated>2018-03-27T02:37:19.606Z</updated>
     
     <summary type="html">
     
@@ -349,7 +374,7 @@
     <link href="https://lingchao.xin/post/how-does-the-golang-scheduler-work.html"/>
     <id>https://lingchao.xin/post/how-does-the-golang-scheduler-work.html</id>
     <published>2018-01-27T05:25:04.000Z</published>
-    <updated>2018-03-26T13:28:33.285Z</updated>
+    <updated>2018-03-26T09:53:01.863Z</updated>
     
     <summary type="html">
     
@@ -369,7 +394,7 @@
     <link href="https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html"/>
     <id>https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html</id>
     <published>2018-01-25T03:55:04.000Z</published>
-    <updated>2018-03-27T15:36:03.933Z</updated>
+    <updated>2018-03-27T02:41:44.175Z</updated>
     
     <summary type="html">
     
@@ -390,7 +415,7 @@
     <link href="https://lingchao.xin/post/golang-internals-part-2-nice-benefits-of-named-return-values.html"/>
     <id>https://lingchao.xin/post/golang-internals-part-2-nice-benefits-of-named-return-values.html</id>
     <published>2018-01-22T09:42:04.000Z</published>
-    <updated>2018-03-26T13:28:33.284Z</updated>
+    <updated>2018-03-26T10:15:08.968Z</updated>
     
     <summary type="html">
     
@@ -411,7 +436,7 @@
     <link href="https://lingchao.xin/post/there-is-no-pass-by-reference-in-go.html"/>
     <id>https://lingchao.xin/post/there-is-no-pass-by-reference-in-go.html</id>
     <published>2018-01-15T08:05:04.000Z</published>
-    <updated>2018-03-26T13:28:33.287Z</updated>
+    <updated>2018-03-26T07:31:48.227Z</updated>
     
     <summary type="html">
     
@@ -423,29 +448,6 @@
       <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
     
       <category term="go" scheme="https://lingchao.xin/tags/go/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>为什么 Go 不实现分代和紧凑 gc</title>
-    <link href="https://lingchao.xin/post/why-golang-garbage-collector-not-implement-generational-and-compact-gc.html"/>
-    <id>https://lingchao.xin/post/why-golang-garbage-collector-not-implement-generational-and-compact-gc.html</id>
-    <published>2018-01-13T08:30:04.000Z</published>
-    <updated>2018-03-26T13:28:33.292Z</updated>
-    
-    <summary type="html">
-    
-      &lt;p&gt;本文译自 Google 论坛(&lt;a href=&quot;https://groups.google.com/forum/#!msg/golang-nuts/KJiyv2mV2pU/wdBUH1mHCAAJ&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;golang-nuts&lt;/a&gt;)版权@归原文所有.&lt;/p&gt;
-&lt;p&gt;有人在论坛里面问: 为什么 Golang 垃圾回收器不实现分代和紧凑 gc ?&lt;br&gt;
-    
-    </summary>
-    
-    
-      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
-    
-      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
-    
-      <category term="gc" scheme="https://lingchao.xin/tags/gc/"/>
     
   </entry>
   

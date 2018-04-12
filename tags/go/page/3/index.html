@@ -9,14 +9,13 @@
     <meta name="description" content="Simple, clear, and stupid">
 <meta name="keywords" content="programming, coding">
 <meta property="og:type" content="website">
-<meta property="og:title" content="search">
-<meta property="og:url" content="https://lingchao.xin/search/index.html">
+<meta property="og:title" content="Coding talks">
+<meta property="og:url" content="https://lingchao.xin/tags/go/page/3/index.html">
 <meta property="og:site_name" content="Coding talks">
 <meta property="og:description" content="Simple, clear, and stupid">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2018-03-26T08:44:18.428Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="search">
+<meta name="twitter:title" content="Coding talks">
 <meta name="twitter:description" content="Simple, clear, and stupid">
     
     
@@ -37,7 +36,7 @@
         
     
     <!-- title -->
-    <title>search</title>
+    <title>Coding talks</title>
     <!-- styles -->
     <link rel="stylesheet" href="/css/style.css">
     <!-- rss -->
@@ -77,23 +76,45 @@
 </header>
 
         
-        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
-  
-    <section id="search">
-  <form>
-    <input type="text" class="search-input" id="search-input" placeholder="Search...">
-  </form>
-  <div id="search-result"></div>
-  <p class="search-no-result">No results found.</p>
-</section>
-
-  
-  
-
-  <div class="content" itemprop="articleBody">
+        <div id="archive">
+  <ul class="post-list">
     
-  </div>
-</article>
+    
+    
+      
+      
+      
+      
+        <h2>2017</h2>
+      
+      <li class="post-item">
+        
+    <div class="meta">
+        <time datetime="2017-06-18T07:00:33.000Z" itemprop="datePublished">2017-06-18</time>
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/post/gin-gonic-middleware-theory-and-apply.html">Gin-Gonic 框架中间件原理与应用</a>
+    
+
+
+</span>
+      </li>
+    
+  </ul>
+  
+    <div class="pagination">
+        
+            <a href="/tags/go/page/2/"><i class="fas fa-angle-left"></i></a>
+        
+        <span class="page-number">Page 3 of 3</span>
+        
+    </div>
+
+
+</div>
 
     </div>
     
@@ -130,35 +151,6 @@
 <script src="/js/main.js"></script>
 <!-- search -->
 
-  <script src="/js/search.js"></script>
-  <script type="text/javascript">
-    var inputArea = document.querySelector("#search-input");
-    var $resultArea = $("#search-result");
-
-    inputArea.onfocus = function() {
-      var search_path = "search.xml";
-      if (search_path.length == 0) {
-        search_path = "search.xml";
-      }
-      var path = "/" + search_path;
-      searchFunc(path, 'search-input', 'search-result');
-    }
-
-    inputArea.onkeydown = function(){
-        if(event.keyCode==13){
-            return false
-        }
-    }
-
-    $resultArea.bind("DOMNodeRemoved DOMNodeInserted", function(e) {
-        if (!$(e.target).text()) {
-            $(".search-no-result").show(200);
-        } else {
-            $(".search-no-result").hide();
-        }
-    })
-  </script>
-
 <!-- Google Analytics -->
 
     <script type="text/javascript">
@@ -179,7 +171,7 @@
             var dsq = document.createElement('script');
             dsq.type = 'text/javascript';
             dsq.async = true;
-            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            dsq.src = '//' + disqus_shortname + '.disqus.com/count.js';
             (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
         }());
     </script>

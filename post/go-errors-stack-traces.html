@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="Error 作为值相对于 C 语言来说, 在处理传统的逻辑错误上确实略高一筹. 至少一个 func 返回 error, 我们知道需要处理并且偶尔会进行传递, 而不是干巴巴等着运行时崩溃. Errors 也是值我们每个人在学习 Go 的时候都被这样说服: Errors are values, 错误也是一种值, 就像其他任何类型的值一样. 我们先看一个简单的例子: // https://play.go">
+<meta name="keywords" content="go">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go errors 堆栈">
+<meta property="og:url" content="https://lingchao.xin/post/go-errors-stack-traces.html">
+<meta property="og:site_name" content="Coding talks">
+<meta property="og:description" content="Error 作为值相对于 C 语言来说, 在处理传统的逻辑错误上确实略高一筹. 至少一个 func 返回 error, 我们知道需要处理并且偶尔会进行传递, 而不是干巴巴等着运行时崩溃. Errors 也是值我们每个人在学习 Go 的时候都被这样说服: Errors are values, 错误也是一种值, 就像其他任何类型的值一样. 我们先看一个简单的例子: // https://play.go">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2018-04-12T05:06:14.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Go errors 堆栈">
+<meta name="twitter:description" content="Error 作为值相对于 C 语言来说, 在处理传统的逻辑错误上确实略高一筹. 至少一个 func 返回 error, 我们知道需要处理并且偶尔会进行传递, 而不是干巴巴等着运行时崩溃. Errors 也是值我们每个人在学习 Go 的时候都被这样说服: Errors are values, 错误也是一种值, 就像其他任何类型的值一样. 我们先看一个简单的例子: // https://play.go">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="https://www.gravatar.com/avatar/f4254a13e728ba649241e5776b4884db?s=16">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="https://www.gravatar.com/avatar/f4254a13e728ba649241e5776b4884db?s=192" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="https://www.gravatar.com/avatar/f4254a13e728ba649241e5776b4884db?s=180">
+          
+        
+    
+    <!-- title -->
+    <title>Go errors 堆栈</title>
+    <!-- styles -->
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="Coding talks" type="application/atom+xml" />
+    
+</head>
+
+<body class="max-width mx-auto px3">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Archives</a></li>
+         
+          <li><a href="/atom.xml">Feed</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" href="/post/sicp-quickstart.html"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://lingchao.xin/post/go-errors-stack-traces.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://lingchao.xin/post/go-errors-stack-traces.html&text=Go errors 堆栈"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://lingchao.xin/post/go-errors-stack-traces.html&title=Go errors 堆栈"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lingchao.xin/post/go-errors-stack-traces.html&is_video=false&description=Go errors 堆栈"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Go errors 堆栈&body=Check out this article: https://lingchao.xin/post/go-errors-stack-traces.html"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://lingchao.xin/post/go-errors-stack-traces.html&title=Go errors 堆栈"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/go-errors-stack-traces.html&title=Go errors 堆栈"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/go-errors-stack-traces.html&title=Go errors 堆栈"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/go-errors-stack-traces.html&title=Go errors 堆栈"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/go-errors-stack-traces.html&name=Go errors 堆栈&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Errors-也是值"><span class="toc-number">1.</span> <span class="toc-text">Errors 也是值</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Errors-堆栈跟踪"><span class="toc-number">2.</span> <span class="toc-text">Errors 堆栈跟踪</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#社区实现-pkg-errors"><span class="toc-number">3.</span> <span class="toc-text">社区实现(pkg/errors)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Benchmark"><span class="toc-number">4.</span> <span class="toc-text">Benchmark</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#参考资料"><span class="toc-number">4.1.</span> <span class="toc-text">参考资料</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index my4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Go errors 堆栈
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Coding talks</span>
+      </span>
+      
+    <div class="postdate">
+        <time datetime="2018-04-12T02:10:21.000Z" itemprop="datePublished">2018-04-12</time>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/go/">go</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>Error 作为值相对于 C 语言来说, 在处理传统的逻辑错误上确实略高一筹. 至少一个 func 返回 error, 我们知道需要处理并且偶尔会进行传递, 而不是干巴巴等着运行时崩溃.</p>
+<h3 id="Errors-也是值"><a href="#Errors-也是值" class="headerlink" title="Errors 也是值"></a>Errors 也是值</h3><p>我们每个人在学习 Go 的时候都被这样说服: <a href="https://blog.golang.org/errors-are-values" target="_blank" rel="noopener">Errors are values</a>, 错误也是一种值, 就像其他任何类型的值一样.</p>
+<p>我们先看一个简单的例子:</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// https://play.golang.org/p/VFVX0fRKBnS</span></span><br><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"strconv"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> _, err := strconv.ParseInt(<span class="string">"abcd"</span>, <span class="number">10</span>, <span class="number">64</span>); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Println(err)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 输出</span></span><br><span class="line"><span class="comment">// strconv.ParseInt: parsing "abcd": invalid syntax</span></span><br></pre></td></tr></table></figure>
+<p>看起来好像还不错, 起码我们知道 3 个内容:</p>
+<ul>
+<li>错误发生的 func: <code>strconv.ParseInt</code></li>
+<li>发生错误 func 的参数: <code>abcd</code></li>
+<li>错误的原因: <code>invalid syntax</code></li>
+</ul>
+<p>如果查看 <a href="https://golang.org/src/strconv/atoi.go?s=4086:4153#L146" target="_blank" rel="noopener">strconv.ParseInt</a> 的源码你会发现, 代码如标准库者依然没有使用最原始的 error .<br>它之所以打印出上面的 3 个内容, 使用了自定义的 <code>NumError</code> :</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// A NumError records a failed conversion.</span></span><br><span class="line"><span class="keyword">type</span> NumError <span class="keyword">struct</span> &#123;</span><br><span class="line">	Func <span class="keyword">string</span> <span class="comment">// the failing function (ParseBool, ParseInt, ParseUint, ParseFloat)</span></span><br><span class="line">	Num  <span class="keyword">string</span> <span class="comment">// the input</span></span><br><span class="line">	Err  error  <span class="comment">// the reason the conversion failed (e.g. ErrRange, ErrSyntax, etc.)</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *NumError)</span> <span class="title">Error</span><span class="params">()</span> <span class="title">string</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="string">"strconv."</span> + e.Func + <span class="string">": "</span> + <span class="string">"parsing "</span> + Quote(e.Num) + <span class="string">": "</span> + e.Err.Error()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果我们领会了 <code>Errors are values</code> 的精神, 基本上能写出这样的错误处理已经很符合 <a href="https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully" target="_blank" rel="noopener">不要仅仅检查 errors, 优雅的处理它们</a> 的宗旨了.<br>本文也可能就结束了, 然后将标题改为: <code>Go errors 指南</code> \ (•◡•) /.</p>
+<h3 id="Errors-堆栈跟踪"><a href="#Errors-堆栈跟踪" class="headerlink" title="Errors 堆栈跟踪"></a>Errors 堆栈跟踪</h3><p>不, 这不够啊, 对于标准库可能每个错误都像那样模版式搞个花式自定义 error . 如果我们用过 <code>Python</code> 或者 <code>Java</code> 的 <code>try</code>, 不会不知道异常(可能有人在这里跟我掰 Go 里面 errors 不是异常)发生的时候, 打印行号等关键信息有多重要吧.</p>
+<p>上面的 ParseInt 例子只是个简单的不能再简单的例子, 如果我们的工程和代码复杂度都上一个层次, 一个 func 里面可能需要处理多个第三方 func 返回的 errors. 一个简单的 errors 信息对于程序的调试并不友好.<br>当然你如果确保了像标准库那样给出了那样翔实的 errors 内容, 倒也不错. 即便是这样, 我觉得依然没有发生 errors 时给出文件和行号来得实用一些.</p>
+<p>实现这个功能需要用到 Go 强大的 <code>runtime</code> 包, 我们尝试自己实现一个简单的自定义 errors 堆栈跟踪:</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// https://play.golang.org/p/-tesfXuy9fc</span></span><br><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"runtime"</span></span><br><span class="line">	<span class="string">"strings"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">callers</span><span class="params">()</span> []<span class="title">uintptr</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> pcs [<span class="number">32</span>]<span class="keyword">uintptr</span></span><br><span class="line">	n := runtime.Callers(<span class="number">3</span>, pcs[:])</span><br><span class="line">	st := pcs[<span class="number">0</span>:n]</span><br><span class="line">	<span class="keyword">return</span> st</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> trace <span class="keyword">struct</span> &#123;</span><br><span class="line">	m <span class="keyword">string</span></span><br><span class="line">	s []<span class="keyword">uintptr</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *trace)</span> <span class="title">Error</span><span class="params">()</span> <span class="title">string</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> b strings.Builder</span><br><span class="line">	b.WriteString(e.m)</span><br><span class="line">	b.WriteString(<span class="string">"\n\n"</span>)</span><br><span class="line">	b.WriteString(<span class="string">"Traceback:"</span>)</span><br><span class="line">	<span class="keyword">for</span> _, pc := <span class="keyword">range</span> e.s &#123;</span><br><span class="line">		fn := runtime.FuncForPC(pc)</span><br><span class="line">		b.WriteString(<span class="string">"\n"</span>)</span><br><span class="line">		f, n := fn.FileLine(pc)</span><br><span class="line">		b.WriteString(fmt.Sprintf(<span class="string">"%s:%d"</span>, f, n))</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> b.String()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// NewTrace creats a simple traceable error.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewTrace</span><span class="params">(message <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> &amp;trace&#123;m: message, s: callers()&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">f</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> NewTrace(<span class="string">"ooops"</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	fmt.Println(f())</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// goplay 输出</span></span><br><span class="line"><span class="comment">// ooops</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Traceback:</span></span><br><span class="line"><span class="comment">// /tmp/sandbox315155193/main.go:41</span></span><br><span class="line"><span class="comment">// /tmp/sandbox315155193/main.go:45</span></span><br><span class="line"><span class="comment">// /usr/local/go/src/runtime/proc.go:207</span></span><br><span class="line"><span class="comment">// /usr/local/go/src/runtime/asm_amd64p32.s:968</span></span><br></pre></td></tr></table></figure>
+<p>虽然简单粗糙了一些, 但确实实现了我们要的简单 errors 堆栈跟踪.</p>
+<h3 id="社区实现-pkg-errors"><a href="#社区实现-pkg-errors" class="headerlink" title="社区实现(pkg/errors)"></a>社区实现(pkg/errors)</h3><p>我们当然不打算在平常的代码中使用这样一个简单的实现, 我们这里介绍一下社区已经存在的 <a href="https://github.com/pkg/errors" target="_blank" rel="noopener">pkg/errors</a> 库.</p>
+<p>对于标准库或者第三方库的 errors 返回我们需要一个简单的 wrap, 一遍在同样使用 <code>pkg/errors</code> 的地方可以获取一致的 errors 体验:</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line">_, err := ioutil.ReadAll(r)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> errors.Wrap(err, <span class="string">"read failed"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们看看怎样使用 <code>pkg/errors</code> 得到的 errors:</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"os"</span></span><br><span class="line"></span><br><span class="line">	<span class="string">"github.com/pkg/errors"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">parseArgs</span><span class="params">(args []<span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(args) &lt; <span class="number">3</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> errors.Errorf(<span class="string">"not enough arguments, expected at least 3, got %d"</span>, <span class="built_in">len</span>(args))</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	err := parseArgs(os.Args[<span class="number">1</span>:])</span><br><span class="line">	fmt.Printf(<span class="string">"%v\n"</span>, err)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 输出</span></span><br><span class="line"><span class="comment">// not enough arguments, expected at least 3, got 0</span></span><br></pre></td></tr></table></figure>
+<p>? 没有堆栈信息打印 ??? <code>pkg/errors</code> 默认的 flag 是不打印堆栈信息的(虽然一直包含). 我们施展一下 <code>Go Formatter</code> 的魔法:</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	err := parseArgs(os.Args[<span class="number">1</span>:])</span><br><span class="line">    fmt.Printf(<span class="string">"%+v\n"</span>, err) <span class="comment">// 没错, 加个 `+` flag</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>之所以会有这个效果是因为 <code>pkg/errors</code> 实现 <a href="https://golang.org/pkg/fmt/#Formatter" target="_blank" rel="noopener">Formatter</a> 接口:</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(f *fundamental)</span> <span class="title">Format</span><span class="params">(s fmt.State, verb <span class="keyword">rune</span>)</span></span> &#123;</span><br><span class="line">	<span class="keyword">switch</span> verb &#123;</span><br><span class="line">	<span class="keyword">case</span> <span class="string">'v'</span>:</span><br><span class="line">		<span class="keyword">if</span> s.Flag(<span class="string">'+'</span>) &#123;</span><br><span class="line">			io.WriteString(s, f.msg)</span><br><span class="line">			f.stack.Format(s, verb)</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">fallthrough</span></span><br><span class="line">	<span class="keyword">case</span> <span class="string">'s'</span>:</span><br><span class="line">		io.WriteString(s, f.msg)</span><br><span class="line">	<span class="keyword">case</span> <span class="string">'q'</span>:</span><br><span class="line">		fmt.Fprintf(s, <span class="string">"%q"</span>, f.msg)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Benchmark"><a href="#Benchmark" class="headerlink" title="Benchmark"></a>Benchmark</h3><p><code>pkg/errors</code> 堆栈跟踪不是没有运行时开销的, <a href="https://github.com/pkg/errors/issues/72" target="_blank" rel="noopener">官方</a>给出的指标是每个操作大约 1000-3000 ns.<br>一般来说这不会构成性能忧虑. 如果超过了你的性能预期, 可以定制成调试模式启用.</p>
+<h4 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h4><ul>
+<li><a href="https://blog.golang.org/errors-are-values" target="_blank" rel="noopener">Errors are values</a></li>
+<li><a href="https://dave.cheney.net/2016/06/12/stack-traces-and-the-errors-package" target="_blank" rel="noopener">Stack traces and the errors package</a></li>
+<li><a href="https://github.com/pkg/errors" target="_blank" rel="noopener">pkg/errors</a></li>
+</ul>
+
+  </div>
+</article>
+
+    <div class="blog-post-comments">
+        <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the comments.</noscript>
+        </div>
+    </div>
+
+
+
+    </div>
+    
+      <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Archives</a></li>
+         
+          <li><a href="/atom.xml">Feed</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Errors-也是值"><span class="toc-number">1.</span> <span class="toc-text">Errors 也是值</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Errors-堆栈跟踪"><span class="toc-number">2.</span> <span class="toc-text">Errors 堆栈跟踪</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#社区实现-pkg-errors"><span class="toc-number">3.</span> <span class="toc-text">社区实现(pkg/errors)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Benchmark"><span class="toc-number">4.</span> <span class="toc-text">Benchmark</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#参考资料"><span class="toc-number">4.1.</span> <span class="toc-text">参考资料</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://lingchao.xin/post/go-errors-stack-traces.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://lingchao.xin/post/go-errors-stack-traces.html&text=Go errors 堆栈"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://lingchao.xin/post/go-errors-stack-traces.html&title=Go errors 堆栈"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lingchao.xin/post/go-errors-stack-traces.html&is_video=false&description=Go errors 堆栈"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Go errors 堆栈&body=Check out this article: https://lingchao.xin/post/go-errors-stack-traces.html"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://lingchao.xin/post/go-errors-stack-traces.html&title=Go errors 堆栈"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/go-errors-stack-traces.html&title=Go errors 堆栈"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/go-errors-stack-traces.html&title=Go errors 堆栈"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/go-errors-stack-traces.html&title=Go errors 堆栈"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/go-errors-stack-traces.html&name=Go errors 堆栈&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+    
+    <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; 2018 Lingchao Xin
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Archives</a></li>
+         
+          <li><a href="/atom.xml">Feed</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>
+<!-- styles -->
+<link rel="stylesheet" href="/lib/font-awesome/css/fontawesome-all.min.css">
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+<!-- jquery -->
+<script src="/lib/jquery/jquery.min.js"></script>
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+<script src="/js/main.js"></script>
+<!-- search -->
+
+<!-- Google Analytics -->
+
+    <script type="text/javascript">
+        (function(i,s,o,g,r,a,m) {i['GoogleAnalyticsObject']=r;i[r]=i[r]||function() {
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+        ga('create', 'UA-47053188-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+
+<!-- Disqus Comments -->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'douglarek';
+
+        (function(){
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        }());
+    </script>
+
+
