@@ -14,7 +14,7 @@
 <meta property="og:site_name" content="Coding talks">
 <meta property="og:description" content="相对于 C 语言来说, Go 在处理传统的逻辑错误上确实略高一筹. 至少一个 func 返回 error, 我们知道需要处理并且偶尔会进行传递, 而不是干巴巴等着运行时崩溃. Errors 也是值我们每个人在学习 Go 的时候都被这样说服: Errors are values, 错误也是一种值, 就像其他任何类型的值一样. 我们先看一个简单的例子: // https://play.golang.o">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2018-04-12T05:16:31.000Z">
+<meta property="og:updated_time" content="2018-04-12T05:17:33.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Go errors 堆栈">
 <meta name="twitter:description" content="相对于 C 语言来说, Go 在处理传统的逻辑错误上确实略高一筹. 至少一个 func 返回 error, 我们知道需要处理并且偶尔会进行传递, 而不是干巴巴等着运行时崩溃. Errors 也是值我们每个人在学习 Go 的时候都被这样说服: Errors are values, 错误也是一种值, 就像其他任何类型的值一样. 我们先看一个简单的例子: // https://play.golang.o">
@@ -150,7 +150,7 @@
 </ul>
 <p>如果查看 <a href="https://golang.org/src/strconv/atoi.go?s=4086:4153#L146" target="_blank" rel="noopener">strconv.ParseInt</a> 的源码你会发现, 代码如标准库者依然没有使用最原始的 error 返回.<br>它之所以打印出上面的 3 个内容, 是因为使用了自定义的 <code>NumError</code> :</p>
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// A NumError records a failed conversion.</span></span><br><span class="line"><span class="keyword">type</span> NumError <span class="keyword">struct</span> &#123;</span><br><span class="line">	Func <span class="keyword">string</span> <span class="comment">// the failing function (ParseBool, ParseInt, ParseUint, ParseFloat)</span></span><br><span class="line">	Num  <span class="keyword">string</span> <span class="comment">// the input</span></span><br><span class="line">	Err  error  <span class="comment">// the reason the conversion failed (e.g. ErrRange, ErrSyntax, etc.)</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *NumError)</span> <span class="title">Error</span><span class="params">()</span> <span class="title">string</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="string">"strconv."</span> + e.Func + <span class="string">": "</span> + <span class="string">"parsing "</span> + Quote(e.Num) + <span class="string">": "</span> + e.Err.Error()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>如果我们领会了 <code>Errors are values</code> 的精神, 基本上能写出这样的错误处理已经很符合 <a href="https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully" target="_blank" rel="noopener">不要仅仅检查 errors, 优雅的处理它们</a> 的宗旨了.本文也可能就结束了, 然后将标题改为: <code>Go errors 指南</code> \ (•◡•) /.</p>
+<p>如果我们领会了 <code>Errors are values</code> 的精神, 基本上能写出这样的错误处理已经很符合 <a href="https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully" target="_blank" rel="noopener">不要仅仅检查 errors, 优雅的处理它们</a> 的宗旨了. 本文在这里也可能就结束了, 然后将标题改为: <code>Go errors 指南</code> \ (•◡•) /.</p>
 <h3 id="Errors-堆栈跟踪"><a href="#Errors-堆栈跟踪" class="headerlink" title="Errors 堆栈跟踪"></a>Errors 堆栈跟踪</h3><p>不, 这不够啊, 对于标准库可能每个错误都像那样模版式搞个花式自定义 error . 如果我们用过 <code>Python</code> 或者 <code>Java</code> 的 <code>try</code>, 不会不知道异常(可能有人在这里跟我掰 Go 里面 errors 不是异常)发生的时候, 打印行号等关键信息有多重要吧.</p>
 <p>上面的 ParseInt 例子只是个简单的不能再简单的例子, 如果我们的工程和代码复杂度都上一个层次, 一个 func 里面可能需要处理多个第三方 func 返回的 errors. 一个简单的 errors 信息对于程序的调试并不友好.<br>当然你如果确保了像标准库那样给出了那样翔实的 errors 内容, 倒也不错. 即便是这样, 我觉得依然没有发生 errors 时给出文件和行号来得实用一些.</p>
 <p>实现这个功能需要用到 Go 强大的 <code>runtime</code> 包, 我们尝试自己实现一个简单的自定义 errors 堆栈跟踪:</p>
