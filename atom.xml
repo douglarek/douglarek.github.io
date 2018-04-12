@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://lingchao.xin/"/>
-  <updated>2018-04-12T05:06:14.000Z</updated>
+  <updated>2018-04-12T05:15:37.000Z</updated>
   <id>https://lingchao.xin/</id>
   
   <author>
@@ -21,7 +21,7 @@
     <link href="https://lingchao.xin/post/go-errors-stack-traces.html"/>
     <id>https://lingchao.xin/post/go-errors-stack-traces.html</id>
     <published>2018-04-12T02:10:21.000Z</published>
-    <updated>2018-04-12T05:06:14.000Z</updated>
+    <updated>2018-04-12T05:15:37.000Z</updated>
     
     <summary type="html">
     
@@ -29,8 +29,8 @@
       
         
         
-          &lt;p&gt;Error 作为值相对于 C 语言来说, 在处理传统的逻辑错误上确实略高一筹. 至少一个 func 返回 error, 我们知道需要处理并且偶尔会进行传递, 而不是干巴巴等着运行时崩溃.&lt;/p&gt;
-&lt;h3 id=&quot;Errors-也是值&quot;&gt;&lt;a
+          &lt;p&gt;相对于 C 语言来说, Go 在处理传统的逻辑错误上确实略高一筹. 至少一个 func 返回 error, 我们知道需要处理并且偶尔会进行传递, 而不是干巴巴等着运行时崩溃.&lt;/p&gt;
+&lt;h3 id=&quot;Errors-也是值&quot;&gt;&lt;a href=&quot;#Errors-也是值&quot;
         
       
     
