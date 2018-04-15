@@ -4,7 +4,7 @@
   <url>
     <loc>https://lingchao.xin/post/vgo-module.html</loc>
     
-    <lastmod>2018-04-15T07:08:22.000Z</lastmod>
+    <lastmod>2018-04-15T07:18:32.000Z</lastmod>
     
   </url>
   
@@ -44,14 +44,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/vgo-tour.html</loc>
+    <loc>https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html</loc>
     
     <lastmod>2018-03-27T15:36:03.933Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html</loc>
+    <loc>https://lingchao.xin/post/vgo-tour.html</loc>
     
     <lastmod>2018-03-27T15:36:03.933Z</lastmod>
     
@@ -79,14 +79,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/go-proverbs.html</loc>
+    <loc>https://lingchao.xin/post/gos-work-stealing-scheduler.html</loc>
     
     <lastmod>2018-03-27T15:36:03.931Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/gos-work-stealing-scheduler.html</loc>
+    <loc>https://lingchao.xin/post/go-proverbs.html</loc>
     
     <lastmod>2018-03-27T15:36:03.931Z</lastmod>
     
@@ -135,13 +135,6 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/rock-with-coleslaw.html</loc>
-    
-    <lastmod>2018-03-26T13:28:33.287Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>https://lingchao.xin/post/the-past-2016.html</loc>
     
     <lastmod>2018-03-26T13:28:33.287Z</lastmod>
@@ -150,6 +143,13 @@
   
   <url>
     <loc>https://lingchao.xin/post/there-is-no-pass-by-reference-in-go.html</loc>
+    
+    <lastmod>2018-03-26T13:28:33.287Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://lingchao.xin/post/rock-with-coleslaw.html</loc>
     
     <lastmod>2018-03-26T13:28:33.287Z</lastmod>
     
@@ -205,13 +205,6 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/a-developer-relations-bill-of-rights.html</loc>
-    
-    <lastmod>2018-03-26T13:28:33.282Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>https://lingchao.xin/post/emacs-is-a-habit.html</loc>
     
     <lastmod>2018-03-26T13:28:33.282Z</lastmod>
@@ -220,6 +213,13 @@
   
   <url>
     <loc>https://lingchao.xin/post/conditional-expressions-in-postgres.html</loc>
+    
+    <lastmod>2018-03-26T13:28:33.282Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://lingchao.xin/post/a-developer-relations-bill-of-rights.html</loc>
     
     <lastmod>2018-03-26T13:28:33.282Z</lastmod>
     
