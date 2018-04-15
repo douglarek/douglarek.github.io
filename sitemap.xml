@@ -4,7 +4,7 @@
   <url>
     <loc>https://lingchao.xin/post/go-errors-stack-traces.html</loc>
     
-    <lastmod>2018-04-15T06:30:51.278Z</lastmod>
+    <lastmod>2018-04-15T06:34:09.000Z</lastmod>
     
   </url>
   
@@ -65,14 +65,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/gos-work-stealing-scheduler.html</loc>
+    <loc>https://lingchao.xin/post/go-range-loop-internals.html</loc>
     
     <lastmod>2018-03-27T15:36:03.931Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/go-range-loop-internals.html</loc>
+    <loc>https://lingchao.xin/post/gos-work-stealing-scheduler.html</loc>
     
     <lastmod>2018-03-27T15:36:03.931Z</lastmod>
     
@@ -135,6 +135,13 @@
   </url>
   
   <url>
+    <loc>https://lingchao.xin/post/there-is-no-pass-by-reference-in-go.html</loc>
+    
+    <lastmod>2018-03-26T13:28:33.287Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://lingchao.xin/post/rock-with-coleslaw.html</loc>
     
     <lastmod>2018-03-26T13:28:33.287Z</lastmod>
@@ -149,14 +156,7 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/there-is-no-pass-by-reference-in-go.html</loc>
-    
-    <lastmod>2018-03-26T13:28:33.287Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://lingchao.xin/post/postgresql-10-full-text-search-support-for-json-and-jsonb.html</loc>
+    <loc>https://lingchao.xin/post/postgresql-aggregate-functions.html</loc>
     
     <lastmod>2018-03-26T13:28:33.286Z</lastmod>
     
@@ -170,7 +170,7 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/postgresql-aggregate-functions.html</loc>
+    <loc>https://lingchao.xin/post/postgresql-10-full-text-search-support-for-json-and-jsonb.html</loc>
     
     <lastmod>2018-03-26T13:28:33.286Z</lastmod>
     
@@ -191,14 +191,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html</loc>
+    <loc>https://lingchao.xin/post/functional-options-pattern-in-go.html</loc>
     
     <lastmod>2018-03-26T13:28:33.283Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/functional-options-pattern-in-go.html</loc>
+    <loc>https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html</loc>
     
     <lastmod>2018-03-26T13:28:33.283Z</lastmod>
     
