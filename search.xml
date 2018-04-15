@@ -446,9 +446,9 @@
       
         <tags>
             
-            <tag> database </tag>
-            
             <tag> translation </tag>
+            
+            <tag> database </tag>
             
             <tag> postgresql </tag>
             
