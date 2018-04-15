@@ -27,7 +27,7 @@
 <meta property="og:image" content="https://lingchao.xin/static/images/deps-b2-short@2x.png">
 <meta property="og:image" content="https://lingchao.xin/static/images/deps-c1-short@2x.png">
 <meta property="og:image" content="https://lingchao.xin/static/images/deps-c2-short@2x.png">
-<meta property="og:updated_time" content="2018-04-15T08:21:43.000Z">
+<meta property="og:updated_time" content="2018-04-15T08:24:26.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="语义导入版本控制">
 <meta name="twitter:description" content="本文译自 Semantic Import Versioning, Go &amp;amp; Versioning 的第 3 部分, 版权@归原文所有.">
@@ -257,7 +257,7 @@
 <p>打算供公众使用的软件包应该尽量保持向后兼容性. <a href="https://golang.org/doc/go1compat.html" target="_blank" rel="noopener">Go 1 兼容性准则</a>在这里是一个很好的参考: 不要删除导出的名称, 鼓励标记的复合字面量等等. 如果需要不同的功能, 请添加新名称而不是更改旧名称. 如果需要完全破坏兼容性, 请使用新的导入路径创建新的程序包.</p>
 </blockquote>
 <p>这篇博文的一个动机是用一个清晰​​可信的例子来展示为什么遵循规则是如此重要.</p>
-<h3 id="避免单例-Singleton-问题"><a href="#避免单例-Singleton-问题" class="headerlink" title="避免单例 (Singleton) 问题"></a>避免单例 (Singleton) 问题</h3><p>对语义导入版本管理方法的一个普遍反对意见是, 包作者今天预计在给定的构建中只有一个包的副本. 在不同主要版本中允许多个包可能会由于单例的意外重复而导致问题. 一个例子是注册一个 HTTP handler. 如果 my/thing 为 /debug/my/thing 注册了一个 HTTP handler, 那么拥有该程序包的两个副本将导致重复的注册, 这在注册时会引起恐慌. 另一个问题是如果程序中有两个 HTTP 堆栈. 显然, 只有一个 HTTP 堆栈可以在端口 80 上监听; 我们不希望一半的程序注册不会被使用的 handlers. Go 开发者已经由于 vendored 包出现这样的问题.</p>
+<h3 id="避免单例-Singleton-问题"><a href="#避免单例-Singleton-问题" class="headerlink" title="避免单例 (Singleton) 问题"></a>避免单例 (Singleton) 问题</h3><p>对语义导入版本管理方法的一个普遍反对意见是, 包作者今天预计在给定的构建中只有一个包的副本. 在不同主要版本中允许多个包可能会由于单例的意外重复而导致问题. 一个例子是注册一个 HTTP handler. 如果 my/thing 为 /debug/my/thing 注册了一个 HTTP handler, 那么拥有该程序包的两个副本将导致重复的注册, 这在注册时会引起恐慌. 另一个问题是如果程序中有两个 HTTP 堆栈. 显然, 只有一个 HTTP 堆栈可以在端口 80 上监听; 我们不希望一半的程序注册不会被使用的 handlers. <strong>Go 开发者已经由于 vendored 包出现这样的问题</strong>.</p>
 <p>迁移到 vgo 和语义导入版本可以澄清并简化当前的情况. 通过取代 vendoring 导致的不可控的重复问题, 包作者将保证每个主版本的软件包只有一个实例. 通过将主要版本包含在导入路径中, 包作者应该更清楚 my/thing 和 my/thing/v2 是不同的并且需要能够共存. 或许这意味着在 /debug/my/thing/v2 上导出 v2 调试信息. 或者这也许意味着协调. 也许 v2 可以负责注册 handler, 但也可以为 v1 提供一个钩子(hook)来提供信息以显示在页面上. 这意味着 my/thing 导入 my/thing/v2 或反之亦然; 具有不同的导入路径, 这很容易做到并且易于理解. 相反, 如果 v1 和v2 都是 my/thing, 那么很难理解导入自己的导入路径并获取其他导入路径的含义.</p>
 <h3 id="自动-API-更新"><a href="#自动-API-更新" class="headerlink" title="自动 API 更新"></a>自动 API 更新</h3><p>允许程序包的 v1 和 v2 共存于一个大型程序中的关键原因之一是可以一次升级该程序包的客户端, 并且仍然具有可构建的结果. 这是逐步修复代码的更一般问题的具体实例. (请参阅我的 2016 年文章 “<a href="https://talks.golang.org/2016/refactor.article" target="_blank" rel="noopener">Codebase Refactoring (with help from Go),</a>“ 了解更多关于该问题的信息.)</p>
 <p>除了保持程序的构建外, 语义导入版本控制对逐步修复代码有很大的好处, 我在前面的章节中提到过: 代码包的一个主版本可以导入并用另一个版本编写. 将 v2 API 编写为 v1 实现的封装很简单, 反之亦然. 这让他们能够共享代码, 并且通过适当的设计选择和使用类型别名, 甚至可以允许使用 v1 和 v2 的客户端进行互操作. 它还可以帮助解决定义自动 API 更新中的关键技术问题.</p>
