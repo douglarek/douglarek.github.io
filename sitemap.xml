@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://lingchao.xin/post/go-errors-stack-traces.html</loc>
+    
+    <lastmod>2018-04-15T09:56:12.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://lingchao.xin/post/postgresql-10-full-text-search-support-for-json-and-jsonb.html</loc>
     
     <lastmod>2018-04-15T09:51:38.000Z</lastmod>
@@ -128,13 +135,6 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/go-errors-stack-traces.html</loc>
-    
-    <lastmod>2018-04-15T06:34:09.000Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>https://lingchao.xin/post/sicp-quickstart.html</loc>
     
     <lastmod>2018-04-06T14:15:40.000Z</lastmod>
@@ -212,14 +212,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/conditional-expressions-in-postgres.html</loc>
+    <loc>https://lingchao.xin/post/emacs-is-a-habit.html</loc>
     
     <lastmod>2018-03-26T13:28:33.282Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/emacs-is-a-habit.html</loc>
+    <loc>https://lingchao.xin/post/conditional-expressions-in-postgres.html</loc>
     
     <lastmod>2018-03-26T13:28:33.282Z</lastmod>
     
