@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://lingchao.xin/post/postgresql-10-full-text-search-support-for-json-and-jsonb.html</loc>
+    
+    <lastmod>2018-04-15T09:51:38.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html</loc>
     
     <lastmod>2018-04-15T09:50:19.000Z</lastmod>
@@ -163,14 +170,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/the-past-2016.html</loc>
+    <loc>https://lingchao.xin/post/there-is-no-pass-by-reference-in-go.html</loc>
     
     <lastmod>2018-03-26T13:28:33.287Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/there-is-no-pass-by-reference-in-go.html</loc>
+    <loc>https://lingchao.xin/post/the-past-2016.html</loc>
     
     <lastmod>2018-03-26T13:28:33.287Z</lastmod>
     
@@ -191,13 +198,6 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/postgresql-10-full-text-search-support-for-json-and-jsonb.html</loc>
-    
-    <lastmod>2018-03-26T13:28:33.286Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>https://lingchao.xin/post/make-a-dynamic-class-in-python.html</loc>
     
     <lastmod>2018-03-26T13:28:33.286Z</lastmod>
@@ -212,14 +212,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/emacs-is-a-habit.html</loc>
+    <loc>https://lingchao.xin/post/conditional-expressions-in-postgres.html</loc>
     
     <lastmod>2018-03-26T13:28:33.282Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/conditional-expressions-in-postgres.html</loc>
+    <loc>https://lingchao.xin/post/emacs-is-a-habit.html</loc>
     
     <lastmod>2018-03-26T13:28:33.282Z</lastmod>
     
