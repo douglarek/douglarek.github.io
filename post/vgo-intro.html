@@ -14,7 +14,7 @@
 <meta property="og:site_name" content="Coding talks">
 <meta property="og:description" content="本文译自 Go += Package Versioning, Go &amp;amp; Versioning 的第 1 部分, 版权@归原文所有.">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2018-04-15T09:25:44.000Z">
+<meta property="og:updated_time" content="2018-04-15T09:27:20.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Go += 包版本">
 <meta name="twitter:description" content="本文译自 Go += Package Versioning, Go &amp;amp; Versioning 的第 1 部分, 版权@归原文所有.">
@@ -157,7 +157,7 @@
 <h3 id="版本和-API-稳定性"><a href="#版本和-API-稳定性" class="headerlink" title="版本和 API 稳定性"></a>版本和 API 稳定性</h3><p>go get 的第一个显著缺点是, 如果没有版本控制的概念, 它就不能告诉用户对给定更新期望发生什么样的变化.</p>
 <p>2013 年 11 月, Go 1.2 添加了一个关于包版本控制的常见问题解答条目, 提供了基本的建议 (Go 1.10也没有变):</p>
 <blockquote>
-<p>打算供公众使用的软件包应该尽量保持向后兼容性.<br><a href="https://golang.org/doc/go1compat.html" target="_blank" rel="noopener">Go 1 兼容性准则</a>在这里是一个很好的参考: 不要删除导出的名称, 鼓励标记的复合文字等等.<br>如果需要不同的功能, 请添加新名称而不是更改旧名称. 如果需要完全打破兼容性, 请创建新的导入路径的软件包.</p>
+<p>打算供公众使用的软件包应该尽量保持向后兼容性. <a href="https://golang.org/doc/go1compat.html" target="_blank" rel="noopener">Go 1 兼容性准则</a>在这里是一个很好的参考: 不要删除导出的名称, 鼓励标记的复合文字等等. 如果需要不同的功能, 请添加新名称而不是更改旧名称. 如果需要完全打破兼容性, 请创建新的导入路径的软件包.</p>
 </blockquote>
 <p>2014 年 3 月, Gustavo Niemeyer 创建了 <a href="https://gopkg.in/" target="_blank" rel="noopener">gopkg.in</a>, 广而告之为 “Go语言的稳定API”. 该域名是一个版本感知的 GitHub 重定向器, 允许导入路径, 如 gopkg.in/yaml.v1 和 gopkg.in/yaml.v2 引用单个 Git 仓库的不同提交 (可能位于不同分支上) . 在语义版本化之后, 包作者需要在进行重大更改时引入一个新的主要版本, 以便较早版本的 v1 导入路径可以作为先前版本的替代版本, 而 v2 导入路径可能是完全不同的 API.</p>
 <p>2015 年 8 月, Dave Cheney 提出<a href="https://github.com/golang/go/issues/12302" target="_blank" rel="noopener">采用语义版本化的提案</a>. 这在接下来的几个月里引发了一场有趣的讨论, 其中每个人似乎都认为, 使用语义版本标记代码似乎是一个好主意, 但没有人知道下一步: 这些版本应该使用什么工具 ?</p>
@@ -169,7 +169,7 @@
 <p>我没有从海勒姆法则中得出结论: 语义版本化是不可能的, 我认为构建应该小心地使用作者所做的每个依赖的完全相同的版本, 除非被迫. 也就是说, 构建应该默认为尽可能重现.</p>
 <h3 id="Vendoring-以及可重复性构建"><a href="#Vendoring-以及可重复性构建" class="headerlink" title="Vendoring 以及可重复性构建"></a>Vendoring 以及可重复性构建</h3><p>go get 的第二个显著的缺点是, 如果没有版本控制的概念, 它不能确保甚至不能表达可重复构建的想法. 无法确定你的用户正在编译你的代码所依赖的相同版本. 2013 年 11 月, Go 1.2 常见问题解答还添加了以下基本建议:</p>
 <blockquote>
-<p>如果你使用的是外部提供的软件包, 并担心它可能会以意想不到的方式更改, 最简单的解决方案是将其复制到本地仓库 (这是 Google 内部采取的方法).<br>将副本存储在新的导入路径下, 以将其标识为本地副本.<br>例如, 你可能会复制 “original.com/pkg” 到 “you.com/external/original.com/pkg”. Keith Rarick 的 goven 是帮助实现这一过程自动化的工具之一.</p>
+<p>如果你使用的是外部提供的软件包, 并担心它可能会以意想不到的方式更改, 最简单的解决方案是将其复制到本地仓库 (这是 Google 内部采取的方法). 将副本存储在新的导入路径下, 以将其标识为本地副本. 例如, 你可能会复制 “original.com/pkg” 到 “you.com/external/original.com/pkg”. Keith Rarick 的 goven 是帮助实现这一过程自动化的工具之一.</p>
 </blockquote>
 <p>Goven, Keith Rarick 于 2012 年 3 月开始创建, 它将依赖项复制到你的仓库中, 并更新其中的所有导入路径以反映新位置. 以这种方式修改依赖项的源代码对于构建它而言是必要的, 但也是不幸的. 这些修改使得它难以与使用该依赖关系的其他复制代码进行比较和合并更新的副本和所需的更新.</p>
 <p>Keith 在 2013 年 9 月宣布了 <a href="https://groups.google.com/d/msg/golang-nuts/8NJq6jTIpas/Vpf-KZtVu9MJ" target="_blank" rel="noopener">godep</a>: “一个冻结软件包依赖关系的新工具”. godep 的主要进展是添加我们现在所理解的 Go vendoring - 即将依赖复制到项目中, 而不修改源文件 - 没有直接工具链通过以某种方式设置 GOPATH 来支持.</p>
@@ -186,7 +186,7 @@
 <h3 id="导入-Import-兼容性规则"><a href="#导入-Import-兼容性规则" class="headerlink" title="导入 (Import) 兼容性规则"></a>导入 (Import) 兼容性规则</h3><p>包装管理系统中几乎所有的痛苦都是由于试图驯服不兼容而导致的. 例如, 大多数系统允许程序包 B 声明它需要程序包 D 6 或更高版本, 然后允许程序包 C 声明它需要D 2, 3 或 4, 但不是 5 或更高版本. 如果你正在编写软件包 A, 并且你想同时使用 B 和 C, 那么你运气不好: 没有一个 D 版本可以选择将 B 和 C 一起构建到 A 中. 你什么也做不了: 这些系统说 B 和 C 这样做是可以接受的 - 他们有效地鼓励它 - 所以就这样你被卡住了.</p>
 <p>这个提案要求包作者遵循导入兼容性规则, 而不是设计一个不可避免导致大型程序无法构建的系统:</p>
 <blockquote>
-<p>如果旧软件包和新软件包具有相同的导入路径,<br>则新软件包必须与旧软件包向后兼容.</p>
+<p>如果旧软件包和新软件包具有相同的导入路径, 则新软件包必须与旧软件包向后兼容.</p>
 </blockquote>
 <p>这条规则是对前面引用的 Go FAQ 中的建议的重申. 常见问题引文最后说到: “如果需要完全的破坏兼容性, 请使用新的导入路径创建一个新包”. 今天的开发人员希望使用语义版本来表达这样一个破坏, 所以我们将语义版本集成到了我们的提案中. 具体来说, 主版本 2 和更高版本可以通过在路径中包含版本来使用, 如下所示:</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import &quot;github.com/go-yaml/yaml/v2&quot;</span><br></pre></td></tr></table></figure>
