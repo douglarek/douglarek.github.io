@@ -14,7 +14,7 @@
 <meta property="og:site_name" content="Coding talks">
 <meta property="og:description" content="译文版权@归原文所有. 虽然他们非常方便, 但我总是发现 Go 的 Range 循环有点神秘. 我并不是第一个:">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2018-03-27T15:36:03.931Z">
+<meta property="og:updated_time" content="2018-04-15T09:45:29.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Go Range 循环内幕">
 <meta name="twitter:description" content="译文版权@归原文所有. 虽然他们非常方便, 但我总是发现 Go 的 Range 循环有点神秘. 我并不是第一个:">
@@ -145,7 +145,7 @@
 <p>虽然他们非常方便, 但我总是发现 Go 的 Range 循环有点神秘. 我并不是第一个:<br><a id="more"></a></p>
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// http://bit.ly/2CXC1Ob 来自 Dave Cheney.</span></span><br><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	v := []<span class="keyword">int</span>&#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>&#125;</span><br><span class="line">	<span class="keyword">for</span> i := <span class="keyword">range</span> v &#123;</span><br><span class="line">		v = <span class="built_in">append</span>(v, i)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>现在我可以把这些事实记录下来, 但是我很可能会忘记. 为了有更好的机会记住这个, 我需要找出为什么 range 循环会这样. 所以我写了这篇文章.</p>
-<h2 id="Step-1-读手册-RTFM"><a href="#Step-1-读手册-RTFM" class="headerlink" title="Step 1: 读手册(RTFM)"></a>Step 1: 读手册(RTFM)</h2><p>我们首先应该去读 range 循环文档. Go语言规范文档在 <a href="https://golang.org/ref/spec#For_statements" target="_blank" rel="noopener">for 语句</a>部分的 <em>For 语句和 range 子句</em>描述了 range 循环.<br>我不会在这里复制整个规范，我会总结一些有趣的部分.</p>
+<h2 id="Step-1-读手册-RTFM"><a href="#Step-1-读手册-RTFM" class="headerlink" title="Step 1: 读手册(RTFM)"></a>Step 1: 读手册(RTFM)</h2><p>我们首先应该去读 range 循环文档. Go语言规范文档在 <a href="https://golang.org/ref/spec#For_statements" target="_blank" rel="noopener">for 语句</a>部分的 <em>For 语句和 range 子句</em>描述了 range 循环. 我不会在这里复制整个规范，我会总结一些有趣的部分.</p>
 <p>首先, 让我们提醒自己我们在这里看到什么:</p>
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> i := <span class="keyword">range</span> a &#123;</span><br><span class="line">	fmt.Println(i)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h3 id="Range-变量"><a href="#Range-变量" class="headerlink" title="Range 变量"></a>Range 变量</h3><p>你们中的大多数人会知道, 在 Range 子句的左边(上面的例子中的 i), 你可以这样分配循环变量:</p>
@@ -164,7 +164,7 @@
 <li>字典(map)</li>
 <li>允许接收的管道(channel), 如: chan int 或者 chan&lt;- int</li>
 </ul>
-<p><strong>Range 表达式在开始循环之前只计算一次</strong>. 请注意, 这个规则有一个例外: 如果 Range 一个数组(或指向它的指针), 你只能分配索引：那么只有 len(a) 被计算.<br>仅计算 len(a) 意味着可以在编译时计算表达式 a, 并由编译器用常量替换. <a href="https://golang.org/ref/spec#Length_and_capacity" target="_blank" rel="noopener">len 函数规范</a>解释如下:</p>
+<p><strong>Range 表达式在开始循环之前只计算一次</strong>. 请注意, 这个规则有一个例外: 如果 Range 一个数组(或指向它的指针), 你只能分配索引：那么只有 len(a) 被计算. 仅计算 len(a) 意味着可以在编译时计算表达式 a, 并由编译器用常量替换. <a href="https://golang.org/ref/spec#Length_and_capacity" target="_blank" rel="noopener">len 函数规范</a>解释如下:</p>
 <blockquote>
 <p>如果s的类型是数组或指向数组的指针并且表达式 s 不包含通道接收(channel receives) 或(非 常量) 函数调用, 则表达式 len(s) 和 cap(s) 是常量. 在这种情况下 s 不被计算. 否则, len 和 cap 的调用不是常量, 而是被计算.</p>
 </blockquote>
