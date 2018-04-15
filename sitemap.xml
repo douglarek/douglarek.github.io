@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://lingchao.xin/post/json-tips-in-go.html</loc>
+    
+    <lastmod>2018-04-15T09:32:35.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://lingchao.xin/post/a-developer-relations-bill-of-rights.html</loc>
     
     <lastmod>2018-04-15T09:30:59.000Z</lastmod>
@@ -93,20 +100,6 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/json-tips-in-go.html</loc>
-    
-    <lastmod>2018-03-27T15:36:03.932Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://lingchao.xin/post/gos-work-stealing-scheduler.html</loc>
-    
-    <lastmod>2018-03-27T15:36:03.931Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>https://lingchao.xin/post/go-range-loop-internals.html</loc>
     
     <lastmod>2018-03-27T15:36:03.931Z</lastmod>
@@ -115,6 +108,13 @@
   
   <url>
     <loc>https://lingchao.xin/post/go-proverbs.html</loc>
+    
+    <lastmod>2018-03-27T15:36:03.931Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://lingchao.xin/post/gos-work-stealing-scheduler.html</loc>
     
     <lastmod>2018-03-27T15:36:03.931Z</lastmod>
     
@@ -163,14 +163,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/postgresql-aggregate-functions.html</loc>
+    <loc>https://lingchao.xin/post/make-a-dynamic-class-in-python.html</loc>
     
     <lastmod>2018-03-26T13:28:33.286Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/make-a-dynamic-class-in-python.html</loc>
+    <loc>https://lingchao.xin/post/postgresql-aggregate-functions.html</loc>
     
     <lastmod>2018-03-26T13:28:33.286Z</lastmod>
     
@@ -212,14 +212,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/emacs-is-a-habit.html</loc>
+    <loc>https://lingchao.xin/post/conditional-expressions-in-postgres.html</loc>
     
     <lastmod>2018-03-26T13:28:33.282Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/conditional-expressions-in-postgres.html</loc>
+    <loc>https://lingchao.xin/post/emacs-is-a-habit.html</loc>
     
     <lastmod>2018-03-26T13:28:33.282Z</lastmod>
     
