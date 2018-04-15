@@ -4,7 +4,7 @@
   <url>
     <loc>https://lingchao.xin/post/vgo-tour.html</loc>
     
-    <lastmod>2018-04-15T08:36:51.000Z</lastmod>
+    <lastmod>2018-04-15T08:39:49.000Z</lastmod>
     
   </url>
   
@@ -100,14 +100,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/go-proverbs.html</loc>
+    <loc>https://lingchao.xin/post/gos-work-stealing-scheduler.html</loc>
     
     <lastmod>2018-03-27T15:36:03.931Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/gos-work-stealing-scheduler.html</loc>
+    <loc>https://lingchao.xin/post/go-proverbs.html</loc>
     
     <lastmod>2018-03-27T15:36:03.931Z</lastmod>
     
@@ -121,14 +121,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/why-golang-garbage-collector-not-implement-generational-and-compact-gc.html</loc>
+    <loc>https://lingchao.xin/search/index.html</loc>
     
     <lastmod>2018-03-26T13:28:33.292Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/search/index.html</loc>
+    <loc>https://lingchao.xin/post/why-golang-garbage-collector-not-implement-generational-and-compact-gc.html</loc>
     
     <lastmod>2018-03-26T13:28:33.292Z</lastmod>
     
@@ -156,6 +156,13 @@
   </url>
   
   <url>
+    <loc>https://lingchao.xin/post/postgresql-aggregate-functions.html</loc>
+    
+    <lastmod>2018-03-26T13:28:33.286Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://lingchao.xin/post/postgresql-10-full-text-search-support-for-json-and-jsonb.html</loc>
     
     <lastmod>2018-03-26T13:28:33.286Z</lastmod>
@@ -164,13 +171,6 @@
   
   <url>
     <loc>https://lingchao.xin/post/make-a-dynamic-class-in-python.html</loc>
-    
-    <lastmod>2018-03-26T13:28:33.286Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://lingchao.xin/post/postgresql-aggregate-functions.html</loc>
     
     <lastmod>2018-03-26T13:28:33.286Z</lastmod>
     
@@ -205,7 +205,7 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/a-developer-relations-bill-of-rights.html</loc>
+    <loc>https://lingchao.xin/post/conditional-expressions-in-postgres.html</loc>
     
     <lastmod>2018-03-26T13:28:33.282Z</lastmod>
     
@@ -219,7 +219,7 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/conditional-expressions-in-postgres.html</loc>
+    <loc>https://lingchao.xin/post/a-developer-relations-bill-of-rights.html</loc>
     
     <lastmod>2018-03-26T13:28:33.282Z</lastmod>
     
