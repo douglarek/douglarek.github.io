@@ -16,7 +16,7 @@
 <meta property="og:locale" content="en">
 <meta property="og:image" content="https://lingchao.xin/static/images/gitmod-1@2x.png">
 <meta property="og:image" content="https://lingchao.xin/static/images/gitmod-2@2x.png">
-<meta property="og:updated_time" content="2018-04-15T07:18:32.000Z">
+<meta property="og:updated_time" content="2018-04-15T07:21:06.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="定义 Go 模块">
 <meta name="twitter:description" content="本文译自 Defining Go Modules, Go &amp;amp; Versioning 的第 6 部分, 版权@归原文所有.">
@@ -204,7 +204,7 @@
 <p>vgo 原型中的标准格式是 zip 档案, 其中所有路径都以模块路径和版本开头. 例如, 运行 rsc.io/quoteV1.5.2 的 vgo get 后, 你可以在 vgo 的下载缓存里找到 zip 文件:</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ unzip -l $GOPATH/src/v/cache/rsc.io/quote/@v/v1.5.2.zip</span><br><span class="line">     1479  00-00-1980 00:00   rsc.io/quote@v1.5.2/LICENSE</span><br><span class="line">      131  00-00-1980 00:00   rsc.io/quote@v1.5.2/README.md</span><br><span class="line">      240  00-00-1980 00:00   rsc.io/quote@v1.5.2/buggy/buggy_test.go</span><br><span class="line">       55  00-00-1980 00:00   rsc.io/quote@v1.5.2/go.mod</span><br><span class="line">      793  00-00-1980 00:00   rsc.io/quote@v1.5.2/quote.go</span><br><span class="line">      917  00-00-1980 00:00   rsc.io/quote@v1.5.2/quote_test.go</span><br><span class="line">$</span><br></pre></td></tr></table></figure>
 <p>我使用了 zip, 因为它是精心指定的, 广泛支持的, 并且如果需要可以干净地扩展, 并允许随机访问单个文件. (相比之下, tar 文件是另一个显而易见的选择, 但是都不满足这些特点.)</p>
-<h3 id="下载协议"><a href="#下载协议" class="headerlink" title="下载协议"></a>下载协议</h3><p>要下载有关模块的信息以及模块本身, vgo原型仅发出简单的 HTTP GET 请求. 一个关键的设计目标是使得可以从静态托管站点提供模块, 因此请求没有 URL 查询参数.</p>
+<h3 id="下载协议"><a href="#下载协议" class="headerlink" title="下载协议"></a>下载协议</h3><p>要下载有关模块的信息以及模块本身, vgo 原型仅发出简单的 HTTP GET 请求. 一个关键的设计目标是使得可以从静态托管站点提供模块, 因此请求没有 URL 查询参数.</p>
 <p>正如我们前面看到的, 自定义域可以指定模块托管在特定的基本 URL. 像 vgo 今天实现的那样(但是, vgo 的所有这些可能会发生变化), 该模块托管服务器必须提供四种请求格式:</p>
 <ul>
 <li><code>GET baseURL/module/@v/list</code> 获取所有已知版本的列表, 每行一个.</li>
