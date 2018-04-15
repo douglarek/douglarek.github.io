@@ -16,7 +16,7 @@
 <meta property="og:locale" content="en">
 <meta property="og:image" content="https://lingchao.xin/static/images/scheduler-concepts.png">
 <meta property="og:image" content="https://lingchao.xin/static/images/scheduler-stealing.png">
-<meta property="og:updated_time" content="2018-03-27T15:36:03.931Z">
+<meta property="og:updated_time" content="2018-04-15T09:36:37.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Go work-stealing 调度器">
 <meta name="twitter:description" content="本文译自 Rakyll 的 scheduler 版权@归原文所有.">
@@ -144,14 +144,14 @@
 
   <div class="content" itemprop="articleBody">
     <p>本文译自 Rakyll 的 <a href="https://rakyll.org/scheduler/" target="_blank" rel="noopener">scheduler</a> 版权@归原文所有.<br><a id="more"></a></p>
-<p>Go 调度器的工作是将可运行的 goroutine 分发到一个或多个处理器上运行的多个操作系统工作线程.<br>在多线程计算里, 调度出现了两种模式: work-sharing (工作共享) 和 work-stealing (工作窃取).</p>
+<p>Go 调度器的工作是将可运行的 goroutine 分发到一个或多个处理器上运行的多个操作系统工作线程. 在多线程计算里, 调度出现了两种模式: work-sharing (工作共享) 和 work-stealing (工作窃取).</p>
 <ul>
 <li><strong>work-sharing</strong> 当一个处理器产生新的线程时, 它试图将其中的一些迁移到其他处理器上, 希望它们能被空闲或未充分利用的处理器所利用.</li>
-<li><strong>work-stealing</strong> 未充分利用的处理器会主动去寻找其他处理器的线程并 <code>窃取</code> 一些.</li>
+<li><strong>work-stealing</strong> 未充分利用的处理器会主动去寻找其他处理器的线程并窃取一些.</li>
 </ul>
 <p>work-stealing 中线程迁移的频率少于 work-sharing. 当所有处理器都有工作要运行时, 没有线程会被迁移. 而一旦有空闲的处理器, 就会考虑迁移.</p>
 <p>Go 从 1.1 开始就有一个 work-stealing 的调度器, 由 <a href="https://github.com/dvyukov" target="_blank" rel="noopener">Dmitry Vyukov</a> 贡献. 本文将深入解释什么是 work-stealing 调度器, 以及 Go 如何实现它.</p>
-<h2 id="调度基础"><a href="#调度基础" class="headerlink" title="调度基础"></a>调度基础</h2><p>Go 有一个可以利用多核处理器的 M:N 调度器. 任何时候, M 个 goroutine 都需要在 N 个 OS 线程上进行调度, 这些线程运行在最多 GOMAXPROCS 数量的处理器上.<br>Go 调度器使用以下术语解释 goroutine, 线程以及处理器:</p>
+<h2 id="调度基础"><a href="#调度基础" class="headerlink" title="调度基础"></a>调度基础</h2><p>Go 有一个可以利用多核处理器的 M:N 调度器. 任何时候, M 个 goroutine 都需要在 N 个 OS 线程上进行调度, 这些线程运行在最多 GOMAXPROCS 数量的处理器上. Go 调度器使用以下术语解释 goroutine, 线程以及处理器:</p>
 <ul>
 <li>G: goroutine</li>
 <li>M: OS 线程 (机器)</li>
@@ -166,8 +166,8 @@
 <h2 id="Stealing-窃取"><a href="#Stealing-窃取" class="headerlink" title="Stealing (窃取)"></a>Stealing (窃取)</h2><p>当一个新的 G 被创建或者一个现有的 G 变成可运行的时候, 它被压入当前 P 的可运行的 goroutine 列表. 当 P 完成 G 时, 它会尝试从自己的可运行 goroutine 列表中弹出一个 G. 如果列表现在是空的, P 会随机的选择其他的 P, 并尝试从其队列中偷取一半可运行的 goroutine(s).</p>
 <p><img src="/static/images/scheduler-stealing.png" width="782" height="409"></p>
 <p>在上面的例子中, P2 找不到任何可运行的 goroutine. 因此, 它随机选择另一个 P1, 并将其三个 goroutine(s) 窃取到自己的本地队列中. P2 将能够运行这些 goroutine, 并且调度器的工作会在多个处理器之间更加公平地分配.</p>
-<h2 id="自旋线程-Spinning-threads"><a href="#自旋线程-Spinning-threads" class="headerlink" title="自旋线程 (Spinning threads)"></a>自旋线程 (Spinning threads)</h2><p>调度器总是希望将尽可能多的可运行的 goroutine(s) 分配给 M (们) 来利用处理器, 但是同时我们需要停留过多的工作来节省 CPU 和电力. 与此相矛盾的是, 调度器还需要能够扩展到高吞吐量和 CPU 密集型的程序.<br>如果性能是至关重要的, 那么对高吞吐量程序来说持续抢占既是昂贵又是有问题的. 操作系统线程不应该频繁地在 goroutine(s) 之间切换, 因为这会增加延迟. 除此之外, 在发生系统调用的时候, 操作系统线程需要不断地被阻塞和解除阻塞. 这是昂贵的, 并增加了很多开销.</p>
-<p>为了尽量减少切换, Go 调度器实现了 <code>自旋线程</code>. 自旋线程消耗一点额外的 CPU, 但是它们最小化了 OS 线程的抢占. 一个线程是自旋的, 如果:</p>
+<h2 id="自旋线程-Spinning-threads"><a href="#自旋线程-Spinning-threads" class="headerlink" title="自旋线程 (Spinning threads)"></a>自旋线程 (Spinning threads)</h2><p>调度器总是希望将尽可能多的可运行的 goroutine(s) 分配给 M (们) 来利用处理器, 但是同时我们需要停留过多的工作来节省 CPU 和电力. 与此相矛盾的是, 调度器还需要能够扩展到高吞吐量和 CPU 密集型的程序. 如果性能是至关重要的, 那么对高吞吐量程序来说持续抢占既是昂贵又是有问题的. 操作系统线程不应该频繁地在 goroutine(s) 之间切换, 因为这会增加延迟. 除此之外, 在发生系统调用的时候, 操作系统线程需要不断地被阻塞和解除阻塞. 这是昂贵的, 并增加了很多开销.</p>
+<p>为了尽量减少切换, Go 调度器实现了自旋线程. 自旋线程消耗一点额外的 CPU, 但是它们最小化了 OS 线程的抢占. 一个线程是自旋的, 如果:</p>
 <ul>
 <li>分配了 P 的 M 正在寻找一个可执行 goroutine;</li>
 <li>没有分配 P 的 M 正在寻找可用的 P;</li>
@@ -175,12 +175,12 @@
 </ul>
 <p>任何时候最多有 GOMAXPROCS 个自旋的 M (们). 当一个自旋的线程找到工作, 它就脱离了自旋状态.</p>
 <p>如果有空闲的 M 没有被赋予 P, 那么被赋予 P 的空闲线程不会被阻塞. 当新的 goroutine(s) 被创建或 M 被阻塞时, 调度器确保至少有一个自旋 M. 这确保了没有可运行的 goroutine(s) 不被运行; 并且避免过多的 M 阻塞或者解除阻塞.</p>
-<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>Go 调度器做了很多事情来避免过多的操作系统线程抢占, 通过窃取(stealing)调度它们到正确和未充分利用的处理器, 以及实现 <code>自旋</code> 线程以避免过高阻塞或者解除阻塞切换的发生.</p>
+<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>Go 调度器做了很多事情来避免过多的操作系统线程抢占, 通过窃取(stealing)调度它们到正确和未充分利用的处理器, 以及实现自旋线程以避免过高阻塞或者解除阻塞切换的发生.</p>
 <p>调度事件可以用执行追踪器(<a href="https://golang.org/cmd/trace/" target="_blank" rel="noopener">execution tracer</a>)追踪. 如果你碰巧认为自己的处理器利用率很差, 则可以用它探究发生了什么事情.</p>
 <h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><ul>
 <li><a href="https://github.com/golang/go/blob/master/src/runtime/proc.go" target="_blank" rel="noopener">Go 运行时调度器源码</a></li>
 <li><a href="https://golang.org/s/go11sched" target="_blank" rel="noopener">可扩展 Go 调度器设计文档</a></li>
-<li><a href="https://morsmachine.dk/go-scheduler" target="_blank" rel="noopener">Daniel Morsing: Go 调度器</a></li>
+<li><a href="https://morsmachine.dk/go-scheduler" target="_blank" rel="noopener">Daniel Morsing: Go 调度器</a><br>s</li>
 </ul>
 
   </div>
