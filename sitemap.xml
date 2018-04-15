@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html</loc>
+    
+    <lastmod>2018-04-15T09:50:19.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://lingchao.xin/post/golang-graceful-restart-server.html</loc>
     
     <lastmod>2018-04-15T09:46:28.000Z</lastmod>
@@ -156,7 +163,7 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/rock-with-coleslaw.html</loc>
+    <loc>https://lingchao.xin/post/the-past-2016.html</loc>
     
     <lastmod>2018-03-26T13:28:33.287Z</lastmod>
     
@@ -170,7 +177,7 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/the-past-2016.html</loc>
+    <loc>https://lingchao.xin/post/rock-with-coleslaw.html</loc>
     
     <lastmod>2018-03-26T13:28:33.287Z</lastmod>
     
@@ -198,23 +205,9 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html</loc>
-    
-    <lastmod>2018-03-26T13:28:33.283Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>https://lingchao.xin/post/functional-options-pattern-in-go.html</loc>
     
     <lastmod>2018-03-26T13:28:33.283Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://lingchao.xin/post/2017-has-passed.html</loc>
-    
-    <lastmod>2018-03-26T13:28:33.282Z</lastmod>
     
   </url>
   
@@ -227,6 +220,13 @@
   
   <url>
     <loc>https://lingchao.xin/post/conditional-expressions-in-postgres.html</loc>
+    
+    <lastmod>2018-03-26T13:28:33.282Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://lingchao.xin/post/2017-has-passed.html</loc>
     
     <lastmod>2018-03-26T13:28:33.282Z</lastmod>
     
