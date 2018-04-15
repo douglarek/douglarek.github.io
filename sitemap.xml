@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://lingchao.xin/post/how-does-the-golang-scheduler-work.html</loc>
+    
+    <lastmod>2018-04-15T09:41:05.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://lingchao.xin/post/go-proverbs.html</loc>
     
     <lastmod>2018-04-15T09:40:06.000Z</lastmod>
@@ -128,14 +135,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/why-golang-garbage-collector-not-implement-generational-and-compact-gc.html</loc>
+    <loc>https://lingchao.xin/search/index.html</loc>
     
     <lastmod>2018-03-26T13:28:33.292Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/search/index.html</loc>
+    <loc>https://lingchao.xin/post/why-golang-garbage-collector-not-implement-generational-and-compact-gc.html</loc>
     
     <lastmod>2018-03-26T13:28:33.292Z</lastmod>
     
@@ -163,14 +170,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/make-a-dynamic-class-in-python.html</loc>
+    <loc>https://lingchao.xin/post/postgresql-10-full-text-search-support-for-json-and-jsonb.html</loc>
     
     <lastmod>2018-03-26T13:28:33.286Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/postgresql-10-full-text-search-support-for-json-and-jsonb.html</loc>
+    <loc>https://lingchao.xin/post/make-a-dynamic-class-in-python.html</loc>
     
     <lastmod>2018-03-26T13:28:33.286Z</lastmod>
     
@@ -180,13 +187,6 @@
     <loc>https://lingchao.xin/post/postgresql-aggregate-functions.html</loc>
     
     <lastmod>2018-03-26T13:28:33.286Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://lingchao.xin/post/how-does-the-golang-scheduler-work.html</loc>
-    
-    <lastmod>2018-03-26T13:28:33.285Z</lastmod>
     
   </url>
   
