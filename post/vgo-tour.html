@@ -14,7 +14,7 @@
 <meta property="og:site_name" content="Coding talks">
 <meta property="og:description" content="本文译自 A Tour of Versioned Go (vgo), Go &amp;amp; Versioning 的第 2 部分, 版权@归原文所有.">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2018-04-15T08:54:02.000Z">
+<meta property="og:updated_time" content="2018-04-15T09:11:08.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="版本化 Go 之旅">
 <meta name="twitter:description" content="本文译自 A Tour of Versioned Go (vgo), Go &amp;amp; Versioning 的第 2 部分, 版权@归原文所有.">
@@ -141,7 +141,7 @@
 
   <div class="content" itemprop="articleBody">
     <p>本文译自 <a href="https://research.swtch.com/vgo-tour" target="_blank" rel="noopener">A Tour of Versioned Go (vgo)</a>, <a href="https://lingchao.xin/tag/vgo.html">Go &amp; Versioning</a> 的第 2 部分, 版权@归原文所有.<br><a id="more"></a></p>
-<p>对我而言, 设计意味着构建, 拆除和再次构建, 一遍又一遍. 为了编写<a href="https://research.swtch.com/vgo-intro" target="_blank" rel="noopener">新的版本控制提案</a>, 我构建了一个原型 vgo, 来处理许多细微的细节. 这篇博文展示了如何使用 vgo.</p>
+<p>对我而言, 设计意味着一遍又一遍地构建, 拆除和再构建. 为了编写<a href="https://research.swtch.com/vgo-intro" target="_blank" rel="noopener">新的版本控制提案</a>, 我构建了一个原型 vgo, 来处理许多细微的细节. 这篇博文展示了如何使用 vgo.</p>
 <p>你现在可以通过运行 go get golang.org/x/vgo 下载并尝试 vgo. Vgo 是 go 命令的一个直接替换(和分支拷贝). 你运行 vgo 而不是 go, 它将使用你安装在 $GOROOT (Go 1.10 beta1 或更高版本) 的编译器和标准库.</p>
 <p>随着我们更多地了解什么可行, 什么不可行, vgo 的语义和命令行细节可能会发生变化. 但是, 我们打算避免 go.mod 文件格式的向后不兼容的更改, 以便今天添加了 go.mod 的项目以后也可以工作. 在我们完善提案时, 我们也会相应地更新 vgo.</p>
 <h2 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h2><p>该部分演示怎么使用 vgo. 请按照步骤进行实验.</p>

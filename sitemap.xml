@@ -2,9 +2,16 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://lingchao.xin/post/vgo-intro.html</loc>
+    
+    <lastmod>2018-04-15T09:25:44.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://lingchao.xin/post/vgo-tour.html</loc>
     
-    <lastmod>2018-04-15T08:54:02.000Z</lastmod>
+    <lastmod>2018-04-15T09:11:08.000Z</lastmod>
     
   </url>
   
@@ -72,13 +79,6 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/vgo-intro.html</loc>
-    
-    <lastmod>2018-03-27T15:36:03.933Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html</loc>
     
     <lastmod>2018-03-27T15:36:03.933Z</lastmod>
@@ -100,14 +100,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/go-proverbs.html</loc>
+    <loc>https://lingchao.xin/post/gos-work-stealing-scheduler.html</loc>
     
     <lastmod>2018-03-27T15:36:03.931Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/gos-work-stealing-scheduler.html</loc>
+    <loc>https://lingchao.xin/post/go-proverbs.html</loc>
     
     <lastmod>2018-03-27T15:36:03.931Z</lastmod>
     
