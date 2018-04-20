@@ -4,7 +4,7 @@
   <url>
     <loc>https://lingchao.xin/post/go-nils.html</loc>
     
-    <lastmod>2018-04-20T06:49:07.000Z</lastmod>
+    <lastmod>2018-04-20T07:33:56.000Z</lastmod>
     
   </url>
   
@@ -30,13 +30,6 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/vgo-mvs.html</loc>
-    
-    <lastmod>2018-04-20T05:40:59.631Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>https://lingchao.xin/post/vgo-module.html</loc>
     
     <lastmod>2018-04-20T05:40:59.631Z</lastmod>
@@ -44,9 +37,9 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/vgo-intro.html</loc>
+    <loc>https://lingchao.xin/post/vgo-mvs.html</loc>
     
-    <lastmod>2018-04-20T05:40:59.630Z</lastmod>
+    <lastmod>2018-04-20T05:40:59.631Z</lastmod>
     
   </url>
   
@@ -58,9 +51,9 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/synchronization-queues-in-golang.html</loc>
+    <loc>https://lingchao.xin/post/vgo-intro.html</loc>
     
-    <lastmod>2018-04-20T05:40:59.629Z</lastmod>
+    <lastmod>2018-04-20T05:40:59.630Z</lastmod>
     
   </url>
   
@@ -79,7 +72,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/memory-leaking.html</loc>
+    <loc>https://lingchao.xin/post/synchronization-queues-in-golang.html</loc>
+    
+    <lastmod>2018-04-20T05:40:59.629Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://lingchao.xin/post/json-tips-in-go.html</loc>
     
     <lastmod>2018-04-20T05:40:59.628Z</lastmod>
     
@@ -93,14 +93,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/json-tips-in-go.html</loc>
+    <loc>https://lingchao.xin/post/memory-leaking.html</loc>
     
     <lastmod>2018-04-20T05:40:59.628Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/gos-work-stealing-scheduler.html</loc>
+    <loc>https://lingchao.xin/post/golang-internals-part-2-nice-benefits-of-named-return-values.html</loc>
     
     <lastmod>2018-04-20T05:40:59.627Z</lastmod>
     
@@ -114,16 +114,9 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/golang-internals-part-2-nice-benefits-of-named-return-values.html</loc>
+    <loc>https://lingchao.xin/post/gos-work-stealing-scheduler.html</loc>
     
     <lastmod>2018-04-20T05:40:59.627Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://lingchao.xin/post/go-range-loop-internals.html</loc>
-    
-    <lastmod>2018-04-20T05:40:59.626Z</lastmod>
     
   </url>
   
@@ -136,6 +129,13 @@
   
   <url>
     <loc>https://lingchao.xin/post/go-errors-stack-traces.html</loc>
+    
+    <lastmod>2018-04-20T05:40:59.626Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://lingchao.xin/post/go-range-loop-internals.html</loc>
     
     <lastmod>2018-04-20T05:40:59.626Z</lastmod>
     
