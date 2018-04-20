@@ -4,7 +4,7 @@
   <url>
     <loc>https://lingchao.xin/post/go-nils.html</loc>
     
-    <lastmod>2018-04-20T08:27:34.000Z</lastmod>
+    <lastmod>2018-04-20T08:57:13.000Z</lastmod>
     
   </url>
   
@@ -16,13 +16,6 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/vgo-repro.html</loc>
-    
-    <lastmod>2018-04-20T05:40:59.632Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>https://lingchao.xin/post/vgo-tour.html</loc>
     
     <lastmod>2018-04-20T05:40:59.632Z</lastmod>
@@ -30,14 +23,21 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/vgo-module.html</loc>
+    <loc>https://lingchao.xin/post/vgo-repro.html</loc>
+    
+    <lastmod>2018-04-20T05:40:59.632Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://lingchao.xin/post/vgo-mvs.html</loc>
     
     <lastmod>2018-04-20T05:40:59.631Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/vgo-mvs.html</loc>
+    <loc>https://lingchao.xin/post/vgo-module.html</loc>
     
     <lastmod>2018-04-20T05:40:59.631Z</lastmod>
     
@@ -65,6 +65,13 @@
   </url>
   
   <url>
+    <loc>https://lingchao.xin/post/postgresql-10-full-text-search-support-for-json-and-jsonb.html</loc>
+    
+    <lastmod>2018-04-20T05:40:59.629Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://lingchao.xin/post/synchronization-queues-in-golang.html</loc>
     
     <lastmod>2018-04-20T05:40:59.629Z</lastmod>
@@ -72,9 +79,9 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/postgresql-10-full-text-search-support-for-json-and-jsonb.html</loc>
+    <loc>https://lingchao.xin/post/memory-leaking.html</loc>
     
-    <lastmod>2018-04-20T05:40:59.629Z</lastmod>
+    <lastmod>2018-04-20T05:40:59.628Z</lastmod>
     
   </url>
   
@@ -93,9 +100,9 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/memory-leaking.html</loc>
+    <loc>https://lingchao.xin/post/gos-work-stealing-scheduler.html</loc>
     
-    <lastmod>2018-04-20T05:40:59.628Z</lastmod>
+    <lastmod>2018-04-20T05:40:59.627Z</lastmod>
     
   </url>
   
@@ -108,13 +115,6 @@
   
   <url>
     <loc>https://lingchao.xin/post/golang-internals-part-2-nice-benefits-of-named-return-values.html</loc>
-    
-    <lastmod>2018-04-20T05:40:59.627Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://lingchao.xin/post/gos-work-stealing-scheduler.html</loc>
     
     <lastmod>2018-04-20T05:40:59.627Z</lastmod>
     
