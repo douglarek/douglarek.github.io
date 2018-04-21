@@ -15,7 +15,7 @@
 <meta property="og:description" content="本文译自 Why are there nil channels in Go 版权@归原文所有. 每个写过 Go 的人都知道 channels. 我们大多数人也知道 channels 的默认值是 nil. 但是我们很多人都不知道这个 nil 值是有用的. (译注: 老实说读到这篇文章之前我也认为 nil channels 没什么用, 不仅没用, 我还觉得对 nil channels 的写入操作应该">
 <meta property="og:locale" content="en">
 <meta property="og:image" content="https://lingchao.xin/static/images/0_aKHj7JJ0UCDEYu23.png">
-<meta property="og:updated_time" content="2018-04-21T15:35:49.000Z">
+<meta property="og:updated_time" content="2018-04-21T15:39:57.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="为什么 Go 会有 nil channels">
 <meta name="twitter:description" content="本文译自 Why are there nil channels in Go 版权@归原文所有. 每个写过 Go 的人都知道 channels. 我们大多数人也知道 channels 的默认值是 nil. 但是我们很多人都不知道这个 nil 值是有用的. (译注: 老实说读到这篇文章之前我也认为 nil channels 没什么用, 不仅没用, 我还觉得对 nil channels 的写入操作应该">
@@ -146,8 +146,8 @@
 <p>想知道是否有用是有意义的, 因为它们的行为表现的截然相反.</p>
 <p>给定一个 nil channel c:</p>
 <ul>
-<li>&lt;-c      从 c 接收将永远 block</li>
-<li>c &lt;- v   发送值到 c 会永远 block</li>
+<li>&lt;-c 从 c 接收将永远阻塞</li>
+<li>c &lt;- v 发送值到 c 会永远阻塞</li>
 <li>close(c) 关闭 c 引发 panic</li>
 </ul>
 <p>但我仍然坚持他们是有用的. 让我先介绍一个问题, 其解决方案起初看起来很明显, 但实际上并不像人们想象的那么容易, 实际上却从 nil channels 中受益.</p>
@@ -157,7 +157,7 @@
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">asChan</span><span class="params">(vs ...<span class="keyword">int</span>)</span> &lt;-<span class="title">chan</span> <span class="title">int</span></span> &#123;</span><br><span class="line">	c := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)</span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		<span class="keyword">for</span> _, v := <span class="keyword">range</span> vs &#123;</span><br><span class="line">			c &lt;- v</span><br><span class="line">			time.Sleep(time.Duration(rand.Intn(<span class="number">1000</span>)) * time.Millisecond)</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="built_in">close</span>(c)</span><br><span class="line">	&#125;()</span><br><span class="line">	<span class="keyword">return</span> c</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>此函数创建一个 channel c, 启动一个新的 goroutine, 将值发送到创建的 channel c, 最后返回 channel c.</p>
 <p>在处理 channels 时这是很常见的模式, 因此在继续阅读之前, 请确保你了解它的工作原理.</p>
-<h3 id="让我们开始吧"><a href="#让我们开始吧" class="headerlink" title="让我们开始吧"></a>让我们开始吧</h3><p>由于我们没有对 a 或 b 的偏好, 所以我们将避免通过选择我们应该首先选择(range)哪个 channel 来创建偏好.</p>
+<h3 id="让我们开始吧"><a href="#让我们开始吧" class="headerlink" title="让我们开始吧"></a>让我们开始吧</h3><p>由于我们没有对 a 或 b 的偏好, 所以我们将避免通过选择我们应该首先 range 哪个 channel 来创建偏好.</p>
 <p>相反我们会保持这种对称性, 并且使用一个无限循环来 select 这两个 channels.</p>
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">merge</span><span class="params">(a, b &lt;-<span class="keyword">chan</span> <span class="keyword">int</span>)</span> &lt;-<span class="title">chan</span> <span class="title">int</span></span> &#123;</span><br><span class="line">	c := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)</span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		<span class="keyword">for</span> &#123;</span><br><span class="line">			<span class="keyword">select</span> &#123;</span><br><span class="line">			<span class="keyword">case</span> v := &lt;-a:</span><br><span class="line">				c &lt;- v</span><br><span class="line">			<span class="keyword">case</span> v := &lt;-b:</span><br><span class="line">				c &lt;- v</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;()</span><br><span class="line">	<span class="keyword">return</span> c</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>这看起来不错, 让我们写一个快速测试并运行它.</p>
