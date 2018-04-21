@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://lingchao.xin/"/>
-  <updated>2018-04-20T09:48:39.000Z</updated>
+  <updated>2018-04-21T15:34:36.000Z</updated>
   <id>https://lingchao.xin/</id>
   
   <author>
@@ -17,11 +17,37 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>为什么 Go 会有 nil channels</title>
+    <link href="https://lingchao.xin/post/why-are-there-nil-channels-in-go.html"/>
+    <id>https://lingchao.xin/post/why-are-there-nil-channels-in-go.html</id>
+    <published>2018-04-21T14:25:15.000Z</published>
+    <updated>2018-04-21T15:34:36.000Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;p&gt;本文译自&lt;a href=&quot;https://medium.com/justforfunc/why-are-there-nil-channels-in-go-9877cc0b2308&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Why are there
+        
+      
+    
+    </summary>
+    
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
+    
+      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+  </entry>
+  
+  <entry>
     <title>Go 中的 nil</title>
     <link href="https://lingchao.xin/post/go-nils.html"/>
     <id>https://lingchao.xin/post/go-nils.html</id>
     <published>2018-04-20T05:41:26.000Z</published>
-    <updated>2018-04-20T09:48:39.000Z</updated>
+    <updated>2018-04-21T02:51:24.908Z</updated>
     
     <summary type="html">
     
@@ -50,7 +76,7 @@
     <link href="https://lingchao.xin/post/go-errors-stack-traces.html"/>
     <id>https://lingchao.xin/post/go-errors-stack-traces.html</id>
     <published>2018-04-12T02:10:21.000Z</published>
-    <updated>2018-04-20T05:40:59.626Z</updated>
+    <updated>2018-04-15T09:57:19.000Z</updated>
     
     <summary type="html">
     
@@ -75,7 +101,7 @@
     <link href="https://lingchao.xin/post/sicp-quickstart.html"/>
     <id>https://lingchao.xin/post/sicp-quickstart.html</id>
     <published>2018-04-06T13:11:49.000Z</published>
-    <updated>2018-04-08T05:16:11.529Z</updated>
+    <updated>2018-04-06T14:15:40.000Z</updated>
     
     <summary type="html">
     
@@ -101,7 +127,7 @@
     <link href="https://lingchao.xin/post/memory-leaking.html"/>
     <id>https://lingchao.xin/post/memory-leaking.html</id>
     <published>2018-04-02T06:58:32.000Z</published>
-    <updated>2018-04-20T05:40:59.628Z</updated>
+    <updated>2018-04-15T09:59:18.000Z</updated>
     
     <summary type="html">
     
@@ -129,7 +155,7 @@
     <link href="https://lingchao.xin/post/synchronization-queues-in-golang.html"/>
     <id>https://lingchao.xin/post/synchronization-queues-in-golang.html</id>
     <published>2018-03-27T13:14:05.000Z</published>
-    <updated>2018-04-20T05:40:59.629Z</updated>
+    <updated>2018-04-15T10:01:42.000Z</updated>
     
     <summary type="html">
     
@@ -149,7 +175,7 @@
     <link href="https://lingchao.xin/post/go-defer-panic-and-recover.html"/>
     <id>https://lingchao.xin/post/go-defer-panic-and-recover.html</id>
     <published>2018-03-23T02:05:04.000Z</published>
-    <updated>2018-04-20T05:40:59.625Z</updated>
+    <updated>2018-04-15T10:04:07.000Z</updated>
     
     <summary type="html">
     
@@ -167,7 +193,7 @@
     <link href="https://lingchao.xin/post/vgo-module.html"/>
     <id>https://lingchao.xin/post/vgo-module.html</id>
     <published>2018-02-25T07:00:04.000Z</published>
-    <updated>2018-04-20T05:40:59.631Z</updated>
+    <updated>2018-04-15T07:21:06.000Z</updated>
     
     <summary type="html">
     
@@ -189,7 +215,7 @@
     <link href="https://lingchao.xin/post/vgo-repro.html"/>
     <id>https://lingchao.xin/post/vgo-repro.html</id>
     <published>2018-02-24T11:00:04.000Z</published>
-    <updated>2018-04-20T05:40:59.632Z</updated>
+    <updated>2018-04-15T07:42:54.000Z</updated>
     
     <summary type="html">
     
@@ -211,7 +237,7 @@
     <link href="https://lingchao.xin/post/vgo-mvs.html"/>
     <id>https://lingchao.xin/post/vgo-mvs.html</id>
     <published>2018-02-23T11:24:04.000Z</published>
-    <updated>2018-04-20T05:40:59.631Z</updated>
+    <updated>2018-04-15T08:02:51.000Z</updated>
     
     <summary type="html">
     
@@ -233,7 +259,7 @@
     <link href="https://lingchao.xin/post/vgo-import.html"/>
     <id>https://lingchao.xin/post/vgo-import.html</id>
     <published>2018-02-22T14:01:04.000Z</published>
-    <updated>2018-04-20T05:40:59.630Z</updated>
+    <updated>2018-04-15T08:24:26.000Z</updated>
     
     <summary type="html">
     
@@ -255,7 +281,7 @@
     <link href="https://lingchao.xin/post/vgo-tour.html"/>
     <id>https://lingchao.xin/post/vgo-tour.html</id>
     <published>2018-02-22T03:01:04.000Z</published>
-    <updated>2018-04-20T05:40:59.632Z</updated>
+    <updated>2018-04-15T09:11:08.000Z</updated>
     
     <summary type="html">
     
@@ -277,7 +303,7 @@
     <link href="https://lingchao.xin/post/vgo-intro.html"/>
     <id>https://lingchao.xin/post/vgo-intro.html</id>
     <published>2018-02-21T07:01:04.000Z</published>
-    <updated>2018-04-20T05:40:59.630Z</updated>
+    <updated>2018-04-15T09:27:20.000Z</updated>
     
     <summary type="html">
     
@@ -299,7 +325,7 @@
     <link href="https://lingchao.xin/post/a-developer-relations-bill-of-rights.html"/>
     <id>https://lingchao.xin/post/a-developer-relations-bill-of-rights.html</id>
     <published>2018-02-19T12:01:04.000Z</published>
-    <updated>2018-04-20T05:40:59.623Z</updated>
+    <updated>2018-04-15T09:30:59.000Z</updated>
     
     <summary type="html">
     
@@ -319,7 +345,7 @@
     <link href="https://lingchao.xin/post/json-tips-in-go.html"/>
     <id>https://lingchao.xin/post/json-tips-in-go.html</id>
     <published>2018-02-10T06:30:04.000Z</published>
-    <updated>2018-04-20T05:40:59.628Z</updated>
+    <updated>2018-04-15T09:33:23.000Z</updated>
     
     <summary type="html">
     
@@ -337,7 +363,7 @@
     <link href="https://lingchao.xin/post/functional-options-pattern-in-go.html"/>
     <id>https://lingchao.xin/post/functional-options-pattern-in-go.html</id>
     <published>2018-02-01T04:00:04.000Z</published>
-    <updated>2018-03-26T07:25:06.568Z</updated>
+    <updated>2018-03-26T13:28:33.283Z</updated>
     
     <summary type="html">
     
@@ -357,7 +383,7 @@
     <link href="https://lingchao.xin/post/gos-work-stealing-scheduler.html"/>
     <id>https://lingchao.xin/post/gos-work-stealing-scheduler.html</id>
     <published>2018-01-31T06:35:04.000Z</published>
-    <updated>2018-04-20T05:40:59.627Z</updated>
+    <updated>2018-04-15T09:38:39.000Z</updated>
     
     <summary type="html">
     
@@ -377,7 +403,7 @@
     <link href="https://lingchao.xin/post/go-proverbs.html"/>
     <id>https://lingchao.xin/post/go-proverbs.html</id>
     <published>2018-01-28T01:25:04.000Z</published>
-    <updated>2018-04-20T05:40:59.626Z</updated>
+    <updated>2018-04-15T09:40:06.000Z</updated>
     
     <summary type="html">
     
@@ -403,7 +429,7 @@
     <link href="https://lingchao.xin/post/how-does-the-golang-scheduler-work.html"/>
     <id>https://lingchao.xin/post/how-does-the-golang-scheduler-work.html</id>
     <published>2018-01-27T05:25:04.000Z</published>
-    <updated>2018-04-20T05:40:59.628Z</updated>
+    <updated>2018-04-15T09:41:05.000Z</updated>
     
     <summary type="html">
     
@@ -423,7 +449,7 @@
     <link href="https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html"/>
     <id>https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html</id>
     <published>2018-01-25T03:55:04.000Z</published>
-    <updated>2018-04-20T05:40:59.629Z</updated>
+    <updated>2018-04-15T09:41:53.000Z</updated>
     
     <summary type="html">
     
@@ -436,27 +462,6 @@
       <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
     
       <category term="mysql" scheme="https://lingchao.xin/tags/mysql/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Go 命名返回值的好处</title>
-    <link href="https://lingchao.xin/post/golang-internals-part-2-nice-benefits-of-named-return-values.html"/>
-    <id>https://lingchao.xin/post/golang-internals-part-2-nice-benefits-of-named-return-values.html</id>
-    <published>2018-01-22T09:42:04.000Z</published>
-    <updated>2018-04-20T05:40:59.627Z</updated>
-    
-    <summary type="html">
-    
-      &lt;p&gt;本文译自(&lt;a href=&quot;https://blog.minio.io/golang-internals-part-2-nice-benefits-of-named-return-values-1e95305c8687&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Golang 内幕第 2 部分: 命名返回值的好处&lt;/a&gt;)版权@归原文所有&lt;/p&gt;
-&lt;p&gt;你可能知道 Golang 提供了命名返回值的能力. 到目前为止在 &lt;a href=&quot;https://github.com/minio/minio&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;minio&lt;/a&gt; 中我们还没有使用这个功能, 但是这将会改变, 因为我们将在这个博客文章中解释一些隐藏的好处.&lt;br&gt;
-    
-    </summary>
-    
-    
-      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
-    
-      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
     
   </entry>
   
