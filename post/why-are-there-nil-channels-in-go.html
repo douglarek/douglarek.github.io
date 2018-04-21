@@ -6,19 +6,19 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="本文译自Why are there nil channels in Go版权@归原文所有. 每个写过 Go 的人都知道 channels. 我们大多数人也知道 channels 的默认值是 nil. 但是我们很多人都不知道这个 nil 值是有用的. (译注: 老实说读到这篇文章之前我也认为 nil channels 没什么用, 不仅没用, 我还觉得对 nil channels 的写入操作应该 pa">
+    <meta name="description" content="本文译自 Why are there nil channels in Go 版权@归原文所有. 每个写过 Go 的人都知道 channels. 我们大多数人也知道 channels 的默认值是 nil. 但是我们很多人都不知道这个 nil 值是有用的. (译注: 老实说读到这篇文章之前我也认为 nil channels 没什么用, 不仅没用, 我还觉得对 nil channels 的写入操作应该">
 <meta name="keywords" content="translation,go">
 <meta property="og:type" content="article">
 <meta property="og:title" content="为什么 Go 会有 nil channels">
 <meta property="og:url" content="https://lingchao.xin/post/why-are-there-nil-channels-in-go.html">
 <meta property="og:site_name" content="Coding talks">
-<meta property="og:description" content="本文译自Why are there nil channels in Go版权@归原文所有. 每个写过 Go 的人都知道 channels. 我们大多数人也知道 channels 的默认值是 nil. 但是我们很多人都不知道这个 nil 值是有用的. (译注: 老实说读到这篇文章之前我也认为 nil channels 没什么用, 不仅没用, 我还觉得对 nil channels 的写入操作应该 pa">
+<meta property="og:description" content="本文译自 Why are there nil channels in Go 版权@归原文所有. 每个写过 Go 的人都知道 channels. 我们大多数人也知道 channels 的默认值是 nil. 但是我们很多人都不知道这个 nil 值是有用的. (译注: 老实说读到这篇文章之前我也认为 nil channels 没什么用, 不仅没用, 我还觉得对 nil channels 的写入操作应该">
 <meta property="og:locale" content="en">
 <meta property="og:image" content="https://lingchao.xin/static/images/0_aKHj7JJ0UCDEYu23.png">
-<meta property="og:updated_time" content="2018-04-21T15:34:36.000Z">
+<meta property="og:updated_time" content="2018-04-21T15:35:49.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="为什么 Go 会有 nil channels">
-<meta name="twitter:description" content="本文译自Why are there nil channels in Go版权@归原文所有. 每个写过 Go 的人都知道 channels. 我们大多数人也知道 channels 的默认值是 nil. 但是我们很多人都不知道这个 nil 值是有用的. (译注: 老实说读到这篇文章之前我也认为 nil channels 没什么用, 不仅没用, 我还觉得对 nil channels 的写入操作应该 pa">
+<meta name="twitter:description" content="本文译自 Why are there nil channels in Go 版权@归原文所有. 每个写过 Go 的人都知道 channels. 我们大多数人也知道 channels 的默认值是 nil. 但是我们很多人都不知道这个 nil 值是有用的. (译注: 老实说读到这篇文章之前我也认为 nil channels 没什么用, 不仅没用, 我还觉得对 nil channels 的写入操作应该">
 <meta name="twitter:image" content="https://lingchao.xin/static/images/0_aKHj7JJ0UCDEYu23.png">
     
     
@@ -140,7 +140,7 @@
   
 
   <div class="content" itemprop="articleBody">
-    <p>本文译自<a href="https://medium.com/justforfunc/why-are-there-nil-channels-in-go-9877cc0b2308" target="_blank" rel="noopener">Why are there nil channels in Go</a>版权@归原文所有.</p>
+    <p>本文译自 <a href="https://medium.com/justforfunc/why-are-there-nil-channels-in-go-9877cc0b2308" target="_blank" rel="noopener">Why are there nil channels in Go</a> 版权@归原文所有.</p>
 <p>每个写过 Go 的人都知道 channels. 我们大多数人也知道 channels 的默认值是 nil. 但是我们很多人都不知道这个 nil 值是有用的. (译注: 老实说读到这篇文章之前我也认为 nil channels 没什么用, 不仅没用, 我还觉得对 nil channels 的写入操作应该 panic 才对, 就像对 nil map 的写入是 panic 一样, 甚至认为这是 Go 的设计不一致问题)</p>
 <p>我从一个学习 Go 的开发者的 twitter 上得到了同样的问题, 他想知道是否 Go nil channels 的存在仅仅是为了完整性.</p>
 <p>想知道是否有用是有意义的, 因为它们的行为表现的截然相反.</p>

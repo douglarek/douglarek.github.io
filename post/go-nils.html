@@ -6,18 +6,18 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="本文译自nils In Go版权@归原文所有. nil 是 Go 中一个熟悉而重要的预定义标识符. 它是很多类型零值(zero values)的字面量表示. 很多有一些其他流行语言经验的 Go 程序员新手视 nil 为其他语言 null(或者 NULL)的副本. 这是部分正确的, 但是 Go 中的 nil 和其他语言的 null(或者 NULL)有很多不同之处. 本文的剩余部分将列出与 nil 有">
+    <meta name="description" content="本文译自 nils In Go 版权@归原文所有. nil 是 Go 中一个熟悉而重要的预定义标识符. 它是很多类型零值(zero values)的字面量表示. 很多有一些其他流行语言经验的 Go 程序员新手视 nil 为其他语言 null(或者 NULL)的副本. 这是部分正确的, 但是 Go 中的 nil 和其他语言的 null(或者 NULL)有很多不同之处. 本文的剩余部分将列出与 nil">
 <meta name="keywords" content="translation,go,go101">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Go 中的 nil">
 <meta property="og:url" content="https://lingchao.xin/post/go-nils.html">
 <meta property="og:site_name" content="Coding talks">
-<meta property="og:description" content="本文译自nils In Go版权@归原文所有. nil 是 Go 中一个熟悉而重要的预定义标识符. 它是很多类型零值(zero values)的字面量表示. 很多有一些其他流行语言经验的 Go 程序员新手视 nil 为其他语言 null(或者 NULL)的副本. 这是部分正确的, 但是 Go 中的 nil 和其他语言的 null(或者 NULL)有很多不同之处. 本文的剩余部分将列出与 nil 有">
+<meta property="og:description" content="本文译自 nils In Go 版权@归原文所有. nil 是 Go 中一个熟悉而重要的预定义标识符. 它是很多类型零值(zero values)的字面量表示. 很多有一些其他流行语言经验的 Go 程序员新手视 nil 为其他语言 null(或者 NULL)的副本. 这是部分正确的, 但是 Go 中的 nil 和其他语言的 null(或者 NULL)有很多不同之处. 本文的剩余部分将列出与 nil">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2018-04-21T02:51:24.908Z">
+<meta property="og:updated_time" content="2018-04-21T15:35:57.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Go 中的 nil">
-<meta name="twitter:description" content="本文译自nils In Go版权@归原文所有. nil 是 Go 中一个熟悉而重要的预定义标识符. 它是很多类型零值(zero values)的字面量表示. 很多有一些其他流行语言经验的 Go 程序员新手视 nil 为其他语言 null(或者 NULL)的副本. 这是部分正确的, 但是 Go 中的 nil 和其他语言的 null(或者 NULL)有很多不同之处. 本文的剩余部分将列出与 nil 有">
+<meta name="twitter:description" content="本文译自 nils In Go 版权@归原文所有. nil 是 Go 中一个熟悉而重要的预定义标识符. 它是很多类型零值(zero values)的字面量表示. 很多有一些其他流行语言经验的 Go 程序员新手视 nil 为其他语言 null(或者 NULL)的副本. 这是部分正确的, 但是 Go 中的 nil 和其他语言的 null(或者 NULL)有很多不同之处. 本文的剩余部分将列出与 nil">
     
     
         
@@ -140,7 +140,7 @@
   
 
   <div class="content" itemprop="articleBody">
-    <p>本文译自<a href="https://go101.org/article/nil.html" target="_blank" rel="noopener">nils In Go</a>版权@归原文所有.</p>
+    <p>本文译自 <a href="https://go101.org/article/nil.html" target="_blank" rel="noopener">nils In Go</a> 版权@归原文所有.</p>
 <p>nil 是 Go 中一个熟悉而重要的预定义标识符. 它是很多类型零值(zero values)的字面量表示. 很多有一些其他流行语言经验的 Go 程序员新手视 nil 为其他语言 null(或者 NULL)的副本. 这是部分正确的, 但是 Go 中的 nil 和其他语言的 null(或者 NULL)有很多不同之处.</p>
 <p>本文的剩余部分将列出与 nil 有关的各种事实和细节.</p>
 <h3 id="Go-中的-nil-是一个预定义标识符"><a href="#Go-中的-nil-是一个预定义标识符" class="headerlink" title="Go 中的 nil 是一个预定义标识符"></a>Go 中的 nil 是一个预定义标识符</h3><p>你可以使用 nil 而不用声明它.</p>

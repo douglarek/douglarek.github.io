@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://lingchao.xin/"/>
-  <updated>2018-04-21T15:34:36.000Z</updated>
+  <updated>2018-04-21T15:35:49.000Z</updated>
   <id>https://lingchao.xin/</id>
   
   <author>
@@ -21,7 +21,7 @@
     <link href="https://lingchao.xin/post/why-are-there-nil-channels-in-go.html"/>
     <id>https://lingchao.xin/post/why-are-there-nil-channels-in-go.html</id>
     <published>2018-04-21T14:25:15.000Z</published>
-    <updated>2018-04-21T15:34:36.000Z</updated>
+    <updated>2018-04-21T15:35:49.000Z</updated>
     
     <summary type="html">
     
@@ -29,7 +29,7 @@
       
         
         
-          &lt;p&gt;本文译自&lt;a href=&quot;https://medium.com/justforfunc/why-are-there-nil-channels-in-go-9877cc0b2308&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Why are there
+          &lt;p&gt;本文译自 &lt;a href=&quot;https://medium.com/justforfunc/why-are-there-nil-channels-in-go-9877cc0b2308&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Why are there
         
       
     
@@ -47,7 +47,7 @@
     <link href="https://lingchao.xin/post/go-nils.html"/>
     <id>https://lingchao.xin/post/go-nils.html</id>
     <published>2018-04-20T05:41:26.000Z</published>
-    <updated>2018-04-21T02:51:24.908Z</updated>
+    <updated>2018-04-21T15:35:57.000Z</updated>
     
     <summary type="html">
     
@@ -55,8 +55,8 @@
       
         
         
-          &lt;p&gt;本文译自&lt;a href=&quot;https://go101.org/article/nil.html&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;nils In Go&lt;/a&gt;版权@归原文所有.&lt;/p&gt;
-&lt;p&gt;nil 是 Go 中一个熟悉而重要的预定义标识符.
+          &lt;p&gt;本文译自 &lt;a href=&quot;https://go101.org/article/nil.html&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;nils In Go&lt;/a&gt; 版权@归原文所有.&lt;/p&gt;
+&lt;p&gt;nil 是 Go
         
       
     
