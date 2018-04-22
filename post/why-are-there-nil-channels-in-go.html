@@ -15,7 +15,7 @@
 <meta property="og:description" content="本文译自 Why are there nil channels in Go 版权@归原文所有. 每个写过 Go 的人都知道 channels. 我们大多数人也知道 channels 的默认值是 nil. 但是我们很多人都不知道这个 nil 值是有用的. (译注: 老实说读到这篇文章之前我也认为 nil channels 没什么用, 不仅没用, 我还觉得对 nil channels 的写入操作应该">
 <meta property="og:locale" content="en">
 <meta property="og:image" content="https://lingchao.xin/static/images/0_aKHj7JJ0UCDEYu23.png">
-<meta property="og:updated_time" content="2018-04-21T15:42:36.000Z">
+<meta property="og:updated_time" content="2018-04-22T00:49:39.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="为什么 Go 会有 nil channels">
 <meta name="twitter:description" content="本文译自 Why are there nil channels in Go 版权@归原文所有. 每个写过 Go 的人都知道 channels. 我们大多数人也知道 channels 的默认值是 nil. 但是我们很多人都不知道这个 nil 值是有用的. (译注: 老实说读到这篇文章之前我也认为 nil channels 没什么用, 不仅没用, 我还觉得对 nil channels 的写入操作应该">
@@ -151,7 +151,7 @@
 <li>close(c) 关闭 c 引发 panic</li>
 </ul>
 <p>但我仍然坚持他们是有用的. 让我先介绍一个问题, 其解决方案起初看起来很明显, 但实际上并不像人们想象的那么容易, 实际上却从 nil channels 中受益.</p>
-<h3 id="合并-channels"><a href="#合并-channels" class="headerlink" title="合并 channels"></a>合并 channels</h3><p>如果你选择接受它, 你的任务是编写一个函数, 给定两个 channels a 和 b 返回一个相同类型的 channel c. a 或 b 中收到的每个元素都将发送给 c, 并且一旦 a 和b 都关闭, c也将被关闭.</p>
+<h3 id="合并-channels"><a href="#合并-channels" class="headerlink" title="合并 channels"></a>合并 channels</h3><p>如果你选择接受它, 你的任务是编写一个函数, 给定两个 channels a 和 b 返回一个相同类型的 channel c. a 或 b 中收到的每个元素都将发送给 c, 并且一旦 a 和 b 都关闭, c 也将被关闭.</p>
 <p><img src="/static/images/0_aKHj7JJ0UCDEYu23.png" width="700px" height="371px"></p>
 <h3 id="一个辅助函数"><a href="#一个辅助函数" class="headerlink" title="一个辅助函数"></a>一个辅助函数</h3><p>在我们开始之前, 让我们编写一个函数来帮助我们测试我们的解决方案. 此函数返回一个 channel , 该 channel 最终将随机接收所有给定的值并通过关闭完成.</p>
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">asChan</span><span class="params">(vs ...<span class="keyword">int</span>)</span> &lt;-<span class="title">chan</span> <span class="title">int</span></span> &#123;</span><br><span class="line">	c := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)</span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		<span class="keyword">for</span> _, v := <span class="keyword">range</span> vs &#123;</span><br><span class="line">			c &lt;- v</span><br><span class="line">			time.Sleep(time.Duration(rand.Intn(<span class="number">1000</span>)) * time.Millisecond)</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="built_in">close</span>(c)</span><br><span class="line">	&#125;()</span><br><span class="line">	<span class="keyword">return</span> c</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
