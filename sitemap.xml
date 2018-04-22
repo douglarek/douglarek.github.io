@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://lingchao.xin/post/json-tips-in-go.html</loc>
+    
+    <lastmod>2018-04-22T01:22:42.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://lingchao.xin/post/gos-work-stealing-scheduler.html</loc>
     
     <lastmod>2018-04-22T01:22:14.000Z</lastmod>
@@ -124,13 +131,6 @@
     <loc>https://lingchao.xin/post/go-proverbs.html</loc>
     
     <lastmod>2018-04-15T09:40:06.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://lingchao.xin/post/json-tips-in-go.html</loc>
-    
-    <lastmod>2018-04-15T09:33:23.000Z</lastmod>
     
   </url>
   
