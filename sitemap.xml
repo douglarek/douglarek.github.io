@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html</loc>
+    
+    <lastmod>2018-04-22T01:25:00.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://lingchao.xin/post/json-tips-in-go.html</loc>
     
     <lastmod>2018-04-22T01:22:42.000Z</lastmod>
@@ -110,13 +117,6 @@
     <loc>https://lingchao.xin/post/golang-internals-part-2-nice-benefits-of-named-return-values.html</loc>
     
     <lastmod>2018-04-15T09:43:21.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html</loc>
-    
-    <lastmod>2018-04-15T09:41:53.000Z</lastmod>
     
   </url>
   
