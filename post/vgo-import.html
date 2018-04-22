@@ -25,7 +25,7 @@
 <meta property="og:image" content="https://lingchao.xin/static/images/deps-b2-short@2x.png">
 <meta property="og:image" content="https://lingchao.xin/static/images/deps-c1-short@2x.png">
 <meta property="og:image" content="https://lingchao.xin/static/images/deps-c2-short@2x.png">
-<meta property="og:updated_time" content="2018-04-15T08:24:26.000Z">
+<meta property="og:updated_time" content="2018-04-22T01:17:50.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="语义导入版本控制">
 <meta name="twitter:image" content="https://lingchao.xin/static/images/impver@2x.png">
@@ -217,7 +217,7 @@
 <p>这里的问题是, semver 规范实际上不仅仅是选择和比较版本字符串的方式. 它没有说别的. 特别是, 在增加主版本号后, 如何处理不兼容的更改也没有提及.</p>
 <p>semver 最有价值的部分是鼓励在可能的情况下进行向后兼容的更改. FAQ 正确的记录到:</p>
 <blockquote>
-<p>“不兼容的更改不应该轻微引入具有大量相关代码的软件. 升级必须承担的成本可能很大. 不得不通过增加主版本号来发布不兼容的更改意味着你将会考虑更改的影响并评估涉及的 成本/收益 率.”</p>
+<p>“不兼容的更改不应该轻微引入具有大量相关代码的软件. 升级必须承担的成本可能很大. 不得不通过增加主版本号来发布不兼容的更改意味着你将会考虑更改的影响并评估涉及的成本/收益率.”</p>
 </blockquote>
 <p>我当然同意 “不应该轻易引入不兼容的变化”. 我认为 semver 缺乏的地方是: “不得不通过增加主版本号” 是促使你 “思考你更改的影响并评估涉及的 成本/收益 率” 的一个步骤. 恰恰相反: 读取 semver 太容易了, 因为这意味着只要你在进行不兼容的更改时递增主版本, 其他所有操作都可以解决. 这个例子表明情况并非如此.</p>
 <p>从 Alice 的角度来看, OAuth2 API 需要向后兼容的变更, 并且当她做出这些更改时, semver 似乎承诺发布不兼容的 OAuth2 软件包会很好, 前提是她给了它 2.0.0 版本. 但是这种经过 semver 认可的改变引发了 Ugo 和 Unity 的一系列问题.</p>
