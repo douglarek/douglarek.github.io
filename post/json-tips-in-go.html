@@ -6,18 +6,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="相对于很多的语言来说, Go 的 JSON 解析可谓简单至极.">
-<meta name="keywords" content="go">
+    <meta name="keywords" content="go">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Go JSON 技巧">
 <meta property="og:url" content="https://lingchao.xin/post/json-tips-in-go.html">
 <meta property="og:site_name" content="Coding talks">
-<meta property="og:description" content="相对于很多的语言来说, Go 的 JSON 解析可谓简单至极.">
 <meta property="og:locale" content="en">
 <meta property="og:updated_time" content="2018-04-15T09:33:23.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Go JSON 技巧">
-<meta name="twitter:description" content="相对于很多的语言来说, Go 的 JSON 解析可谓简单至极.">
     
     
         
@@ -96,7 +93,7 @@
   <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/json-tips-in-go.html&title=Go JSON 技巧"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/json-tips-in-go.html&title=Go JSON 技巧"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/json-tips-in-go.html&title=Go JSON 技巧"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/json-tips-in-go.html&name=Go JSON 技巧&description=&lt;p&gt;相对于很多的语言来说, Go 的 JSON 解析可谓简单至极.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/json-tips-in-go.html&name=Go JSON 技巧&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34;&gt;&lt;div class=&#34;.article-gallery&#34; &lt;p=&#34;&#34;&gt;相对于很多的语言来说, Go 的 JSON 解析可谓简单至极.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -140,7 +137,7 @@
   
 
   <div class="content" itemprop="articleBody">
-    <p>相对于很多的语言来说, Go 的 JSON 解析可谓简单至极.<br><a id="more"></a></p>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css"><div class=".article-gallery" <p="">相对于很多的语言来说, Go 的 JSON 解析可谓简单至极.<br><a id="more"></a><p></p>
 <h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>通常情况下, 我们在 Go 中经常这样进行 JSON 的解码:</p>
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">"encoding/json"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// jsonText comes from http://json.org/example.html</span></span><br><span class="line"><span class="keyword">var</span> jsonText = []<span class="keyword">byte</span>(<span class="string">`</span></span><br><span class="line"><span class="string">&#123;</span></span><br><span class="line"><span class="string">   "glossary":&#123;</span></span><br><span class="line"><span class="string">      "title":"example glossary",</span></span><br><span class="line"><span class="string">      "GlossDiv":&#123;</span></span><br><span class="line"><span class="string">         "title":"S",</span></span><br><span class="line"><span class="string">         "GlossList":&#123;</span></span><br><span class="line"><span class="string">            "GlossEntry":&#123;</span></span><br><span class="line"><span class="string">               "ID":"SGML",</span></span><br><span class="line"><span class="string">               "SortAs":"SGML",</span></span><br><span class="line"><span class="string">               "GlossTerm":"Standard Generalized Markup Language",</span></span><br><span class="line"><span class="string">               "Acronym":"SGML",</span></span><br><span class="line"><span class="string">               "Abbrev":"ISO 8879:1986",</span></span><br><span class="line"><span class="string">               "GlossDef":&#123;</span></span><br><span class="line"><span class="string">                  "para":"A meta-markup language, used to create markup languages such as DocBook.",</span></span><br><span class="line"><span class="string">                  "GlossSeeAlso":[</span></span><br><span class="line"><span class="string">                     "GML",</span></span><br><span class="line"><span class="string">                     "XML"</span></span><br><span class="line"><span class="string">                  ]</span></span><br><span class="line"><span class="string">               &#125;,</span></span><br><span class="line"><span class="string">               "GlossSee":"markup"</span></span><br><span class="line"><span class="string">            &#125;</span></span><br><span class="line"><span class="string">         &#125;</span></span><br><span class="line"><span class="string">      &#125;</span></span><br><span class="line"><span class="string">   &#125;</span></span><br><span class="line"><span class="string">&#125;`</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> glossary <span class="keyword">struct</span> &#123;</span><br><span class="line">	Glossary <span class="keyword">struct</span> &#123;</span><br><span class="line">		Title    <span class="keyword">string</span> <span class="string">`json:"title"`</span></span><br><span class="line">		GlossDiv <span class="keyword">struct</span> &#123;</span><br><span class="line">			Title     <span class="keyword">string</span> <span class="string">`json:"title"`</span></span><br><span class="line">			GlossList <span class="keyword">struct</span> &#123;</span><br><span class="line">				GlossEntry <span class="keyword">struct</span> &#123;</span><br><span class="line">					ID        <span class="keyword">string</span> <span class="string">`json:"ID"`</span></span><br><span class="line">					SortAs    <span class="keyword">string</span> <span class="string">`json:"SortAs"`</span></span><br><span class="line">					GlossTerm <span class="keyword">string</span> <span class="string">`json:"GlossTerm"`</span></span><br><span class="line">					Acronym   <span class="keyword">string</span> <span class="string">`json:"Acronym"`</span></span><br><span class="line">					Abbrev    <span class="keyword">string</span> <span class="string">`json:"Abbrev"`</span></span><br><span class="line">					GlossDef  <span class="keyword">struct</span> &#123;</span><br><span class="line">						Para         <span class="keyword">string</span>   <span class="string">`json:"para"`</span></span><br><span class="line">						GlossSeeAlso []<span class="keyword">string</span> <span class="string">`json:"GlossSeeAlso"`</span></span><br><span class="line">					&#125; <span class="string">`json:"GlossDef"`</span></span><br><span class="line">					GlossSee <span class="keyword">string</span> <span class="string">`json:"GlossSee"`</span></span><br><span class="line">				&#125; <span class="string">`json:"GlossEntry"`</span></span><br><span class="line">			&#125; <span class="string">`json:"GlossList"`</span></span><br><span class="line">		&#125; <span class="string">`json:"GlossDiv"`</span></span><br><span class="line">	&#125; <span class="string">`json:"glossary"`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> g glossary</span><br><span class="line">	json.Unmarshal(jsonText, &amp;g)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>这样的解码对于我们日常使用好像也没什么问题, 起码能用 ? 对于一段 JSON, 我们解码的时候未必需要立即解码所有的部分, 什么意思呢 ?</p>
@@ -159,7 +156,12 @@
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">benchmark                    old ns/op     new ns/op     delta</span><br><span class="line">BenchmarkJSONUnmarshal-8     10298         7591          -26.29%</span><br></pre></td></tr></table></figure>
 <p>可以看得出这个差别还是很大的, 特别是当 JSON 本身体量很大的时候.</p>
 <h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>对于一些关乎性能的 JSON 解析的处理, 我们可以通过 json.RawMessage 进行性能的提升.</p>
-
+</div><script src="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/js/lightgallery.min.js"></script><script>if (typeof lightGallery !== 'undefined') {
+        var options = {
+            selector: '.gallery-item'
+        };
+        lightGallery(document.getElementsByClassName('.article-gallery')[0], options);
+        }</script>
   </div>
 </article>
 
@@ -205,7 +207,7 @@
   <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/json-tips-in-go.html&title=Go JSON 技巧"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/json-tips-in-go.html&title=Go JSON 技巧"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/json-tips-in-go.html&title=Go JSON 技巧"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/json-tips-in-go.html&name=Go JSON 技巧&description=&lt;p&gt;相对于很多的语言来说, Go 的 JSON 解析可谓简单至极.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/json-tips-in-go.html&name=Go JSON 技巧&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34;&gt;&lt;div class=&#34;.article-gallery&#34; &lt;p=&#34;&#34;&gt;相对于很多的语言来说, Go 的 JSON 解析可谓简单至极.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>

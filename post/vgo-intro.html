@@ -6,18 +6,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="本文译自 Go += Package Versioning, Go &amp;amp; Versioning 的第 1 部分, 版权@归原文所有.">
-<meta name="keywords" content="translation,go,vgo">
+    <meta name="keywords" content="translation,go,vgo">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Go += 包版本">
 <meta property="og:url" content="https://lingchao.xin/post/vgo-intro.html">
 <meta property="og:site_name" content="Coding talks">
-<meta property="og:description" content="本文译自 Go += Package Versioning, Go &amp;amp; Versioning 的第 1 部分, 版权@归原文所有.">
 <meta property="og:locale" content="en">
 <meta property="og:updated_time" content="2018-04-15T09:27:20.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Go += 包版本">
-<meta name="twitter:description" content="本文译自 Go += Package Versioning, Go &amp;amp; Versioning 的第 1 部分, 版权@归原文所有.">
     
     
         
@@ -96,7 +93,7 @@
   <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/vgo-intro.html&title=Go += 包版本"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/vgo-intro.html&title=Go += 包版本"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/vgo-intro.html&title=Go += 包版本"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/vgo-intro.html&name=Go += 包版本&description=&lt;p&gt;本文译自 &lt;a href=&#34;https://research.swtch.com/vgo-intro&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Go += Package Versioning&lt;/a&gt;, &lt;a href=&#34;https://lingchao.xin/tag/vgo.html&#34;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 1 部分, 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/vgo-intro.html&name=Go += 包版本&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34;&gt;&lt;div class=&#34;.article-gallery&#34; &lt;p=&#34;&#34;&gt;本文译自 &lt;a href=&#34;https://research.swtch.com/vgo-intro&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Go += Package Versioning&lt;/a&gt;, &lt;a href=&#34;https://lingchao.xin/tag/vgo.html&#34;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 1 部分, 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -140,7 +137,7 @@
   
 
   <div class="content" itemprop="articleBody">
-    <p>本文译自 <a href="https://research.swtch.com/vgo-intro" target="_blank" rel="noopener">Go += Package Versioning</a>, <a href="https://lingchao.xin/tag/vgo.html">Go &amp; Versioning</a> 的第 1 部分, 版权@归原文所有.<br><a id="more"></a></p>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css"><div class=".article-gallery" <p="">本文译自 <a href="https://research.swtch.com/vgo-intro" target="_blank" rel="noopener">Go += Package Versioning</a>, <a href="https://lingchao.xin/tag/vgo.html">Go &amp; Versioning</a> 的第 1 部分, 版权@归原文所有.<br><a id="more"></a><p></p>
 <p>我们需要将包版本控制添加到 Go.</p>
 <p>更确切地说, 我们需要将软件包版本的概念添加到 Go 开发人员和我们的工具的工作词汇表中, 以便在彼此交谈时准确地确定应该构建, 运行或分析哪个程序. go 命令需要能够告诉开发人员具体哪些版本的软件包在特定构建中, 反之亦然.</p>
 <p>版本控制可以让我们启用可重复构建, 所以如果我告诉你试用我的程序的最新版本, 我知道你将不仅获得我的代码的最新版本, 而且还包括我的代码所依赖包的精确的同一版本, 所以你和我将构建完全等价的二进制.</p>
@@ -213,7 +210,12 @@
 <p>即便如此, 我确定有些细节是错误的. 我希望我们的用户能够通过尝试新的 vgo 原型并参与富有成效的讨论来帮助我们实现这一设计. 我希望 Go 1.11 为 Go 模块提供初步支持, 作为一种技术预览, 然后我希望 Go 1.12 能够提供官方支持. 在稍后的一些版本中, 我们将删除对旧的无版本的 go get 支持. 不过, 这是一个激进的时间表, 如果获得正确的功能意味着等待以后的发布, 我们会.</p>
 <p>我非常关心从旧的 go get 和无数的 vendoring 工具到新的模块系统的过渡. 对于我来说, 这个过程就和获得正确的功能同样重要. 如果成功的转换意味着等待以后的发布, 我们会.</p>
 <p>感谢 Peter Bourgon, Jess Frazelle, Andrew Gerrand 和 Ed Mueller 以及 Sam Boyer 在包管理委员会的工作以及去年的许多有益讨论. 还要感谢 Dave Cheney, Gustavo Niemeyer, Keith Rarick 和 Daniel Theophanes 对 Go 和包版本的关键贡献. 再次感谢 Sam Boyer 创造 dep, 并感谢他和 dep 的所有贡献者. 感谢所有曾经在许多早期的 vendoring 工具上创建或工作过的人. 最后, 感谢所有能够帮助我们推进此提案的人, 找到并解决问题, 并尽可能顺利地将软件包版本控制添加到 Go.</p>
-
+</div><script src="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/js/lightgallery.min.js"></script><script>if (typeof lightGallery !== 'undefined') {
+        var options = {
+            selector: '.gallery-item'
+        };
+        lightGallery(document.getElementsByClassName('.article-gallery')[0], options);
+        }</script>
   </div>
 </article>
 
@@ -259,7 +261,7 @@
   <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/vgo-intro.html&title=Go += 包版本"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/vgo-intro.html&title=Go += 包版本"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/vgo-intro.html&title=Go += 包版本"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/vgo-intro.html&name=Go += 包版本&description=&lt;p&gt;本文译自 &lt;a href=&#34;https://research.swtch.com/vgo-intro&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Go += Package Versioning&lt;/a&gt;, &lt;a href=&#34;https://lingchao.xin/tag/vgo.html&#34;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 1 部分, 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/vgo-intro.html&name=Go += 包版本&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34;&gt;&lt;div class=&#34;.article-gallery&#34; &lt;p=&#34;&#34;&gt;本文译自 &lt;a href=&#34;https://research.swtch.com/vgo-intro&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Go += Package Versioning&lt;/a&gt;, &lt;a href=&#34;https://lingchao.xin/tag/vgo.html&#34;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 1 部分, 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>

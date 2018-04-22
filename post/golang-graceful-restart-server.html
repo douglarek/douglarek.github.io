@@ -6,18 +6,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="很多时候对于服务升级的做法简单粗暴, 就简单的杀进程启动新的进程.">
-<meta name="keywords" content="go,http">
+    <meta name="keywords" content="go,http">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Go 服务优雅重启">
 <meta property="og:url" content="https://lingchao.xin/post/golang-graceful-restart-server.html">
 <meta property="og:site_name" content="Coding talks">
-<meta property="og:description" content="很多时候对于服务升级的做法简单粗暴, 就简单的杀进程启动新的进程.">
 <meta property="og:locale" content="en">
 <meta property="og:updated_time" content="2018-04-15T09:46:28.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Go 服务优雅重启">
-<meta name="twitter:description" content="很多时候对于服务升级的做法简单粗暴, 就简单的杀进程启动新的进程.">
     
     
         
@@ -96,7 +93,7 @@
   <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/golang-graceful-restart-server.html&title=Go 服务优雅重启"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/golang-graceful-restart-server.html&title=Go 服务优雅重启"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/golang-graceful-restart-server.html&title=Go 服务优雅重启"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/golang-graceful-restart-server.html&name=Go 服务优雅重启&description=&lt;p&gt;很多时候对于服务升级的做法简单粗暴, 就简单的杀进程启动新的进程.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/golang-graceful-restart-server.html&name=Go 服务优雅重启&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34;&gt;&lt;div class=&#34;.article-gallery&#34; &lt;p=&#34;&#34;&gt;很多时候对于服务升级的做法简单粗暴, 就简单的杀进程启动新的进程.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -140,7 +137,7 @@
   
 
   <div class="content" itemprop="articleBody">
-    <p>很多时候对于服务升级的做法简单粗暴, 就简单的杀进程启动新的进程.<br><a id="more"></a></p>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css"><div class=".article-gallery" <p="">很多时候对于服务升级的做法简单粗暴, 就简单的杀进程启动新的进程.<br><a id="more"></a><p></p>
 <p>还有的好一点就是多个相同的服务依次升级, 保证有服务可用. 但是公平的说这两种都会丢失请求中的连接. 鉴于这种情况, 在现实中我们可以使用优雅重启来搞定这个问题. Golang 实现优雅重启的原理也很简单:</p>
 <ul>
 <li><p>监听 USR2 信号;</p>
@@ -166,7 +163,12 @@
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"log"</span></span><br><span class="line">	<span class="string">"net/http"</span></span><br><span class="line">	<span class="string">"time"</span></span><br><span class="line"></span><br><span class="line">	<span class="string">"github.com/douglarek/zerodown"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	http.HandleFunc(<span class="string">"/"</span>, <span class="function"><span class="keyword">func</span><span class="params">(w http.ResponseWriter, r *http.Request)</span></span> &#123;</span><br><span class="line">		time.Sleep(<span class="number">5</span> * time.Second)</span><br><span class="line">		fmt.Fprintln(w, <span class="string">"Hello, World!"</span>)</span><br><span class="line">	&#125;)</span><br><span class="line">	log.Fatalln(zerodown.ListenAndServe(<span class="string">":8080"</span>, <span class="literal">nil</span>))</span><br></pre></td></tr></table></figure>
 <p>对于第三方库 Gin 我们可以:</p>
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"log"</span></span><br><span class="line">	<span class="string">"net/http"</span></span><br><span class="line">	<span class="string">"time"</span></span><br><span class="line"></span><br><span class="line">	<span class="string">"github.com/douglarek/zerodown"</span></span><br><span class="line"></span><br><span class="line">	<span class="string">"github.com/gin-gonic/gin"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	router := gin.Default()</span><br><span class="line">	router.GET(<span class="string">"/"</span>, <span class="function"><span class="keyword">func</span><span class="params">(c *gin.Context)</span></span> &#123;</span><br><span class="line">		time.Sleep(<span class="number">5</span> * time.Second)</span><br><span class="line">		c.String(http.StatusOK, <span class="string">"Hello, World!"</span>)</span><br><span class="line">	&#125;)</span><br><span class="line">	log.Fatalln(zerodown.ListenAndServe(<span class="string">":8080"</span>, router))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+</div><script src="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/js/lightgallery.min.js"></script><script>if (typeof lightGallery !== 'undefined') {
+        var options = {
+            selector: '.gallery-item'
+        };
+        lightGallery(document.getElementsByClassName('.article-gallery')[0], options);
+        }</script>
   </div>
 </article>
 
@@ -212,7 +214,7 @@
   <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/golang-graceful-restart-server.html&title=Go 服务优雅重启"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/golang-graceful-restart-server.html&title=Go 服务优雅重启"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/golang-graceful-restart-server.html&title=Go 服务优雅重启"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/golang-graceful-restart-server.html&name=Go 服务优雅重启&description=&lt;p&gt;很多时候对于服务升级的做法简单粗暴, 就简单的杀进程启动新的进程.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/golang-graceful-restart-server.html&name=Go 服务优雅重启&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34;&gt;&lt;div class=&#34;.article-gallery&#34; &lt;p=&#34;&#34;&gt;很多时候对于服务升级的做法简单粗暴, 就简单的杀进程启动新的进程.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>

@@ -6,18 +6,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="Sometimes, we hope a class can be dynamicly created in python runtime.">
-<meta name="keywords" content="python">
+    <meta name="keywords" content="python">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Python dynamic class">
 <meta property="og:url" content="https://lingchao.xin/post/make-a-dynamic-class-in-python.html">
 <meta property="og:site_name" content="Coding talks">
-<meta property="og:description" content="Sometimes, we hope a class can be dynamicly created in python runtime.">
 <meta property="og:locale" content="en">
 <meta property="og:updated_time" content="2018-03-26T13:28:33.286Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Python dynamic class">
-<meta name="twitter:description" content="Sometimes, we hope a class can be dynamicly created in python runtime.">
     
     
         
@@ -96,7 +93,7 @@
   <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/make-a-dynamic-class-in-python.html&title=Python dynamic class"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/make-a-dynamic-class-in-python.html&title=Python dynamic class"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/make-a-dynamic-class-in-python.html&title=Python dynamic class"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/make-a-dynamic-class-in-python.html&name=Python dynamic class&description=&lt;p&gt;Sometimes, we hope a class can be dynamicly created in python runtime.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/make-a-dynamic-class-in-python.html&name=Python dynamic class&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34;&gt;&lt;div class=&#34;.article-gallery&#34; &lt;p=&#34;&#34;&gt;Sometimes, we hope a class can be dynamicly created in python runtime.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -140,7 +137,7 @@
   
 
   <div class="content" itemprop="articleBody">
-    <p>Sometimes, we hope a class can be dynamicly created in python runtime.<br><a id="more"></a></p>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css"><div class=".article-gallery" <p="">Sometimes, we hope a class can be dynamicly created in python runtime.<br><a id="more"></a><p></p>
 <p>Take this scenario, we have two Django model classes:</p>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> django.db <span class="keyword">import</span> models</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Musician</span><span class="params">(models.Model)</span>:</span></span><br><span class="line">    first_name = models.CharField(max_length=<span class="number">50</span>)</span><br><span class="line">    last_name = models.CharField(max_length=<span class="number">50</span>)</span><br><span class="line">    sex = models.IntegerField()</span><br><span class="line">    instrument = models.CharField(max_length=<span class="number">100</span>)</span><br><span class="line"></span><br><span class="line"><span class="meta">    @classmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">update_sex</span><span class="params">(cls, id, sex)</span>:</span></span><br><span class="line">	<span class="keyword">if</span> cls.objects.filter(pk=id).update(sex=sex) &gt; <span class="number">0</span>:</span><br><span class="line">	    <span class="comment"># update Redis</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Album</span><span class="params">(models.Model)</span>:</span></span><br><span class="line">    name = models.CharField(max_length=<span class="number">30</span>)</span><br><span class="line">    release_date = models.DateField()</span><br><span class="line">    num_stars = models.IntegerField()</span><br><span class="line"></span><br><span class="line"><span class="meta">    @classmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">update_name</span><span class="params">(cls, id, name)</span>:</span></span><br><span class="line">	<span class="keyword">if</span> cls.objects.filter(pk=id).update(name=name) &gt; <span class="number">0</span>:</span><br><span class="line">	    <span class="comment"># update Redis</span></span><br></pre></td></tr></table></figure>
 <p>Ok, what if we just need Redis key-value cache, how can we design our Redis class ? Most of all, we think about two same like classes like this:</p>
@@ -148,7 +145,12 @@
 <p>This may be very ugly ! But we can make things better in Python:</p>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">make_class</span><span class="params">(cls, *fields)</span>:</span></span><br><span class="line">    RedisFactory = type(<span class="string">'RedisFactory'</span>, (), &#123;<span class="string">'r'</span>: redis.Redis()&#125;)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">set_x</span><span class="params">(key, x)</span>:</span></span><br><span class="line">	Redisfactory.r.set(key, x)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">get_x</span><span class="params">(field, key)</span>:</span></span><br><span class="line">	x = Redisfactory.r.get(key)</span><br><span class="line">	<span class="keyword">if</span> <span class="keyword">not</span> x:</span><br><span class="line">	    obj = globals()[cls].objects.filter(id=key).first()</span><br><span class="line">	    <span class="keyword">if</span> obj:</span><br><span class="line">		x = getattr(obj, field)</span><br><span class="line">		set_x(key, x)</span><br><span class="line">	<span class="keyword">return</span> x</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> f <span class="keyword">in</span> fields:</span><br><span class="line">	<span class="comment"># setattr(RedisFactory, 'get_&#123;0&#125;'.format(f), classmethod(lambda kls, key: get_x(f, key)))</span></span><br><span class="line">	<span class="comment"># setattr(Redisfactory, 'set_&#123;0&#125;'.format(f), classmethod(lambda kls, key, x: set_x(key, x)))</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> RedisFactory</span><br><span class="line"></span><br><span class="line">RMusician = make_class(<span class="string">'Musician'</span>, <span class="string">'sex'</span>)</span><br><span class="line">RAlbum = make_class(<span class="string">'Album'</span>, <span class="string">'name'</span>)</span><br></pre></td></tr></table></figure>
 <p>That’s it.</p>
-
+</div><script src="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/js/lightgallery.min.js"></script><script>if (typeof lightGallery !== 'undefined') {
+        var options = {
+            selector: '.gallery-item'
+        };
+        lightGallery(document.getElementsByClassName('.article-gallery')[0], options);
+        }</script>
   </div>
 </article>
 
@@ -194,7 +196,7 @@
   <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/make-a-dynamic-class-in-python.html&title=Python dynamic class"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/make-a-dynamic-class-in-python.html&title=Python dynamic class"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/make-a-dynamic-class-in-python.html&title=Python dynamic class"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/make-a-dynamic-class-in-python.html&name=Python dynamic class&description=&lt;p&gt;Sometimes, we hope a class can be dynamicly created in python runtime.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/make-a-dynamic-class-in-python.html&name=Python dynamic class&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34;&gt;&lt;div class=&#34;.article-gallery&#34; &lt;p=&#34;&#34;&gt;Sometimes, we hope a class can be dynamicly created in python runtime.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>

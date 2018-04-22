@@ -6,18 +6,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="相对于 C 语言来说, Go 在处理传统的逻辑错误上确实略高一筹. 至少一个 func 返回 error, 我们知道需要处理并且偶尔会进行传递, 而不是干巴巴等着运行时崩溃. Errors 也是值我们每个人在学习 Go 的时候都被这样说服: Errors are values, 错误也是一种值, 就像其他任何类型的值一样. 我们先看一个简单的例子: // https://play.golang.o">
-<meta name="keywords" content="go">
+    <meta name="keywords" content="go">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Go errors 堆栈">
 <meta property="og:url" content="https://lingchao.xin/post/go-errors-stack-traces.html">
 <meta property="og:site_name" content="Coding talks">
-<meta property="og:description" content="相对于 C 语言来说, Go 在处理传统的逻辑错误上确实略高一筹. 至少一个 func 返回 error, 我们知道需要处理并且偶尔会进行传递, 而不是干巴巴等着运行时崩溃. Errors 也是值我们每个人在学习 Go 的时候都被这样说服: Errors are values, 错误也是一种值, 就像其他任何类型的值一样. 我们先看一个简单的例子: // https://play.golang.o">
 <meta property="og:locale" content="en">
 <meta property="og:updated_time" content="2018-04-15T09:57:19.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Go errors 堆栈">
-<meta name="twitter:description" content="相对于 C 语言来说, Go 在处理传统的逻辑错误上确实略高一筹. 至少一个 func 返回 error, 我们知道需要处理并且偶尔会进行传递, 而不是干巴巴等着运行时崩溃. Errors 也是值我们每个人在学习 Go 的时候都被这样说服: Errors are values, 错误也是一种值, 就像其他任何类型的值一样. 我们先看一个简单的例子: // https://play.golang.o">
     
     
         
@@ -140,7 +137,7 @@
   
 
   <div class="content" itemprop="articleBody">
-    <p>相对于 C 语言来说, Go 在处理传统的逻辑错误上确实略高一筹. 至少一个 func 返回 error, 我们知道需要处理并且偶尔会进行传递, 而不是干巴巴等着运行时崩溃.</p>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css"><div class=".article-gallery" <p="">相对于 C 语言来说, Go 在处理传统的逻辑错误上确实略高一筹. 至少一个 func 返回 error, 我们知道需要处理并且偶尔会进行传递, 而不是干巴巴等着运行时崩溃.<p></p>
 <h3 id="Errors-也是值"><a href="#Errors-也是值" class="headerlink" title="Errors 也是值"></a>Errors 也是值</h3><p>我们每个人在学习 Go 的时候都被这样说服: <a href="https://blog.golang.org/errors-are-values" target="_blank" rel="noopener">Errors are values</a>, 错误也是一种值, 就像其他任何类型的值一样.</p>
 <p>我们先看一个简单的例子:</p>
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="comment">// https://play.golang.org/p/VFVX0fRKBnS</span></span><br><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"strconv"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> _, err := strconv.ParseInt(<span class="string">"abcd"</span>, <span class="number">10</span>, <span class="number">64</span>); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Println(err)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 输出</span></span><br><span class="line"><span class="comment">// strconv.ParseInt: parsing "abcd": invalid syntax</span></span><br></pre></td></tr></table></figure>
@@ -175,7 +172,12 @@
 <li><a href="https://dave.cheney.net/2016/06/12/stack-traces-and-the-errors-package" target="_blank" rel="noopener">Stack traces and the errors package</a></li>
 <li><a href="https://github.com/pkg/errors" target="_blank" rel="noopener">pkg/errors</a></li>
 </ul>
-
+</div><script src="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/js/lightgallery.min.js"></script><script>if (typeof lightGallery !== 'undefined') {
+        var options = {
+            selector: '.gallery-item'
+        };
+        lightGallery(document.getElementsByClassName('.article-gallery')[0], options);
+        }</script>
   </div>
 </article>
 

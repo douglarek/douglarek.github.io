@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://lingchao.xin/"/>
-  <updated>2018-04-22T00:49:39.000Z</updated>
+  <updated>2018-04-22T01:02:34.000Z</updated>
   <id>https://lingchao.xin/</id>
   
   <author>
@@ -21,7 +21,7 @@
     <link href="https://lingchao.xin/post/why-are-there-nil-channels-in-go.html"/>
     <id>https://lingchao.xin/post/why-are-there-nil-channels-in-go.html</id>
     <published>2018-04-21T14:25:15.000Z</published>
-    <updated>2018-04-22T00:49:39.000Z</updated>
+    <updated>2018-04-22T01:02:34.000Z</updated>
     
     <summary type="html">
     
@@ -29,7 +29,7 @@
       
         
         
-          &lt;p&gt;本文译自 &lt;a href=&quot;https://medium.com/justforfunc/why-are-there-nil-channels-in-go-9877cc0b2308&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Why are there
+          &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div
         
       
     
@@ -55,8 +55,7 @@
       
         
         
-          &lt;p&gt;本文译自 &lt;a href=&quot;https://go101.org/article/nil.html&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;nils In Go&lt;/a&gt; 版权@归原文所有.&lt;/p&gt;
-&lt;p&gt;nil 是 Go
+          &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div
         
       
     
@@ -84,8 +83,7 @@
       
         
         
-          &lt;p&gt;相对于 C 语言来说, Go 在处理传统的逻辑错误上确实略高一筹. 至少一个 func 返回 error, 我们知道需要处理并且偶尔会进行传递, 而不是干巴巴等着运行时崩溃.&lt;/p&gt;
-&lt;h3 id=&quot;Errors-也是值&quot;&gt;&lt;a href=&quot;#Errors-也是值&quot;
+          &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div
         
       
     
@@ -109,7 +107,7 @@
       
         
         
-          &lt;p&gt;买了很久的 SICP (英文: &lt;a href=&quot;https://mitpress.mit.edu/sites/default/files/sicp/full-text/book/book.html&quot; target=&quot;_blank&quot;
+          &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div
         
       
     
@@ -135,7 +133,7 @@
       
         
         
-          &lt;p&gt;本文译自(&lt;a href=&quot;https://go101.org/article/memory-leaking.html&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Memory
+          &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div
         
       
     
@@ -159,7 +157,7 @@
     
     <summary type="html">
     
-      &lt;p&gt;本文译自 &lt;a href=&quot;https://medium.com/golangspec/synchronization-queues-in-golang-554f8e3a31a4&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Synchronization queues in Golang&lt;/a&gt; 版权@归原文所有.&lt;br&gt;
+      &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div class=&quot;.article-gallery&quot; &lt;p=&quot;&quot;&gt;本文译自 &lt;a href=&quot;https://medium.com/golangspec/synchronization-queues-in-golang-554f8e3a31a4&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Synchronization queues in Golang&lt;/a&gt; 版权@归原文所有.&lt;br&gt;
     
     </summary>
     
@@ -179,7 +177,7 @@
     
     <summary type="html">
     
-      &lt;p&gt;不像 Go 的其他流程控制(if, for, switch, goto, go) 一样, defer, panic 和 recover 用的比较少.&lt;br&gt;
+      &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div class=&quot;.article-gallery&quot; &lt;p=&quot;&quot;&gt;不像 Go 的其他流程控制(if, for, switch, goto, go) 一样, defer, panic 和 recover 用的比较少.&lt;br&gt;
     
     </summary>
     
@@ -197,7 +195,7 @@
     
     <summary type="html">
     
-      &lt;p&gt;本文译自 &lt;a href=&quot;https://research.swtch.com/vgo-module&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Defining Go Modules&lt;/a&gt;, &lt;a href=&quot;https://lingchao.xin/tag/vgo.html&quot;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 6 部分, 版权@归原文所有.&lt;br&gt;
+      &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div class=&quot;.article-gallery&quot; &lt;p=&quot;&quot;&gt;本文译自 &lt;a href=&quot;https://research.swtch.com/vgo-module&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Defining Go Modules&lt;/a&gt;, &lt;a href=&quot;https://lingchao.xin/tag/vgo.html&quot;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 6 部分, 版权@归原文所有.&lt;br&gt;
     
     </summary>
     
@@ -219,7 +217,7 @@
     
     <summary type="html">
     
-      &lt;p&gt;本文译自 &lt;a href=&quot;https://research.swtch.com/vgo-repro&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Reproducible, Verifiable, Verified Builds&lt;/a&gt;, &lt;a href=&quot;https://lingchao.xin/tag/vgo.html&quot;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 5 部分, 版权@归原文所有.&lt;br&gt;
+      &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div class=&quot;.article-gallery&quot; &lt;p=&quot;&quot;&gt;本文译自 &lt;a href=&quot;https://research.swtch.com/vgo-repro&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Reproducible, Verifiable, Verified Builds&lt;/a&gt;, &lt;a href=&quot;https://lingchao.xin/tag/vgo.html&quot;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 5 部分, 版权@归原文所有.&lt;br&gt;
     
     </summary>
     
@@ -241,7 +239,7 @@
     
     <summary type="html">
     
-      &lt;p&gt;本文译自 &lt;a href=&quot;https://research.swtch.com/vgo-mvs&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Minimal Version Selection&lt;/a&gt;, &lt;a href=&quot;https://lingchao.xin/tag/vgo.html&quot;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 4 部分, 版权@归原文所有.&lt;br&gt;
+      &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div class=&quot;.article-gallery&quot; &lt;p=&quot;&quot;&gt;本文译自 &lt;a href=&quot;https://research.swtch.com/vgo-mvs&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Minimal Version Selection&lt;/a&gt;, &lt;a href=&quot;https://lingchao.xin/tag/vgo.html&quot;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 4 部分, 版权@归原文所有.&lt;br&gt;
     
     </summary>
     
@@ -263,7 +261,7 @@
     
     <summary type="html">
     
-      &lt;p&gt;本文译自 &lt;a href=&quot;https://research.swtch.com/vgo-import&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Semantic Import Versioning&lt;/a&gt;, &lt;a href=&quot;https://lingchao.xin/tag/vgo.html&quot;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 3 部分, 版权@归原文所有.&lt;br&gt;
+      &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div class=&quot;.article-gallery&quot; &lt;p=&quot;&quot;&gt;本文译自 &lt;a href=&quot;https://research.swtch.com/vgo-import&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Semantic Import Versioning&lt;/a&gt;, &lt;a href=&quot;https://lingchao.xin/tag/vgo.html&quot;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 3 部分, 版权@归原文所有.&lt;br&gt;
     
     </summary>
     
@@ -285,7 +283,7 @@
     
     <summary type="html">
     
-      &lt;p&gt;本文译自 &lt;a href=&quot;https://research.swtch.com/vgo-tour&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;A Tour of Versioned Go (vgo)&lt;/a&gt;, &lt;a href=&quot;https://lingchao.xin/tag/vgo.html&quot;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 2 部分, 版权@归原文所有.&lt;br&gt;
+      &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div class=&quot;.article-gallery&quot; &lt;p=&quot;&quot;&gt;本文译自 &lt;a href=&quot;https://research.swtch.com/vgo-tour&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;A Tour of Versioned Go (vgo)&lt;/a&gt;, &lt;a href=&quot;https://lingchao.xin/tag/vgo.html&quot;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 2 部分, 版权@归原文所有.&lt;br&gt;
     
     </summary>
     
@@ -307,7 +305,7 @@
     
     <summary type="html">
     
-      &lt;p&gt;本文译自 &lt;a href=&quot;https://research.swtch.com/vgo-intro&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Go += Package Versioning&lt;/a&gt;, &lt;a href=&quot;https://lingchao.xin/tag/vgo.html&quot;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 1 部分, 版权@归原文所有.&lt;br&gt;
+      &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div class=&quot;.article-gallery&quot; &lt;p=&quot;&quot;&gt;本文译自 &lt;a href=&quot;https://research.swtch.com/vgo-intro&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Go += Package Versioning&lt;/a&gt;, &lt;a href=&quot;https://lingchao.xin/tag/vgo.html&quot;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 1 部分, 版权@归原文所有.&lt;br&gt;
     
     </summary>
     
@@ -329,7 +327,7 @@
     
     <summary type="html">
     
-      &lt;p&gt;本文译自 &lt;a href=&quot;https://medium.com/glitch/a-developer-relations-bill-of-rights-21381920e273&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;A Developer Relations Bill of Rights&lt;/a&gt; 版权@归原文所有.&lt;br&gt;
+      &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div class=&quot;.article-gallery&quot; &lt;p=&quot;&quot;&gt;本文译自 &lt;a href=&quot;https://medium.com/glitch/a-developer-relations-bill-of-rights-21381920e273&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;A Developer Relations Bill of Rights&lt;/a&gt; 版权@归原文所有.&lt;br&gt;
     
     </summary>
     
@@ -349,7 +347,7 @@
     
     <summary type="html">
     
-      &lt;p&gt;相对于很多的语言来说, Go 的 JSON 解析可谓简单至极.&lt;br&gt;
+      &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div class=&quot;.article-gallery&quot; &lt;p=&quot;&quot;&gt;相对于很多的语言来说, Go 的 JSON 解析可谓简单至极.&lt;br&gt;
     
     </summary>
     
@@ -367,7 +365,7 @@
     
     <summary type="html">
     
-      &lt;p&gt;本文译自 &lt;a href=&quot;https://halls-of-valhalla.org/beta/articles/functional-options-pattern-in-go,54/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Functional Options Pattern in Go&lt;/a&gt; 版权@归原文所有.&lt;br&gt;
+      &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div class=&quot;.article-gallery&quot; &lt;p=&quot;&quot;&gt;本文译自 &lt;a href=&quot;https://halls-of-valhalla.org/beta/articles/functional-options-pattern-in-go,54/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Functional Options Pattern in Go&lt;/a&gt; 版权@归原文所有.&lt;br&gt;
     
     </summary>
     
@@ -387,7 +385,7 @@
     
     <summary type="html">
     
-      &lt;p&gt;本文译自 Rakyll 的 &lt;a href=&quot;https://rakyll.org/scheduler/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;scheduler&lt;/a&gt; 版权@归原文所有.&lt;br&gt;
+      &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div class=&quot;.article-gallery&quot; &lt;p=&quot;&quot;&gt;本文译自 Rakyll 的 &lt;a href=&quot;https://rakyll.org/scheduler/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;scheduler&lt;/a&gt; 版权@归原文所有.&lt;br&gt;
     
     </summary>
     
@@ -411,7 +409,7 @@
       
         
         
-          &lt;p&gt;本文译自&lt;a href=&quot;http://go-proverbs.github.io/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;go-proverbs&lt;/a&gt;, 脱胎于 Rob Pike 振奋人心的演讲视频 &lt;a
+          &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div
         
       
     
@@ -433,7 +431,7 @@
     
     <summary type="html">
     
-      &lt;p&gt;本文是来自 Quora 上面一个 Go 相关的&lt;a href=&quot;https://www.quora.com/How-does-the-golang-scheduler-work/answer/Ian-Lance-Taylor?share=508736a1&amp;amp;srid=imO0&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;问题&lt;/a&gt;.&lt;br&gt;
+      &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div class=&quot;.article-gallery&quot; &lt;p=&quot;&quot;&gt;本文是来自 Quora 上面一个 Go 相关的&lt;a href=&quot;https://www.quora.com/How-does-the-golang-scheduler-work/answer/Ian-Lance-Taylor?share=508736a1&amp;amp;srid=imO0&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;问题&lt;/a&gt;.&lt;br&gt;
     
     </summary>
     
@@ -453,7 +451,7 @@
     
     <summary type="html">
     
-      &lt;p&gt;本文译自(&lt;a href=&quot;https://www.electrictoolbox.com/mysql-order-specific-field-values/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Ordering by specific field values with MySQL&lt;/a&gt;)版权@归原文所有&lt;/p&gt;
+      &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div class=&quot;.article-gallery&quot; &lt;p=&quot;&quot;&gt;本文译自(&lt;a href=&quot;https://www.electrictoolbox.com/mysql-order-specific-field-values/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Ordering by specific field values with MySQL&lt;/a&gt;)版权@归原文所有&lt;p&gt;&lt;/p&gt;
 &lt;p&gt;在 SQL 查询中可能有时需要使用 ASC 或 DESC 或使用特殊排序字段才能完成的特定顺序. MySQL 有一个 ORDER BY FIELD 函数可以用来做这个.&lt;br&gt;
     
     </summary>

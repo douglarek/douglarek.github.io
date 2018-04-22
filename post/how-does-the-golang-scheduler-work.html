@@ -6,18 +6,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="本文是来自 Quora 上面一个 Go 相关的问题.">
-<meta name="keywords" content="translation,go">
+    <meta name="keywords" content="translation,go">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Go 调度工作机制">
 <meta property="og:url" content="https://lingchao.xin/post/how-does-the-golang-scheduler-work.html">
 <meta property="og:site_name" content="Coding talks">
-<meta property="og:description" content="本文是来自 Quora 上面一个 Go 相关的问题.">
 <meta property="og:locale" content="en">
 <meta property="og:updated_time" content="2018-04-15T09:41:05.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Go 调度工作机制">
-<meta name="twitter:description" content="本文是来自 Quora 上面一个 Go 相关的问题.">
     
     
         
@@ -96,7 +93,7 @@
   <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/how-does-the-golang-scheduler-work.html&title=Go 调度工作机制"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/how-does-the-golang-scheduler-work.html&title=Go 调度工作机制"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/how-does-the-golang-scheduler-work.html&title=Go 调度工作机制"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/how-does-the-golang-scheduler-work.html&name=Go 调度工作机制&description=&lt;p&gt;本文是来自 Quora 上面一个 Go 相关的&lt;a href=&#34;https://www.quora.com/How-does-the-golang-scheduler-work/answer/Ian-Lance-Taylor?share=508736a1&amp;amp;srid=imO0&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;问题&lt;/a&gt;.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/how-does-the-golang-scheduler-work.html&name=Go 调度工作机制&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34;&gt;&lt;div class=&#34;.article-gallery&#34; &lt;p=&#34;&#34;&gt;本文是来自 Quora 上面一个 Go 相关的&lt;a href=&#34;https://www.quora.com/How-does-the-golang-scheduler-work/answer/Ian-Lance-Taylor?share=508736a1&amp;amp;srid=imO0&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;问题&lt;/a&gt;.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -140,7 +137,7 @@
   
 
   <div class="content" itemprop="articleBody">
-    <p>本文是来自 Quora 上面一个 Go 相关的<a href="https://www.quora.com/How-does-the-golang-scheduler-work/answer/Ian-Lance-Taylor?share=508736a1&amp;srid=imO0" target="_blank" rel="noopener">问题</a>.<br><a id="more"></a></p>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css"><div class=".article-gallery" <p="">本文是来自 Quora 上面一个 Go 相关的<a href="https://www.quora.com/How-does-the-golang-scheduler-work/answer/Ian-Lance-Taylor?share=508736a1&amp;srid=imO0" target="_blank" rel="noopener">问题</a>.<br><a id="more"></a><p></p>
 <p>下面是 Ian Lance Taylor (Go 核心开发者兼资深元老) 给出的答案:</p>
 <p>我将给出从 Go 1.7 开始使用的调度器的概述.</p>
 <p>调度器有三个基本结构, 称为 G, M 和 P. 一个 G 是一个 goroutine, 一个 M 是一个操作系统线程, 一个 P 是一个(逻辑)处理器.</p>
@@ -150,7 +147,12 @@
 <p>当 channel 操作成功时, 它会唤醒另一个 goroutine, 将其标记为可运行, 并且如果有可用的 P, 则唤醒 M 来运行它.</p>
 <p>虽然垃圾收集器大多是并发的, 但有几点要暂时停止所有的线程才能安全地转移到下一个收集阶段. 它通过标记所有正在运行的 goroutine 来预抢占. 当他们到达安全点时, G 和 M 将进入睡眠. 当垃圾收集器是唯一剩下的正在运行的 G 时, 它将移动到下一个阶段, 然后唤醒 GOMAXPROC 数量的 M, 它们将各自找到可运行的 G, 并继续下去.</p>
 <p>runtime.Gosched 函数促使 M 将当前的 G 放在可运行的 goroutine 列表中, 并从该列表中选择一个新的 G 开始运行.</p>
-
+</div><script src="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/js/lightgallery.min.js"></script><script>if (typeof lightGallery !== 'undefined') {
+        var options = {
+            selector: '.gallery-item'
+        };
+        lightGallery(document.getElementsByClassName('.article-gallery')[0], options);
+        }</script>
   </div>
 </article>
 
@@ -196,7 +198,7 @@
   <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/how-does-the-golang-scheduler-work.html&title=Go 调度工作机制"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/how-does-the-golang-scheduler-work.html&title=Go 调度工作机制"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/how-does-the-golang-scheduler-work.html&title=Go 调度工作机制"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/how-does-the-golang-scheduler-work.html&name=Go 调度工作机制&description=&lt;p&gt;本文是来自 Quora 上面一个 Go 相关的&lt;a href=&#34;https://www.quora.com/How-does-the-golang-scheduler-work/answer/Ian-Lance-Taylor?share=508736a1&amp;amp;srid=imO0&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;问题&lt;/a&gt;.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/how-does-the-golang-scheduler-work.html&name=Go 调度工作机制&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34;&gt;&lt;div class=&#34;.article-gallery&#34; &lt;p=&#34;&#34;&gt;本文是来自 Quora 上面一个 Go 相关的&lt;a href=&#34;https://www.quora.com/How-does-the-golang-scheduler-work/answer/Ian-Lance-Taylor?share=508736a1&amp;amp;srid=imO0&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;问题&lt;/a&gt;.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>

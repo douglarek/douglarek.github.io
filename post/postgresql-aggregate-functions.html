@@ -6,18 +6,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="Sometimes, when we use SQL aggregate functions, we hope to collect all primary keys in each column group.">
-<meta name="keywords" content="postgresql">
+    <meta name="keywords" content="postgresql">
 <meta property="og:type" content="article">
 <meta property="og:title" content="PostgreSQL Aggregate Functions">
 <meta property="og:url" content="https://lingchao.xin/post/postgresql-aggregate-functions.html">
 <meta property="og:site_name" content="Coding talks">
-<meta property="og:description" content="Sometimes, when we use SQL aggregate functions, we hope to collect all primary keys in each column group.">
 <meta property="og:locale" content="en">
 <meta property="og:updated_time" content="2018-03-26T13:28:33.286Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="PostgreSQL Aggregate Functions">
-<meta name="twitter:description" content="Sometimes, when we use SQL aggregate functions, we hope to collect all primary keys in each column group.">
     
     
         
@@ -96,7 +93,7 @@
   <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/postgresql-aggregate-functions.html&title=PostgreSQL Aggregate Functions"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/postgresql-aggregate-functions.html&title=PostgreSQL Aggregate Functions"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/postgresql-aggregate-functions.html&title=PostgreSQL Aggregate Functions"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/postgresql-aggregate-functions.html&name=PostgreSQL Aggregate Functions&description=&lt;p&gt;Sometimes, when we use &lt;code&gt;SQL&lt;/code&gt; aggregate functions, we hope to collect all primary keys in each column group.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/postgresql-aggregate-functions.html&name=PostgreSQL Aggregate Functions&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34;&gt;&lt;div class=&#34;.article-gallery&#34; &lt;p=&#34;&#34;&gt;Sometimes, when we use &lt;code&gt;SQL&lt;/code&gt; aggregate functions, we hope to collect all primary keys in each column group.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -140,7 +137,7 @@
   
 
   <div class="content" itemprop="articleBody">
-    <p>Sometimes, when we use <code>SQL</code> aggregate functions, we hope to collect all primary keys in each column group.<br><a id="more"></a></p>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css"><div class=".article-gallery" <p="">Sometimes, when we use <code>SQL</code> aggregate functions, we hope to collect all primary keys in each column group.<br><a id="more"></a><p></p>
 <p>Take below for example:</p>
 <figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> date_trunc(<span class="string">'day'</span>, create_time) <span class="keyword">AS</span> <span class="built_in">date</span>,</span><br><span class="line">       <span class="keyword">count</span>(<span class="keyword">id</span>)</span><br><span class="line"><span class="keyword">FROM</span> s_table</span><br><span class="line"><span class="keyword">GROUP</span> <span class="keyword">BY</span> <span class="built_in">date</span></span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> <span class="built_in">date</span>;</span><br></pre></td></tr></table></figure>
 <p>In this sql code, we can just get columns grouped by or aggregate results; we can not get id columns (or others) in each row.</p>
@@ -150,7 +147,12 @@
 <p>So you maybe get some records as below:</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">2015-01-17 00:00:00+08 | 5 | 1461491,1461508,1461482,1461483,1461509</span><br></pre></td></tr></table></figure>
 <p>It is very Excited !</p>
-
+</div><script src="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/js/lightgallery.min.js"></script><script>if (typeof lightGallery !== 'undefined') {
+        var options = {
+            selector: '.gallery-item'
+        };
+        lightGallery(document.getElementsByClassName('.article-gallery')[0], options);
+        }</script>
   </div>
 </article>
 
@@ -196,7 +198,7 @@
   <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/postgresql-aggregate-functions.html&title=PostgreSQL Aggregate Functions"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/postgresql-aggregate-functions.html&title=PostgreSQL Aggregate Functions"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/postgresql-aggregate-functions.html&title=PostgreSQL Aggregate Functions"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/postgresql-aggregate-functions.html&name=PostgreSQL Aggregate Functions&description=&lt;p&gt;Sometimes, when we use &lt;code&gt;SQL&lt;/code&gt; aggregate functions, we hope to collect all primary keys in each column group.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/postgresql-aggregate-functions.html&name=PostgreSQL Aggregate Functions&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34;&gt;&lt;div class=&#34;.article-gallery&#34; &lt;p=&#34;&#34;&gt;Sometimes, when we use &lt;code&gt;SQL&lt;/code&gt; aggregate functions, we hope to collect all primary keys in each column group.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>

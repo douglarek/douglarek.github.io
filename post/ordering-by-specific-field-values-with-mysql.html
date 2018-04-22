@@ -6,18 +6,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="本文译自(Ordering by specific field values with MySQL)版权@归原文所有 在 SQL 查询中可能有时需要使用 ASC 或 DESC 或使用特殊排序字段才能完成的特定顺序. MySQL 有一个 ORDER BY FIELD 函数可以用来做这个.">
-<meta name="keywords" content="translation,mysql">
+    <meta name="keywords" content="translation,mysql">
 <meta property="og:type" content="article">
 <meta property="og:title" content="MySQL Order By 按特定的字段值排序">
 <meta property="og:url" content="https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html">
 <meta property="og:site_name" content="Coding talks">
-<meta property="og:description" content="本文译自(Ordering by specific field values with MySQL)版权@归原文所有 在 SQL 查询中可能有时需要使用 ASC 或 DESC 或使用特殊排序字段才能完成的特定顺序. MySQL 有一个 ORDER BY FIELD 函数可以用来做这个.">
 <meta property="og:locale" content="en">
 <meta property="og:updated_time" content="2018-04-15T09:41:53.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="MySQL Order By 按特定的字段值排序">
-<meta name="twitter:description" content="本文译自(Ordering by specific field values with MySQL)版权@归原文所有 在 SQL 查询中可能有时需要使用 ASC 或 DESC 或使用特殊排序字段才能完成的特定顺序. MySQL 有一个 ORDER BY FIELD 函数可以用来做这个.">
     
     
         
@@ -96,7 +93,7 @@
   <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html&title=MySQL Order By 按特定的字段值排序"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html&title=MySQL Order By 按特定的字段值排序"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html&title=MySQL Order By 按特定的字段值排序"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html&name=MySQL Order By 按特定的字段值排序&description=&lt;p&gt;本文译自(&lt;a href=&#34;https://www.electrictoolbox.com/mysql-order-specific-field-values/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Ordering by specific field values with MySQL&lt;/a&gt;)版权@归原文所有&lt;/p&gt;
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html&name=MySQL Order By 按特定的字段值排序&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34;&gt;&lt;div class=&#34;.article-gallery&#34; &lt;p=&#34;&#34;&gt;本文译自(&lt;a href=&#34;https://www.electrictoolbox.com/mysql-order-specific-field-values/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Ordering by specific field values with MySQL&lt;/a&gt;)版权@归原文所有&lt;p&gt;&lt;/p&gt;
 &lt;p&gt;在 SQL 查询中可能有时需要使用 ASC 或 DESC 或使用特殊排序字段才能完成的特定顺序. MySQL 有一个 ORDER BY FIELD 函数可以用来做这个.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
 </ul>
 
@@ -141,7 +138,7 @@
   
 
   <div class="content" itemprop="articleBody">
-    <p>本文译自(<a href="https://www.electrictoolbox.com/mysql-order-specific-field-values/" target="_blank" rel="noopener">Ordering by specific field values with MySQL</a>)版权@归原文所有</p>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css"><div class=".article-gallery" <p="">本文译自(<a href="https://www.electrictoolbox.com/mysql-order-specific-field-values/" target="_blank" rel="noopener">Ordering by specific field values with MySQL</a>)版权@归原文所有<p></p>
 <p>在 SQL 查询中可能有时需要使用 ASC 或 DESC 或使用特殊排序字段才能完成的特定顺序. MySQL 有一个 ORDER BY FIELD 函数可以用来做这个.<br><a id="more"></a></p>
 <h2 id="测试数据"><a href="#测试数据" class="headerlink" title="测试数据"></a>测试数据</h2><p>本文中的示例数据使用我的示例 <a href="https://www.electrictoolbox.com/mysql-example-table/" target="_blank" rel="noopener">fruit</a> 表. 这是一个有点简单的表, 但它可以用来很好地说明这篇文章中的观点.</p>
 <h2 id="按特定字段值排序"><a href="#按特定字段值排序" class="headerlink" title="按特定字段值排序"></a>按特定字段值排序</h2><p>fruit 表有一个 name 字段, 具有以下特定的值: 苹果(Apple), 香蕉(Banana), 橘子(Orange), 梨(Pear). 每个特定的值都有一系列的品种.</p>
@@ -160,7 +157,12 @@
 <p>这导致:</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">+----------+--------+---------------------+</span><br><span class="line">| fruit_id | name   | variety             |</span><br><span class="line">+----------+--------+---------------------+</span><br><span class="line">|       11 | Banana | Burro               |</span><br><span class="line">|       12 | Banana | Cavendish           |</span><br><span class="line">|       10 | Banana | Plantain            |</span><br><span class="line">|        6 | Apple  | Cox&apos;s Orange Pippin |</span><br><span class="line">|        7 | Apple  | Granny Smith        |</span><br><span class="line">|        1 | Apple  | Red Delicious       |</span><br><span class="line">|        5 | Orange | Blood               |</span><br><span class="line">|        3 | Orange | Navel               |</span><br><span class="line">|        9 | Orange | Valencia            |</span><br><span class="line">|        8 | Pear   | Anjou               |</span><br><span class="line">|        4 | Pear   | Bartlett            |</span><br><span class="line">|        2 | Pear   | Comice              |</span><br><span class="line">+----------+--------+---------------------+</span><br></pre></td></tr></table></figure>
 <p>如果一组特定的行需要显示在结果集中的其他行之前, 这可能是一个有用的解决方案, 但是当使用 ASC 或 DESC 排序顺序时, 通常不会出现在第一行.</p>
-
+</div><script src="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/js/lightgallery.min.js"></script><script>if (typeof lightGallery !== 'undefined') {
+        var options = {
+            selector: '.gallery-item'
+        };
+        lightGallery(document.getElementsByClassName('.article-gallery')[0], options);
+        }</script>
   </div>
 </article>
 
@@ -206,7 +208,7 @@
   <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html&title=MySQL Order By 按特定的字段值排序"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html&title=MySQL Order By 按特定的字段值排序"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html&title=MySQL Order By 按特定的字段值排序"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html&name=MySQL Order By 按特定的字段值排序&description=&lt;p&gt;本文译自(&lt;a href=&#34;https://www.electrictoolbox.com/mysql-order-specific-field-values/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Ordering by specific field values with MySQL&lt;/a&gt;)版权@归原文所有&lt;/p&gt;
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html&name=MySQL Order By 按特定的字段值排序&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34;&gt;&lt;div class=&#34;.article-gallery&#34; &lt;p=&#34;&#34;&gt;本文译自(&lt;a href=&#34;https://www.electrictoolbox.com/mysql-order-specific-field-values/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Ordering by specific field values with MySQL&lt;/a&gt;)版权@归原文所有&lt;p&gt;&lt;/p&gt;
 &lt;p&gt;在 SQL 查询中可能有时需要使用 ASC 或 DESC 或使用特殊排序字段才能完成的特定顺序. MySQL 有一个 ORDER BY FIELD 函数可以用来做这个.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
