@@ -14,7 +14,7 @@
 <meta property="og:locale" content="en">
 <meta property="og:image" content="https://lingchao.xin/static/images/gitmod-1@2x.png">
 <meta property="og:image" content="https://lingchao.xin/static/images/gitmod-2@2x.png">
-<meta property="og:updated_time" content="2018-04-15T07:21:06.000Z">
+<meta property="og:updated_time" content="2018-04-22T01:14:30.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="定义 Go 模块">
 <meta name="twitter:image" content="https://lingchao.xin/static/images/gitmod-1@2x.png">
@@ -204,10 +204,10 @@
 <h3 id="下载协议"><a href="#下载协议" class="headerlink" title="下载协议"></a>下载协议</h3><p>要下载有关模块的信息以及模块本身, vgo 原型仅发出简单的 HTTP GET 请求. 一个关键的设计目标是使得可以从静态托管站点提供模块, 因此请求没有 URL 查询参数.</p>
 <p>正如我们前面看到的, 自定义域可以指定模块托管在特定的基本 URL. 像 vgo 今天实现的那样(但是, vgo 的所有这些可能会发生变化), 该模块托管服务器必须提供四种请求格式:</p>
 <ul>
-<li><code>GET baseURL/module/@v/list</code> 获取所有已知版本的列表, 每行一个.</li>
-<li><code>GET baseURL/module/@v/version.info</code> 获取有关该版本的 JSON 格式的元数据.</li>
-<li><code>GET baseURL/module/@v/version.mod</code> 获取该版本的 go.mod 文件.</li>
-<li><code>GET baseURL/module/@v/version.zip</code> 获取该版本的 zip 文件.</li>
+<li>GET baseURL/module/@v/list 获取所有已知版本的列表, 每行一个.</li>
+<li>GET baseURL/module/@v/version.info 获取有关该版本的 JSON 格式的元数据.</li>
+<li>GET baseURL/module/@v/version.mod 获取该版本的 go.mod 文件.</li>
+<li>GET baseURL/module/@v/version.zip 获取该版本的 zip 文件.</li>
 </ul>
 <p>以 version.info 形式提供的 JSON 信息可能会演化, 但现在它对应于此结构:</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">type RevInfo struct &#123;</span><br><span class="line">	Version string    // version string</span><br><span class="line">	Name    string    // complete ID in underlying repository</span><br><span class="line">	Short   string    // shortened ID, for use in pseudo-version</span><br><span class="line">	Time    time.Time // commit time</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -217,8 +217,8 @@
 <p>将获取 1459def.info 并使用 Time 和 Short 字段派生伪版本.</p>
 <p>还有两种可选的请求形式:</p>
 <ul>
-<li><code>GET baseURL/module/@t/yyyymmddhhmmss</code> 在给定的时间戳之前返回或返回最新版本的 .info JSON.</li>
-<li><code>GET baseURL/module/@t/yyyymmddhhmmss/branch</code> 同上, 但将搜索限制在给定分支上的提交.</li>
+<li>GET baseURL/module/@t/yyyymmddhhmmss 在给定的时间戳之前返回或返回最新版本的 .info JSON.</li>
+<li>GET baseURL/module/@t/yyyymmddhhmmss/branch 同上, 但将搜索限制在给定分支上的提交.</li>
 </ul>
 <p>这些支持在 vgo 使用未标记的提交. 如果 vgo 正在添加一个模块却根本找不到标签提交, 它将使用第一种形式来查找截至目前的最新提交. 它在查找可用更新时也是如此, 假定仍然没有标记提交. 分支限制形式用于 gopkg.in 的内部模拟. 这些形式也支持命令行语法:</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">vgo get my/thing/v2@2018-02-01T15:34:45</span><br><span class="line">vgo get my/thing/v2@2018-02-01T15:34:45@branch</span><br></pre></td></tr></table></figure>
