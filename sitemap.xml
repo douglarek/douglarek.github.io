@@ -2,16 +2,16 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>https://lingchao.xin/post/emacs-is-a-habit.html</loc>
+    <loc>https://lingchao.xin/post/conditional-expressions-in-postgres.html</loc>
     
-    <lastmod>2018-04-23T02:29:57.946Z</lastmod>
+    <lastmod>2018-04-23T02:36:27.786Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/why-are-there-nil-channels-in-go.html</loc>
+    <loc>https://lingchao.xin/post/emacs-is-a-habit.html</loc>
     
-    <lastmod>2018-04-23T02:01:23.436Z</lastmod>
+    <lastmod>2018-04-23T02:29:57.946Z</lastmod>
     
   </url>
   
@@ -23,14 +23,21 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/vgo-import.html</loc>
+    <loc>https://lingchao.xin/post/why-are-there-nil-channels-in-go.html</loc>
+    
+    <lastmod>2018-04-23T02:01:23.436Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html</loc>
     
     <lastmod>2018-04-23T02:01:23.435Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html</loc>
+    <loc>https://lingchao.xin/post/vgo-import.html</loc>
     
     <lastmod>2018-04-23T02:01:23.435Z</lastmod>
     
@@ -107,14 +114,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/memory-leaking.html</loc>
+    <loc>https://lingchao.xin/post/how-does-the-golang-scheduler-work.html</loc>
     
     <lastmod>2018-04-20T05:40:59.628Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/how-does-the-golang-scheduler-work.html</loc>
+    <loc>https://lingchao.xin/post/memory-leaking.html</loc>
     
     <lastmod>2018-04-20T05:40:59.628Z</lastmod>
     
@@ -135,7 +142,7 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/go-proverbs.html</loc>
+    <loc>https://lingchao.xin/post/go-errors-stack-traces.html</loc>
     
     <lastmod>2018-04-20T05:40:59.626Z</lastmod>
     
@@ -149,7 +156,7 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/go-errors-stack-traces.html</loc>
+    <loc>https://lingchao.xin/post/go-proverbs.html</loc>
     
     <lastmod>2018-04-20T05:40:59.626Z</lastmod>
     
@@ -208,13 +215,6 @@
     <loc>https://lingchao.xin/post/2017-has-passed.html</loc>
     
     <lastmod>2018-03-26T09:45:49.124Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://lingchao.xin/post/conditional-expressions-in-postgres.html</loc>
-    
-    <lastmod>2018-03-26T09:42:42.902Z</lastmod>
     
   </url>
   
