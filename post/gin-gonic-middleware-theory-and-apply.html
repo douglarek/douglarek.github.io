@@ -6,16 +6,19 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="keywords" content="go,gin,web">
+    <meta name="description" content="在 Go 的世界里, web 框架简直多如牛毛. 前有自带电池的标准库(net/http), 后有简洁优雅的 Gin-Gonic(以下简称 Gin), 再有全栈开发一枝花 Beego, 等等不可胜数. 使用 Go 有一段时间了, web 开发一直用的 Gin. Gin 的思想和 Python 框架 Flask 有颇多相似之处, 可以称作 微框架 .">
+<meta name="keywords" content="go,gin,web">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Gin-Gonic 框架中间件原理与应用">
 <meta property="og:url" content="https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html">
 <meta property="og:site_name" content="Coding talks">
+<meta property="og:description" content="在 Go 的世界里, web 框架简直多如牛毛. 前有自带电池的标准库(net/http), 后有简洁优雅的 Gin-Gonic(以下简称 Gin), 再有全栈开发一枝花 Beego, 等等不可胜数. 使用 Go 有一段时间了, web 开发一直用的 Gin. Gin 的思想和 Python 框架 Flask 有颇多相似之处, 可以称作 微框架 .">
 <meta property="og:locale" content="en">
 <meta property="og:image" content="https://lingchao.xin/static/images/gin-middleware.png">
-<meta property="og:updated_time" content="2018-04-15T09:50:19.000Z">
+<meta property="og:updated_time" content="2018-04-20T05:40:59.624Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Gin-Gonic 框架中间件原理与应用">
+<meta name="twitter:description" content="在 Go 的世界里, web 框架简直多如牛毛. 前有自带电池的标准库(net/http), 后有简洁优雅的 Gin-Gonic(以下简称 Gin), 再有全栈开发一枝花 Beego, 等等不可胜数. 使用 Go 有一段时间了, web 开发一直用的 Gin. Gin 的思想和 Python 框架 Flask 有颇多相似之处, 可以称作 微框架 .">
 <meta name="twitter:image" content="https://lingchao.xin/static/images/gin-middleware.png">
     
     
@@ -95,7 +98,7 @@
   <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html&title=Gin-Gonic 框架中间件原理与应用"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html&title=Gin-Gonic 框架中间件原理与应用"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html&title=Gin-Gonic 框架中间件原理与应用"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html&name=Gin-Gonic 框架中间件原理与应用&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34;&gt;&lt;div class=&#34;.article-gallery&#34; &lt;p=&#34;&#34;&gt;在 Go 的世界里, web 框架简直多如牛毛.&lt;p&gt;&lt;/p&gt;
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html&name=Gin-Gonic 框架中间件原理与应用&description=&lt;p&gt;在 Go 的世界里, web 框架简直多如牛毛.&lt;/p&gt;
 &lt;p&gt;前有自带电池的标准库(net/http), 后有简洁优雅的 Gin-Gonic(以下简称 Gin), 再有全栈开发一枝花 Beego, 等等不可胜数.&lt;/p&gt;
 &lt;p&gt;使用 Go 有一段时间了, web 开发一直用的 Gin. Gin 的思想和 Python 框架 Flask 有颇多相似之处, 可以称作 &lt;em&gt;微框架&lt;/em&gt; .&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
 </ul>
@@ -141,7 +144,7 @@
   
 
   <div class="content" itemprop="articleBody">
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css"><div class=".article-gallery" <p="">在 Go 的世界里, web 框架简直多如牛毛.<p></p>
+    <p>在 Go 的世界里, web 框架简直多如牛毛.</p>
 <p>前有自带电池的标准库(net/http), 后有简洁优雅的 Gin-Gonic(以下简称 Gin), 再有全栈开发一枝花 Beego, 等等不可胜数.</p>
 <p>使用 Go 有一段时间了, web 开发一直用的 Gin. Gin 的思想和 Python 框架 Flask 有颇多相似之处, 可以称作 <em>微框架</em> .<br><a id="more"></a></p>
 <p>Gin 包括以下几个主要的部分:</p>
@@ -163,13 +166,8 @@
 <p>一个请求过来, Gin 会主动调用 c.Next() 一次. 因为 handlers 是 slice , 所以后来者中间件会追加到尾部. 这样就形成了形如 m1(m2(f())) 的调用链. 正如上面数字① ② 标注的一样, 我们会依次执行如下的调用:</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">m1① -&gt; m2① -&gt; f -&gt; m2② -&gt; m1②</span><br></pre></td></tr></table></figure>
 <p>我们用下面一张图来来总结这种关系:</p>
-<p><a href="/static/images/gin-middleware.png" title="middleware stream" class="gallery-item"><img src="/static/images/gin-middleware.png" alt="middleware stream"></a></p>
-</div><script src="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/js/lightgallery.min.js"></script><script>if (typeof lightGallery !== 'undefined') {
-        var options = {
-            selector: '.gallery-item'
-        };
-        lightGallery(document.getElementsByClassName('.article-gallery')[0], options);
-        }</script>
+<p><img src="/static/images/gin-middleware.png" alt="middleware stream"></p>
+
   </div>
 </article>
 
@@ -215,7 +213,7 @@
   <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html&title=Gin-Gonic 框架中间件原理与应用"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html&title=Gin-Gonic 框架中间件原理与应用"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html&title=Gin-Gonic 框架中间件原理与应用"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html&name=Gin-Gonic 框架中间件原理与应用&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34;&gt;&lt;div class=&#34;.article-gallery&#34; &lt;p=&#34;&#34;&gt;在 Go 的世界里, web 框架简直多如牛毛.&lt;p&gt;&lt;/p&gt;
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/gin-gonic-middleware-theory-and-apply.html&name=Gin-Gonic 框架中间件原理与应用&description=&lt;p&gt;在 Go 的世界里, web 框架简直多如牛毛.&lt;/p&gt;
 &lt;p&gt;前有自带电池的标准库(net/http), 后有简洁优雅的 Gin-Gonic(以下简称 Gin), 再有全栈开发一枝花 Beego, 等等不可胜数.&lt;/p&gt;
 &lt;p&gt;使用 Go 有一段时间了, web 开发一直用的 Gin. Gin 的思想和 Python 框架 Flask 有颇多相似之处, 可以称作 &lt;em&gt;微框架&lt;/em&gt; .&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
 </ul>

@@ -6,11 +6,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="keywords" content="translation,go,vgo">
+    <meta name="description" content="本文译自 Semantic Import Versioning, Go &amp;amp; Versioning 的第 3 部分, 版权@归原文所有.">
+<meta name="keywords" content="translation,go,vgo">
 <meta property="og:type" content="article">
 <meta property="og:title" content="语义导入版本控制">
 <meta property="og:url" content="https://lingchao.xin/post/vgo-import.html">
 <meta property="og:site_name" content="Coding talks">
+<meta property="og:description" content="本文译自 Semantic Import Versioning, Go &amp;amp; Versioning 的第 3 部分, 版权@归原文所有.">
 <meta property="og:locale" content="en">
 <meta property="og:image" content="https://lingchao.xin/static/images/impver@2x.png">
 <meta property="og:image" content="https://lingchao.xin/static/images/deps-a1-short2@2x.png">
@@ -25,9 +27,10 @@
 <meta property="og:image" content="https://lingchao.xin/static/images/deps-b2-short@2x.png">
 <meta property="og:image" content="https://lingchao.xin/static/images/deps-c1-short@2x.png">
 <meta property="og:image" content="https://lingchao.xin/static/images/deps-c2-short@2x.png">
-<meta property="og:updated_time" content="2018-04-22T01:17:50.000Z">
+<meta property="og:updated_time" content="2018-04-23T02:01:23.435Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="语义导入版本控制">
+<meta name="twitter:description" content="本文译自 Semantic Import Versioning, Go &amp;amp; Versioning 的第 3 部分, 版权@归原文所有.">
 <meta name="twitter:image" content="https://lingchao.xin/static/images/impver@2x.png">
     
     
@@ -107,7 +110,7 @@
   <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/vgo-import.html&title=语义导入版本控制"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/vgo-import.html&title=语义导入版本控制"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/vgo-import.html&title=语义导入版本控制"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/vgo-import.html&name=语义导入版本控制&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34;&gt;&lt;div class=&#34;.article-gallery&#34; &lt;p=&#34;&#34;&gt;本文译自 &lt;a href=&#34;https://research.swtch.com/vgo-import&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Semantic Import Versioning&lt;/a&gt;, &lt;a href=&#34;https://lingchao.xin/tag/vgo.html&#34;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 3 部分, 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/vgo-import.html&name=语义导入版本控制&description=&lt;p&gt;本文译自 &lt;a href=&#34;https://research.swtch.com/vgo-import&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Semantic Import Versioning&lt;/a&gt;, &lt;a href=&#34;https://lingchao.xin/tag/vgo.html&#34;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 3 部分, 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -151,7 +154,7 @@
   
 
   <div class="content" itemprop="articleBody">
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css"><div class=".article-gallery" <p="">本文译自 <a href="https://research.swtch.com/vgo-import" target="_blank" rel="noopener">Semantic Import Versioning</a>, <a href="https://lingchao.xin/tag/vgo.html">Go &amp; Versioning</a> 的第 3 部分, 版权@归原文所有.<br><a id="more"></a><p></p>
+    <p>本文译自 <a href="https://research.swtch.com/vgo-import" target="_blank" rel="noopener">Semantic Import Versioning</a>, <a href="https://lingchao.xin/tag/vgo.html">Go &amp; Versioning</a> 的第 3 部分, 版权@归原文所有.<br><a id="more"></a></p>
 <p>如何将不兼容的更改部署到现有软件包 ? 这是任何包管理系统中的根本挑战和决断. 问题的答案决定了所产生的系统的复杂性, 它决定了如何轻松或难以使用包管理. (它还决定如何轻松或难以实现包管理, 但用户体验更重要.)</p>
 <p>为了回答这个问题, 这篇文章首先介绍了 Go 的导入兼容性规则:</p>
 <blockquote>
@@ -160,7 +163,7 @@
 <p>我们从 Go 一开始就主张这个原则, 但我们没有给它一个名字或者这样一个直接的陈述.</p>
 <p>导入兼容性规则大大简化了使用不兼容版本的软件包的体验. 当每个不同版本具有不同的导入路径时, 关于给定导入语句的预期语义没有歧义. 这使开发人员和工具更容易理解 Go 程序.</p>
 <p>今天的开发人员希望使用语义版本来描述软件包, 因此我们将它们应用到模型中. 具体来说, 模块 my/thing 被导入成 my/thing 作为 v0, 该阶段预计会发生破坏性更改, 并且不会受到保护, 并且持续到第一个稳定的主要版本 V1. 但是当添加 v2 的时候, 我们不再重新定义现在稳定的 my/thing 的所代表的含义, 而是给它一个新的名字: my/thing/v2.</p>
-<p><a href="/static/images/impver@2x.png" class="gallery-item"><img src="/static/images/impver@2x.png" width="458px" height="223px"></a></p>
+<p><img src="/static/images/impver@2x.png" width="458px" height="223px"></p>
 <p>我将这种约定称为语义导入版本控制, 这是在使用语义版本控制时遵循导入兼容性规则的结果.</p>
 <p>一年前, 我相信把版本放入这样的导入路径是丑陋的, 不可取的, 并且可能是可以避免的. 但是在过去的一年里, 我已经开始理解它们为系统带来多少清晰和简单. 在这篇文章中, 我希望能让你了解我为什么改变主意.</p>
 <h3 id="一个依赖的故事"><a href="#一个依赖的故事" class="headerlink" title="一个依赖的故事"></a>一个依赖的故事</h3><p>为了使讨论具体化, 请考虑以下故事. 这个故事当然是虚构的, 但它是由一个真正的问题所驱动. 当 dep 发布时, Google 编写 OAuth2 软件包的团队问我, 他们应该如何引入他们长期以来都想做的一些不兼容的改进. 我越想它, 越是意识到这不像听起来的那么容易, 至少不像没有语义导入版本的那样.</p>
@@ -169,35 +172,35 @@
 <p>作为用户, Ugo 需要能够用这些其他软件包一起构建 Unity. 他需要精确控制在特定构建中使用哪些版本; 当他选择时他需要能够更新到新版本.</p>
 <p>当然, 我们的朋友可能期望从包管理工具中获得更多, 特别是在发现, 测试, 可移植性和有用的诊断方面, 但这些与故事无关.</p>
 <p>随着我们的故事逐渐打开, Ugo 的 Unity 构建依赖关系看起来像这样:</p>
-<p><a href="/static/images/deps-a1-short2@2x.png" class="gallery-item"><img src="/static/images/deps-a1-short2@2x.png" width="550px" height="351px"></a></p>
+<p><img src="/static/images/deps-a1-short2@2x.png" width="550px" height="351px"></p>
 <h4 id="章节-1"><a href="#章节-1" class="headerlink" title="章节 1"></a>章节 1</h4><p>每个人都独立编写软件.</p>
 <p>在谷歌, Alice 一直在为 OAuth2 软件包设计一个新的, 更简单, 更易于使用的 API. 它仍然可以完成旧软件包可以完成的所有工作, 但只需要一半的 API 接口. 她将其发布为 OAuth2 r2. (这里的 r 代表修订. 目前, 修订号并不表示除顺序之外的任何内容: 特别是, 它们不是语义版本)</p>
 <p>在微软, Amy 正处于应有的长假期中, 她的团队决定在她回来之前不做任何与 OAuth2 r2 相关的更改. Azure 包现在将继续使用 OAuth2 r1.</p>
 <p>在亚马逊, Anna 发现使用 OAuth2 r2 可以让她在实现 AWS r1 的过程中删除许多难看的代码, 因此她将 AWS 更改为使用 OAuth2 r2. 她一路修复了一些错误, 并将结果发布为 AWS r2.</p>
 <p>Ugo 获取了有关 Azure 行为的 bug 报告, 并追踪到 Azure 客户端库的一个 bug. 在休假之前, Amy 已经在 Azure r2 中发布了该 bug 的修复程序. Ugo 向 Unity 添加了一个测试用例, 确认它失败, 并要求包管理工具更新到 Azure r2.</p>
 <p>更新之后, Ugo 的构建看起来像这样:</p>
-<p><a href="/static/images/deps-a1.5@2x.png" class="gallery-item"><img src="/static/images/deps-a1.5@2x.png" width="550px" height="427px"></a></p>
+<p><img src="/static/images/deps-a1.5@2x.png" width="550px" height="427px"></p>
 <p>他确认新的测试通过, 并且他所有的旧测试仍然通过. 他锁定 Azure 更新并发布更新后的 Unity.</p>
 <h4 id="章节-2"><a href="#章节-2" class="headerlink" title="章节 2"></a>章节 2</h4><p>Amazon 大张旗鼓地推出了他们新的云服务: Amazon Zeta Functions. 为了准备发布, Anna 给 AWS 软件包添加了 Zeta 支持, 她现在将它发布为 AWS r3.</p>
 <p>当 Ugo 听到有关 Amazon Zeta 的消息时, 他写了一些测试程序, 并对他们工作的效果感到非常兴奋, 因此他跳过午餐更新去 Unity. 今天的更新不如最后一次. Ugo 希望使用 Azure r2 和 AWS r3 (每个版本的最新版本)来构建包含 Zeta 支持的 Unity. 但  Azure r2 需要 OAuth2 r1 (而不是 r2 ), 而 AWS r3 需要 OAuth2 r2 (而不是 r1). 经典的菱形依赖, 对吧? Ugo 不在乎它是什么. 他只是想构建 Unity.</p>
 <p>更糟的是, 这似乎不是任何人的错. Alice 写了一个更好的 OAuth2 包. Amy 修复了一些 Azure bug 并去度假. Anna 觉得 AWS 应该使用新的 OAuth2 (内部实现细节), 并且后来增加了 Zeta 支持. Ugo 希望 Unity 使用最新的 Azure 和 AWS 软件包. 很难说他们中的任何一个做错了什么. 如果这些人没有错, 那么也许包管理错了. 我们一直假设在 Ugo 的 Unity 构建中只能有一个版本的 OAuth2. 也许这就是问题所在: 也许包管理器应该允许在单个构建中包含不同的版本. 这个例子似乎表明它必须这样.</p>
 <p>Ugo 仍然卡住了, 所以他搜索了 StackOverflow 并找到了包管理器的 -fmultiverse标志, 它允许多个版本, 以便他的程序构建为:</p>
-<p><a href="/static/images/deps-a2-short@2x.png" class="gallery-item"><img src="/static/images/deps-a2-short@2x.png" width="550px" height="351px"></a></p>
+<p><img src="/static/images/deps-a2-short@2x.png" width="550px" height="351px"></p>
 <p>Ugo 试了. 它不起作用. 进一步深入研究这个问题, Ugo 发现 Azure 和 AWS 都在使用名为 Moauth 的流行 OAuth2 中间件库, 它简化了部分 OAuth2 处理. Moauth 不是一个完整的 API 替代品: 用户仍然直接导入 OAuth2, 但他们使用 Moauth 来简化一些 API 调用. Moauth 参与的细节没有从 OAuth2 r1 改为 r2, 因此 Moauth r1 (唯一存在的版本)与两者兼容. Azure r2 和 AWS r3 都使用 Moauth r1. 在仅使用 Azure 或仅使用 AWS 的程序中, 这种方式效果很好, 但 Ugo 的 Unity 构建看起来像这样:</p>
-<p><a href="/static/images/deps-a3-short@2x.png" class="gallery-item"><img src="/static/images/deps-a3-short@2x.png" width="550px" height="454px"></a></p>
+<p><img src="/static/images/deps-a3-short@2x.png" width="550px" height="454px"></p>
 <p>Unity 需要两个 OAuth2 拷贝, 但 Moauth 导入哪个拷贝 ?</p>
 <p>为了使构建工作, 我们似乎需要两个完全相同的Moauth副本: 一个导入 OAuth2 r1 供 Azure 使用, 另一个导入 OAuth2 r2 供 AWS 使用. 一个快速的 StackOverflow 搜索显示软件包管理器有一个标志(flag): -fclone. Ugo 的程序使用这个标志来构建为:</p>
-<p><a href="/static/images/deps-a4-short@2x.png" class="gallery-item"><img src="/static/images/deps-a4-short@2x.png" width="550px" height="451px"></a></p>
+<p><img src="/static/images/deps-a4-short@2x.png" width="550px" height="451px"></p>
 <p>这实际上可以工作并通过了测试, 虽然 Ugo 现在想知道是否还有更多的潜在问题. 他需要回家吃晚饭.</p>
 <h4 id="章节-3"><a href="#章节-3" class="headerlink" title="章节 3"></a>章节 3</h4><p>Amy 已经结束度假回到了微软. 她觉得 Azure 可以继续使用 OAuth2 r1 一段时间, 但她意识到它可以帮助用户直接传递 Moauth 令牌到 Azure API. 她以向后兼容的方式将其添加到 Azure 包中, 并发布 Azure r3. 在亚马逊这边, Anna 喜欢 Azure 包基于 Moauth 的新 API, 并向 AWS 包添加了类似的 API, 发布为 AWS r4.</p>
 <p>Ugo 看到了这些变化, 并决定更新到最新版本的 Azure 和 AWS, 以便使用基于 Moauth 的 API. 这次卡了他一个下午. 首先他暂时更新 Azure 和 AWS 包, 而不修改 Unity. 它的程序可以构建!</p>
 <p>令人兴奋的是, Ugo 将 Unity 改变为使用基于 Moauth 的 Azure API, 而且也可以构建. 但是, 当他将 Unity 更改为使用基于 Moauth 的 AWS API 时, 构建失败. 困惑的是, 他恢复了他的 Azure 更改, 只留下 AWS 更改, 构建成功. 他将 Azure 更改放回, 构建再次失败. Ugo 返回到 StackOverflow (继续搜索).</p>
 <p>Ugo 了解到, 当通过 -fmultiverse -fclone 仅使用一个基于 Moauth 的 API (在本例中为 Azure) 时, Unity 隐式地构建为:</p>
-<p><a href="/static/images/deps-a5-short@2x.png" class="gallery-item"><img src="/static/images/deps-a5-short@2x.png" width="596px" height="451px"></a></p>
+<p><img src="/static/images/deps-a5-short@2x.png" width="596px" height="451px"></p>
 <p>但是当他使用两个基于 Moauth 的 API 时, Unity 中的单个导入 “moauth” 是不明确的. 由于 Unity 是主要的软件包, 它不能被克隆(与 Moauth 本身相反):</p>
-<p><a href="/static/images/deps-a6-short@2x.png" class="gallery-item"><img src="/static/images/deps-a6-short@2x.png" width="628px" height="451px"></a></p>
+<p><img src="/static/images/deps-a6-short@2x.png" width="628px" height="451px"></p>
 <p>一个 StackOverflow 评论建议将 Moauth 导入移动到两个不同的包中, 然后让 Unity 导入它们. Ugo 尝试了这一点, 令人难以置信的是, 它可以工作:</p>
-<p><a href="/static/images/deps-a7-short@2x.png" class="gallery-item"><img src="/static/images/deps-a7-short@2x.png" width="561px" height="601px"></a></p>
+<p><img src="/static/images/deps-a7-short@2x.png" width="561px" height="601px"></p>
 <p>Ugo 按时回了家. 他对包管理并不满意, 但他现在是 StackOverflow 的忠实粉丝.</p>
 <h3 id="基于语义版本的复述"><a href="#基于语义版本的复述" class="headerlink" title="基于语义版本的复述"></a>基于语义版本的复述</h3><p>假设包管理使用它们而不是原始故事的 ‘r’ 数字, 让我们挥动一把魔杖并用语义版本复述故事.</p>
 <p>以下是一些变化:</p>
@@ -230,10 +233,10 @@
 <p>面对两个不同的 OAuth2 软件包, Moe (Moauth 的作者) 必须为 Pocoauth 编写第二个软件包 Moauth, 他命名为 Pocomoauth 并给出了导入路径 “pocomoauth”.</p>
 <p>当 Anna 将 AWS 软件包更新为新的 OAuth2 API 时, 她还将该代码中的导入路径从 “oauth2” 更改为 “pocoauth”, 并将 “moauth” 中的导入路径更改为 “pocomoauth”. 然后, 随着 AWS r2 和 AWS r3 的发布, 故事会继续进行.</p>
 <p>在第 2 章中, 当 Ugo 热切地采用 Amazon Zeta 时, 一切正常. 所有软件包代码中的导入都完全匹配需要构建的代码. 他不必在 StackOverflow 上查找特殊标志(flag), 而且他午餐仅仅晚了五分钟.</p>
-<p><a href="/static/images/deps-b1-short@2x.png" class="gallery-item"><img src="/static/images/deps-b1-short@2x.png" width="550px" height="517px"></a></p>
+<p><img src="/static/images/deps-b1-short@2x.png" width="550px" height="517px"></p>
 <p>在第 3 章中, Amy 将基于 Moauth 的 API 添加到 Azure, 而 Anna 则将相同的基于 Pocomoauth 的 API 添加到 AWS.</p>
 <p>当 Ugo 决定更新 Azure 和 AWS 时, 再次没有问题. 他更新的程序不需要任何特殊的重构:</p>
-<p><a href="/static/images/deps-b2-short@2x.png" class="gallery-item"><img src="/static/images/deps-b2-short@2x.png" width="550px" height="467px"></a></p>
+<p><img src="/static/images/deps-b2-short@2x.png" width="550px" height="467px"></p>
 <p>在这个故事版本的末尾, Ugo 甚至都没有想到他的包管理器. 它正常工作; 他几乎没有注意到它在那里.</p>
 <p>与故事的语义版本翻译相比, 这里使用导入版本化改变了两个关键细节. 首先, 当 Alice 介绍了她向后兼容的 OAuth2 API 时, 她不得不将其作为一个新包发布 (Pocoauth). 其次, 由于 Moe 的封装包 Moauth 在其 API 中公开了 OAuth2 包的类型定义, Alice 发布了一个新包迫使 Moe 也发布了一个新包 (Pocomoauth). Ugo 最终的 Unity 构建进展顺利, 因为 Alice 和 Moe 的软件包拆分创建保持了 Unity 等客户端构建和运行所需的结构. 取而代之的是, Ugo 和像他一样的用户不再需要诸如 -fmultiverse -fclone 这样外来重构辅助的不完整包管理的复杂性, 导入兼容性规则将少量额外的工作推给包作者, 从而让所有用户收益.</p>
 <p>需要为每个向后不兼容的 API 更改引入一个新名称肯定会有成本, 但正如 semver FAQ 所述, 该成本应鼓励作者更清楚地考虑这些变化的影响以及它们是否真的有必要. 而在导入版本控制的情况下, 成本会为用户带来显著的收益.</p>
@@ -243,9 +246,9 @@
 <h3 id="语义导入版本控制"><a href="#语义导入版本控制" class="headerlink" title="语义导入版本控制"></a>语义导入版本控制</h3><p>上一节展示了在更新期间, 导入版本如何带来简单, 可预测的构建. 但是, 在每次向后兼容的更改中选择一个新名字对用户来说都很困难并且没有任何帮助. 鉴于 OAuth2 和 Pocoauth 之间的选择, Amy 应该使用哪个 ? 没有进一步调查, 就没有办法知道. 相比之下, 语义版本化使得这很容易: OAuth2 2.0.0 显然是 OAuth2 1.0.0 的预期替代品.</p>
 <p>我们可以使用语义版本控制, 并通过在导入路径中包含主版本来遵循导入兼容性规则. Alice 可以用新的导入路径 “oauth2/v2” 调用她新的 API OAuth2 2.0.0, 而不需要创建一个可爱但不相关的新名称 Pocoauth. Moe 也一样: Moauth 2.0.0 (导入为 “moauth/v2” ) 也可以成为 OAuth2 2.0.0 的辅助包, 就像 Moauth 1.0.0 是 OAuth2 1.0.0 的辅助包一样.</p>
 <p>当 Ugo 在第  2章中添加 Zeta 支持时, 他的构建看起来像这样:</p>
-<p><a href="/static/images/deps-c1-short@2x.png" class="gallery-item"><img src="/static/images/deps-c1-short@2x.png" width="567px" height="467px"></a></p>
+<p><img src="/static/images/deps-c1-short@2x.png" width="567px" height="467px"></p>
 <p>因为 “moauth” 和 “moauth/v2” 只是不同的软件包, 所以 Ugo 完全清楚他需要如何使用 Azure 的 “moauth” 以及使用 AWS 的 “moauth/v2”: 导入两者.</p>
-<p><a href="/static/images/deps-c2-short@2x.png" class="gallery-item"><img src="/static/images/deps-c2-short@2x.png" width="550px" height="467px"></a></p>
+<p><img src="/static/images/deps-c2-short@2x.png" width="550px" height="467px"></p>
 <p>为了兼容现有的 Go 用法, 并作为不做向后不兼容的 API 更改的小鼓励, 我在此假定主要版本 1 从导入路径中省略: import “moauth”, 而不是 “moauth/v1”. 同样, 主要版本 0 明确拒绝兼容性, 也从导入路径中省略. 这里的想法是, 通过使用 v0 依赖关系, 用户明确承认破坏的可能性并在选择更新时承担处理它的责任. (当然, 更新不会自动发生是很重要的. 我们将在下一篇文章中看到如何最小化版本选择对此有所帮助.)</p>
 <h3 id="功能性名称和不可变的含义"><a href="#功能性名称和不可变的含义" class="headerlink" title="功能性名称和不可变的含义"></a>功能性名称和不可变的含义</h3><p>二十年前, Rob Pike 和我正在修改 Plan 9 C 库的内部结构, Rob 教会了我这样一个经验法则, 当你改变一个函数的行为时, 你也改变它的名字. 旧的名字有一个含义. 通过对新名称使用不同的含义并删除旧名称, 我们确保编译器会大声抱怨需要检查和更新的每段代码, 而不是静静地编译不正确的代码. 如果人们有他们自己的程序在使用这个函数, 他们会得到编译时失败, 而不是长时间的调试会话. 在当今分布式版本控制的世界中, 最后一个问题被放大了, 这使得名称变得更加重要. 并发编写的旧代码所期望的旧的语义不应该在合并的时候被新的语义替代.</p>
 <p>当然, 删除旧函数只有在可以找到所有用到它的地方, 或者当用户了解他们有责任跟上变化时才会起作用, 例如在 Plan 9 等研究系统中. 对于导出的 API, 通常会更好地保留旧名称和旧行为, 并只添加新行为的新名称. Rich Hickey 在 2016 年的 “<a href="https://www.youtube.com/watch?v=oyLBGkS5ICk" target="_blank" rel="noopener">Spec-ulation</a>“ 演讲中提到了这一点, 即只添加新名称和行为, 不删除旧名称或重新定义其含义, 正是函数式编程鼓励的个体变量或数据结构. 功能性方法在小规模编程中带来了明确性和可预测性方面的好处, 并且在应用时效益更大, 就像导入兼容性规则一样, 对于整个 API: 依赖地狱实际上只是可变性而已. 这只是演讲中的一个小点; 整个演讲值得一看.</p>
@@ -268,12 +271,7 @@
 <h3 id="致力于兼容性"><a href="#致力于兼容性" class="headerlink" title="致力于兼容性"></a>致力于兼容性</h3><p>语义导入版本控制对包的作者来说更有用. 他们不能只是决定发布 v2, 远离 v1, 并留下像 Ugo 这样的用户来应对这种后果. 但那些这么做的包作者正在伤害用户. 在我看来, 如果系统难以伤害用户, 并且自然而然地包作者也不会作出伤害用户的行为, 那么这似乎是件好事.</p>
 <p>更一般地说, Sam Boyer 在 GopherCon 2017 上谈到了软件包管理如何调节我们的社交互动, 以及人们构建软件的协作. 我们可以决定. 我们是否希望在一个围绕系统创建的社区中工作, 该系统可以优化兼容性, 平滑过渡以及一起很好的工作 ? 或者我们是否希望在一个围绕系统创建的社区中工作, 该系统可以优化创建和描述不兼容性, 这使得作者破坏用户程序也可以接受 ? 导入版本控制, 特别是通过将语义主版本提升到导入路径来处理语义版本控制, 就是我们如何确保在第一种社区中工作.</p>
 <p>让我们致力于兼容性.</p>
-</div><script src="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/js/lightgallery.min.js"></script><script>if (typeof lightGallery !== 'undefined') {
-        var options = {
-            selector: '.gallery-item'
-        };
-        lightGallery(document.getElementsByClassName('.article-gallery')[0], options);
-        }</script>
+
   </div>
 </article>
 
@@ -319,7 +317,7 @@
   <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/vgo-import.html&title=语义导入版本控制"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/vgo-import.html&title=语义导入版本控制"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/vgo-import.html&title=语义导入版本控制"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/vgo-import.html&name=语义导入版本控制&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34;&gt;&lt;div class=&#34;.article-gallery&#34; &lt;p=&#34;&#34;&gt;本文译自 &lt;a href=&#34;https://research.swtch.com/vgo-import&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Semantic Import Versioning&lt;/a&gt;, &lt;a href=&#34;https://lingchao.xin/tag/vgo.html&#34;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 3 部分, 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/vgo-import.html&name=语义导入版本控制&description=&lt;p&gt;本文译自 &lt;a href=&#34;https://research.swtch.com/vgo-import&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Semantic Import Versioning&lt;/a&gt;, &lt;a href=&#34;https://lingchao.xin/tag/vgo.html&#34;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 3 部分, 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>

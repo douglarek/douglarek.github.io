@@ -6,17 +6,20 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="keywords" content="translation,go,vgo">
+    <meta name="description" content="本文译自 Defining Go Modules, Go &amp;amp; Versioning 的第 6 部分, 版权@归原文所有.">
+<meta name="keywords" content="translation,go,vgo">
 <meta property="og:type" content="article">
 <meta property="og:title" content="定义 Go 模块">
 <meta property="og:url" content="https://lingchao.xin/post/vgo-module.html">
 <meta property="og:site_name" content="Coding talks">
+<meta property="og:description" content="本文译自 Defining Go Modules, Go &amp;amp; Versioning 的第 6 部分, 版权@归原文所有.">
 <meta property="og:locale" content="en">
 <meta property="og:image" content="https://lingchao.xin/static/images/gitmod-1@2x.png">
 <meta property="og:image" content="https://lingchao.xin/static/images/gitmod-2@2x.png">
-<meta property="og:updated_time" content="2018-04-22T01:14:30.000Z">
+<meta property="og:updated_time" content="2018-04-23T02:01:23.436Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="定义 Go 模块">
+<meta name="twitter:description" content="本文译自 Defining Go Modules, Go &amp;amp; Versioning 的第 6 部分, 版权@归原文所有.">
 <meta name="twitter:image" content="https://lingchao.xin/static/images/gitmod-1@2x.png">
     
     
@@ -96,7 +99,7 @@
   <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/vgo-module.html&title=定义 Go 模块"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/vgo-module.html&title=定义 Go 模块"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/vgo-module.html&title=定义 Go 模块"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/vgo-module.html&name=定义 Go 模块&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34;&gt;&lt;div class=&#34;.article-gallery&#34; &lt;p=&#34;&#34;&gt;本文译自 &lt;a href=&#34;https://research.swtch.com/vgo-module&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Defining Go Modules&lt;/a&gt;, &lt;a href=&#34;https://lingchao.xin/tag/vgo.html&#34;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 6 部分, 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/vgo-module.html&name=定义 Go 模块&description=&lt;p&gt;本文译自 &lt;a href=&#34;https://research.swtch.com/vgo-module&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Defining Go Modules&lt;/a&gt;, &lt;a href=&#34;https://lingchao.xin/tag/vgo.html&#34;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 6 部分, 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -140,7 +143,7 @@
   
 
   <div class="content" itemprop="articleBody">
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css"><div class=".article-gallery" <p="">本文译自 <a href="https://research.swtch.com/vgo-module" target="_blank" rel="noopener">Defining Go Modules</a>, <a href="https://lingchao.xin/tag/vgo.html">Go &amp; Versioning</a> 的第 6 部分, 版权@归原文所有.<br><a id="more"></a><p></p>
+    <p>本文译自 <a href="https://research.swtch.com/vgo-module" target="_blank" rel="noopener">Defining Go Modules</a>, <a href="https://lingchao.xin/tag/vgo.html">Go &amp; Versioning</a> 的第 6 部分, 版权@归原文所有.<br><a id="more"></a></p>
 <p>正如在<a href="https://lingchao.xin/post/vgo-intro.html">概述文章</a>中介绍的, Go 模块是作为一个版本化的软件包集合单元, 连同列出其他所需模块的 go.mod 文件. 转向模块是我们重新审视和修正 go 命令如何管理源代码的许多细节的机会. 在我们打算使用模块弃用当前的 go get 模型时, 10 年已经过去了. 我们需要确保模块设计将在未来十年为我们提供良好的服务. 尤其是:</p>
 <ul>
 <li>我们希望鼓励更多的开发人员为他们的软件包打标签(tag), 而不是期望用户只会选择一个对他们来说看起来很好的提交哈希. 标记显式发布清楚地表明了对别人有用的以及正在开发的东西. 同时, 它仍然可以 - 尽管可能不方便 - 请求特定的提交.</li>
@@ -172,10 +175,10 @@
 <p>首先, 创建一个代码库并用类似于 v0.1.0 这样的一个 semver 格式标记一个提交, 就足够了. 顶头的 v 是必需的, 并且还需要三个数字. 虽然 vgo 它自己接受命令行中 v0.1 的简写形式, 但规范形式 v0.1.0 必须在代码库标记中使用, 以避免歧义. 只有标签是必需的. 为了不使用 vgo 的时候也可以使用提交, 在这一点上一个 go.mod 文件要求并不严格. 创建新的标记提交可创建新的模块版本. 简单.</p>
 <p>当开发人员到达 v2 时, 语义导入版本控制意味着 /v2/ 在模块根前缀的末尾添加了一个导入路径: my/thing/v2/sub/pkg. 正如<a href="https://research.swtch.com/vgo-import" target="_blank" rel="noopener">前面的文章</a>中所述, 这个约束有很好的理由, 但是它仍然偏离现有的工具. 意识到这一点, vgo 如果不先检查 go.mod 文件中有主版本的模块路径声明(例如, module “my/thing/v2”) 就不会使用源码库中的 v2 或更高标记版本. Vgo 使用该声明作为作者使用语义导入版本控制来命名该模块中的包的证据. 这对多包模块来说尤其重要, 因为模块中的导入路径必须包含 /v2/ 元素以避免引用回 v1 模块.</p>
 <p>我们预计大多数开发人员会更喜欢遵循通常的 “主分支” 约定, 其中不同的主版本存在于不同的分支中. 在这种情况下, v2 分支中的根目录将有一个表明 v2 的 go.mod, 如下所示:</p>
-<p><a href="/static/images/gitmod-1@2x.png" class="gallery-item"><img src="/static/images/gitmod-1@2x.png" width="591px" height="416px"></a></p>
+<p><img src="/static/images/gitmod-1@2x.png" width="591px" height="416px"></p>
 <p>这大致是大多数开发人员已在工作的(流程). 在图中, v1.0.0 标签指向一个早于 vgo 的提交. 它根本没有 go.mod 文件, 而且工作正常. 在提交标记 v1.0.1 中, 作者添加了一个 go.mod module “my/thing”.<br>然而, 在那个提交之后, 作者分叉了一个新的 v2 开发分支. 除了任何更改代码提示 V2 (包括更换 bar 用 quux)时, go.mod 在新的分支更新为 module “my/thing/v2”. 分支可以独立前进. 事实上, vgo 真的不知道分支(的存在). 它只是将标签解析为提交, 然后在提交中查看 go.mod 文件. 同样, 该 go.mod 文件是 v2 及更高版本所必需的, 以便 vgo 可以使用该文件中的 module 行作为代码使用了语义导入版本控制的标志, 所以 foo 导入的是 my/thing/v2/foo/quux, 不是 my/thing/foo/quux.</p>
 <p>作为替代方案, vgo 还支持 “主子目录” 约定, 在子目录中开发了 V1 以上的主要版本:</p>
-<p><a href="/static/images/gitmod-2@2x.png" class="gallery-item"><img src="/static/images/gitmod-2@2x.png" width="376px" height="768px"></a></p>
+<p><img src="/static/images/gitmod-2@2x.png" width="376px" height="768px"></p>
 <p>在这种情况下, v2.0.0 不是通过将整个树分叉为单独的分支而是通过将其复制到子目录中来创建的. 再次 go.mod 更新为 “my/thing/v2”. 之后, v1.x.x 标记指向根目录文件的提交, 不包含 v2/, 而 v2.x.x 标记仅指向 v2/ 子目录的提交. go.mod 文件可以使 vgo 区分这两种情况. 将 v1.x.x 和 v2.x.x 标记指向相同的提交也是有意义的: 它们将处理提交的不同子树.</p>
 <p>我们期望开发者可能会强烈地选择一种或另一种约定. vgo 同时支持这两种. 请注意, 对于 v2 以上的主版本, 主子目录方案可能会为 go get 用户提供优雅的过渡. 另一方面, dep 或 vendoring 工具的用户应该能够使用任何约定之一来使用代码库. 当然, 我们会确保 dep 可以.</p>
 <h3 id="多模块代码库"><a href="#多模块代码库" class="headerlink" title="多模块代码库"></a>多模块代码库</h3><p>开发人员也可能发现在单个源代码库中维护一组模块是很有用的. 我们想让 vgo 支持这种可能性. 总的来说, 不同的开发人员, 团队, 项目和公司应用源代码控制的方式已经有很大差异, 我们认为将 “单一代码库等同于一个模块” 这样的单一映射强加给所有开发人员并不是很有成效. 在这方面有一定的灵活性也应该有助于 vgo 适应围绕源码控制的最佳实践不断变化.</p>
@@ -230,12 +233,7 @@
 <p>在构建模块时 vgo (和稍后 go) 将完全忽略 vendored 的依赖; 这些依赖也不会包含在模块的 zip 文件中. 为了能够让作者迁移到 vgo 与 go.mod, 同时仍然支持没有完成转换的用户, 新的 vgo vendor 命令通过填充模块的 vendor 目录中用户使用的包来产生基于 vgo 的构建.</p>
 <h3 id="接下来呢"><a href="#接下来呢" class="headerlink" title="接下来呢 ?"></a>接下来呢 ?</h3><p>这里的细节可能会被修改, 但今天的 go.mod 文件将被任何未来的工具所理解. 请开始使用发布标签标记你的软件包; 请添加 go.mod 文件使你的项目有意义.</p>
 <p>本系列的下一篇文章将介绍对 go 工具命令行体验的更改.</p>
-</div><script src="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/js/lightgallery.min.js"></script><script>if (typeof lightGallery !== 'undefined') {
-        var options = {
-            selector: '.gallery-item'
-        };
-        lightGallery(document.getElementsByClassName('.article-gallery')[0], options);
-        }</script>
+
   </div>
 </article>
 
@@ -281,7 +279,7 @@
   <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/vgo-module.html&title=定义 Go 模块"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/vgo-module.html&title=定义 Go 模块"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/vgo-module.html&title=定义 Go 模块"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/vgo-module.html&name=定义 Go 模块&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34;&gt;&lt;div class=&#34;.article-gallery&#34; &lt;p=&#34;&#34;&gt;本文译自 &lt;a href=&#34;https://research.swtch.com/vgo-module&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Defining Go Modules&lt;/a&gt;, &lt;a href=&#34;https://lingchao.xin/tag/vgo.html&#34;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 6 部分, 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/vgo-module.html&name=定义 Go 模块&description=&lt;p&gt;本文译自 &lt;a href=&#34;https://research.swtch.com/vgo-module&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Defining Go Modules&lt;/a&gt;, &lt;a href=&#34;https://lingchao.xin/tag/vgo.html&#34;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 6 部分, 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>

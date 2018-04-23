@@ -6,15 +6,18 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="keywords" content="translation,go">
+    <meta name="description" content="本文译自 Synchronization queues in Golang 版权@归原文所有.">
+<meta name="keywords" content="translation,go">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Go 中的同步队列">
 <meta property="og:url" content="https://lingchao.xin/post/synchronization-queues-in-golang.html">
 <meta property="og:site_name" content="Coding talks">
+<meta property="og:description" content="本文译自 Synchronization queues in Golang 版权@归原文所有.">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2018-04-15T10:01:42.000Z">
+<meta property="og:updated_time" content="2018-04-20T05:40:59.629Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Go 中的同步队列">
+<meta name="twitter:description" content="本文译自 Synchronization queues in Golang 版权@归原文所有.">
     
     
         
@@ -93,7 +96,7 @@
   <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/synchronization-queues-in-golang.html&title=Go 中的同步队列"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/synchronization-queues-in-golang.html&title=Go 中的同步队列"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/synchronization-queues-in-golang.html&title=Go 中的同步队列"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/synchronization-queues-in-golang.html&name=Go 中的同步队列&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34;&gt;&lt;div class=&#34;.article-gallery&#34; &lt;p=&#34;&#34;&gt;本文译自 &lt;a href=&#34;https://medium.com/golangspec/synchronization-queues-in-golang-554f8e3a31a4&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Synchronization queues in Golang&lt;/a&gt; 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/synchronization-queues-in-golang.html&name=Go 中的同步队列&description=&lt;p&gt;本文译自 &lt;a href=&#34;https://medium.com/golangspec/synchronization-queues-in-golang-554f8e3a31a4&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Synchronization queues in Golang&lt;/a&gt; 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -137,7 +140,7 @@
   
 
   <div class="content" itemprop="articleBody">
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css"><div class=".article-gallery" <p="">本文译自 <a href="https://medium.com/golangspec/synchronization-queues-in-golang-554f8e3a31a4" target="_blank" rel="noopener">Synchronization queues in Golang</a> 版权@归原文所有.<br><a id="more"></a><p></p>
+    <p>本文译自 <a href="https://medium.com/golangspec/synchronization-queues-in-golang-554f8e3a31a4" target="_blank" rel="noopener">Synchronization queues in Golang</a> 版权@归原文所有.<br><a id="more"></a></p>
 <h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><p>假设我们正在运作一家雇佣程序员和测试人员的 IT 公司. 为了让人们有机会认识对方并放松一下, 我们买了一张乒乓桌, 并制定了以下规则:</p>
 <ul>
 <li>正好两个人可以同时玩,</li>
@@ -195,12 +198,7 @@
 <li><a href="https://medium.com/golangspec/reusable-barriers-in-golang-156db1f75d0b" target="_blank" rel="noopener">Reusable barriers in Golang</a></li>
 <li><a href="https://blog.golang.org/share-memory-by-communicating" target="_blank" rel="noopener">Share Memory By Communicating</a></li>
 </ul>
-</div><script src="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/js/lightgallery.min.js"></script><script>if (typeof lightGallery !== 'undefined') {
-        var options = {
-            selector: '.gallery-item'
-        };
-        lightGallery(document.getElementsByClassName('.article-gallery')[0], options);
-        }</script>
+
   </div>
 </article>
 
@@ -246,7 +244,7 @@
   <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/synchronization-queues-in-golang.html&title=Go 中的同步队列"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/synchronization-queues-in-golang.html&title=Go 中的同步队列"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/synchronization-queues-in-golang.html&title=Go 中的同步队列"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/synchronization-queues-in-golang.html&name=Go 中的同步队列&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34;&gt;&lt;div class=&#34;.article-gallery&#34; &lt;p=&#34;&#34;&gt;本文译自 &lt;a href=&#34;https://medium.com/golangspec/synchronization-queues-in-golang-554f8e3a31a4&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Synchronization queues in Golang&lt;/a&gt; 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/synchronization-queues-in-golang.html&name=Go 中的同步队列&description=&lt;p&gt;本文译自 &lt;a href=&#34;https://medium.com/golangspec/synchronization-queues-in-golang-554f8e3a31a4&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Synchronization queues in Golang&lt;/a&gt; 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>

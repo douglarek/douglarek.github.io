@@ -6,15 +6,18 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="keywords" content="translation,go">
+    <meta name="description" content="本文译自go-proverbs, 脱胎于 Rob Pike 振奋人心的演讲视频 talk at Gopherfest SV 2015 (bilibili). 不要通过共享内存进行通信, 通过通信共享内存 (Don’t communicate by sharing memory, share memory by communicating)传统的线程模型（通常在编写 Java, C++ 和 Pyth">
+<meta name="keywords" content="translation,go">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Go 谚语">
 <meta property="og:url" content="https://lingchao.xin/post/go-proverbs.html">
 <meta property="og:site_name" content="Coding talks">
+<meta property="og:description" content="本文译自go-proverbs, 脱胎于 Rob Pike 振奋人心的演讲视频 talk at Gopherfest SV 2015 (bilibili). 不要通过共享内存进行通信, 通过通信共享内存 (Don’t communicate by sharing memory, share memory by communicating)传统的线程模型（通常在编写 Java, C++ 和 Pyth">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2018-04-15T09:40:06.000Z">
+<meta property="og:updated_time" content="2018-04-20T05:40:59.626Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Go 谚语">
+<meta name="twitter:description" content="本文译自go-proverbs, 脱胎于 Rob Pike 振奋人心的演讲视频 talk at Gopherfest SV 2015 (bilibili). 不要通过共享内存进行通信, 通过通信共享内存 (Don’t communicate by sharing memory, share memory by communicating)传统的线程模型（通常在编写 Java, C++ 和 Pyth">
     
     
         
@@ -137,7 +140,7 @@
   
 
   <div class="content" itemprop="articleBody">
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css"><div class=".article-gallery" <p="">本文译自<a href="http://go-proverbs.github.io/" target="_blank" rel="noopener">go-proverbs</a>, 脱胎于 Rob Pike 振奋人心的演讲视频 <a href="https://www.youtube.com/watch?v=PAAkCSZUG1c" target="_blank" rel="noopener">talk at Gopherfest SV 2015</a> (<a href="https://www.bilibili.com/video/av18889438/" target="_blank" rel="noopener">bilibili</a>).<p></p>
+    <p>本文译自<a href="http://go-proverbs.github.io/" target="_blank" rel="noopener">go-proverbs</a>, 脱胎于 Rob Pike 振奋人心的演讲视频 <a href="https://www.youtube.com/watch?v=PAAkCSZUG1c" target="_blank" rel="noopener">talk at Gopherfest SV 2015</a> (<a href="https://www.bilibili.com/video/av18889438/" target="_blank" rel="noopener">bilibili</a>).</p>
 <h3 id="不要通过共享内存进行通信-通过通信共享内存-Don’t-communicate-by-sharing-memory-share-memory-by-communicating"><a href="#不要通过共享内存进行通信-通过通信共享内存-Don’t-communicate-by-sharing-memory-share-memory-by-communicating" class="headerlink" title="不要通过共享内存进行通信, 通过通信共享内存 (Don’t communicate by sharing memory, share memory by communicating)"></a>不要通过共享内存进行通信, 通过通信共享内存 (<a href="https://www.bilibili.com/video/av18889438/?t=2m48s" target="_blank" rel="noopener">Don’t communicate by sharing memory, share memory by communicating</a>)</h3><p>传统的线程模型（通常在编写 Java, C++ 和 Python 程序时使用）要求程序员使用共享内存在线程之间进行通信. 通常, 共享数据结构受锁保护, 线程将争夺这些锁访问数据, 在某些情况下, 通过使用 Python 的 Queue 等线程安全的数据结构可以使这变得更容易.</p>
 <p>Go 的并发原语 (goroutines 和 channels) 为构造并发软件提供了一种优雅而独特的手段. (这些概念有一个有趣的历史, 要从 C.A.R.Hoare 的通信顺序进程说起.) Go 鼓励使用 channels 在 goroutines 之间传递对数据的引用, 而不是显式地使用锁来调解对共享数据的访问. 这种方法确保只有一个 goroutine 可以在给定的时间访问数据. 这个概念总结在 Effective Go 文档中 (任何 Go 程序员都必须阅读).</p>
 <p>Go 官方博客中有一篇文章对该谚语解读, 可以参见<a href="https://blog.golang.org/share-memory-by-communicating" target="_blank" rel="noopener">原文</a>.</p>
@@ -169,12 +172,7 @@
 <h3 id="文档是针对用户的-Documentation-is-for-users"><a href="#文档是针对用户的-Documentation-is-for-users" class="headerlink" title="文档是针对用户的 (Documentation is for users)"></a>文档是针对用户的 (<a href="https://www.bilibili.com/video/av18889438/?t=19m07s" target="_blank" rel="noopener">Documentation is for users</a>)</h3><p>很多人写文档表明某个 func 是做什么的, 但是他们不想想这个 func 是为谁而写. 这有很大的不同. 你知道这个 func 返回什么是对的, 但是它为什么返回了你使用的时候不一样的结果?</p>
 <p>把自己当成使用者而不是写它的人, 那么 godoc 上的文档就是对用户有用的. 这对于其他语言一样适用.</p>
 <h3 id="不要慌-Don’t-panic"><a href="#不要慌-Don’t-panic" class="headerlink" title="不要慌 (Don’t panic)"></a>不要慌 (<a href="https://github.com/golang/go/wiki/CodeReviewComments#dont-panic" target="_blank" rel="noopener">Don’t panic</a>)</h3><p>不要使用 panic 进行正常的错误处理. 使用错误 (error) 和多个返回值.</p>
-</div><script src="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/js/lightgallery.min.js"></script><script>if (typeof lightGallery !== 'undefined') {
-        var options = {
-            selector: '.gallery-item'
-        };
-        lightGallery(document.getElementsByClassName('.article-gallery')[0], options);
-        }</script>
+
   </div>
 </article>
 
