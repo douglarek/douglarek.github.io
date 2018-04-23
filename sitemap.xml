@@ -4,7 +4,7 @@
   <url>
     <loc>https://lingchao.xin/post/conditional-expressions-in-postgres.html</loc>
     
-    <lastmod>2018-04-23T02:36:27.786Z</lastmod>
+    <lastmod>2018-04-23T02:39:28.289Z</lastmod>
     
   </url>
   
@@ -100,13 +100,6 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/postgresql-10-full-text-search-support-for-json-and-jsonb.html</loc>
-    
-    <lastmod>2018-04-20T05:40:59.629Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>https://lingchao.xin/post/synchronization-queues-in-golang.html</loc>
     
     <lastmod>2018-04-20T05:40:59.629Z</lastmod>
@@ -114,14 +107,21 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/how-does-the-golang-scheduler-work.html</loc>
+    <loc>https://lingchao.xin/post/postgresql-10-full-text-search-support-for-json-and-jsonb.html</loc>
+    
+    <lastmod>2018-04-20T05:40:59.629Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://lingchao.xin/post/memory-leaking.html</loc>
     
     <lastmod>2018-04-20T05:40:59.628Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/memory-leaking.html</loc>
+    <loc>https://lingchao.xin/post/how-does-the-golang-scheduler-work.html</loc>
     
     <lastmod>2018-04-20T05:40:59.628Z</lastmod>
     
@@ -142,14 +142,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/go-errors-stack-traces.html</loc>
+    <loc>https://lingchao.xin/post/go-range-loop-internals.html</loc>
     
     <lastmod>2018-04-20T05:40:59.626Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/go-range-loop-internals.html</loc>
+    <loc>https://lingchao.xin/post/go-errors-stack-traces.html</loc>
     
     <lastmod>2018-04-20T05:40:59.626Z</lastmod>
     
