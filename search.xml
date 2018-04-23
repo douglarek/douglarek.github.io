@@ -577,7 +577,7 @@
       <title>Coleslaw, A Lisp static blog generator</title>
       <link href="/post/rock-with-coleslaw.html"/>
       <url>/post/rock-with-coleslaw.html</url>
-      <content type="html"><![CDATA[<p>A long time, I used <code>jekyll</code> as my static site generator. But now I will play some lisp, so Coleslaw comes.</p>]]></content>
+      <content type="html"><![CDATA[<p>A long time, I used jekyll as my static site generator. But now I will play some lisp, so Coleslaw comes.</p>]]></content>
       
       
         <tags>
