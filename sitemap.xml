@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://lingchao.xin/post/postgresql-aggregate-functions.html</loc>
+    
+    <lastmod>2018-04-23T02:46:06.973Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://lingchao.xin/post/rock-with-coleslaw.html</loc>
     
     <lastmod>2018-04-23T02:41:45.237Z</lastmod>
@@ -23,13 +30,6 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/vgo-module.html</loc>
-    
-    <lastmod>2018-04-23T02:01:23.436Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>https://lingchao.xin/post/why-are-there-nil-channels-in-go.html</loc>
     
     <lastmod>2018-04-23T02:01:23.436Z</lastmod>
@@ -37,9 +37,9 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/vgo-import.html</loc>
+    <loc>https://lingchao.xin/post/vgo-module.html</loc>
     
-    <lastmod>2018-04-23T02:01:23.435Z</lastmod>
+    <lastmod>2018-04-23T02:01:23.436Z</lastmod>
     
   </url>
   
@@ -51,14 +51,21 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/gos-work-stealing-scheduler.html</loc>
+    <loc>https://lingchao.xin/post/vgo-import.html</loc>
+    
+    <lastmod>2018-04-23T02:01:23.435Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://lingchao.xin/post/json-tips-in-go.html</loc>
     
     <lastmod>2018-04-23T02:01:23.434Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/json-tips-in-go.html</loc>
+    <loc>https://lingchao.xin/post/gos-work-stealing-scheduler.html</loc>
     
     <lastmod>2018-04-23T02:01:23.434Z</lastmod>
     
@@ -79,14 +86,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/vgo-tour.html</loc>
+    <loc>https://lingchao.xin/post/vgo-repro.html</loc>
     
     <lastmod>2018-04-20T05:40:59.632Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/vgo-repro.html</loc>
+    <loc>https://lingchao.xin/post/vgo-tour.html</loc>
     
     <lastmod>2018-04-20T05:40:59.632Z</lastmod>
     
@@ -107,14 +114,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/synchronization-queues-in-golang.html</loc>
+    <loc>https://lingchao.xin/post/postgresql-10-full-text-search-support-for-json-and-jsonb.html</loc>
     
     <lastmod>2018-04-20T05:40:59.629Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/postgresql-10-full-text-search-support-for-json-and-jsonb.html</loc>
+    <loc>https://lingchao.xin/post/synchronization-queues-in-golang.html</loc>
     
     <lastmod>2018-04-20T05:40:59.629Z</lastmod>
     
@@ -149,13 +156,6 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/go-range-loop-internals.html</loc>
-    
-    <lastmod>2018-04-20T05:40:59.626Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>https://lingchao.xin/post/go-proverbs.html</loc>
     
     <lastmod>2018-04-20T05:40:59.626Z</lastmod>
@@ -164,6 +164,13 @@
   
   <url>
     <loc>https://lingchao.xin/post/go-errors-stack-traces.html</loc>
+    
+    <lastmod>2018-04-20T05:40:59.626Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://lingchao.xin/post/go-range-loop-internals.html</loc>
     
     <lastmod>2018-04-20T05:40:59.626Z</lastmod>
     
@@ -215,13 +222,6 @@
     <loc>https://lingchao.xin/post/2017-has-passed.html</loc>
     
     <lastmod>2018-03-26T09:45:49.124Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://lingchao.xin/post/postgresql-aggregate-functions.html</loc>
-    
-    <lastmod>2018-03-26T09:24:45.284Z</lastmod>
     
   </url>
   
