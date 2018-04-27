@@ -6,14 +6,14 @@
       <title>Go 的值拷贝代价</title>
       <link href="/post/go-value-copy-cost.html"/>
       <url>/post/go-value-copy-cost.html</url>
-      <content type="html"><![CDATA[<p>本文译自 <a href="https://go101.org/article/value-copy-cost.html" target="_blank" rel="noopener">Go Value Copy Costs</a> 版权@归原文所有.</p><p>值拷贝在 Go 语言编程中普遍发生. 赋值, 参数传递, channel 值发送以及接收操作都会涉及值拷贝. 本文将讨论 Go 中的值拷贝代价.</p><h3 id="值大小"><a href="#值大小" class="headerlink" title="值大小"></a>值大小</h3><p>值的大小意味着该值(<a href="https://go101.org/article/value-part.html" target="_blank" rel="noopener">直接部分</a>)将在内存中占用多少字节. 值的间接底层部分不影响值的大小.</p><p>在 Go 中, 如果两个值的类型属于同一类型, 并且类型不是基本类型, 字符串类型, 接口类型, 数组类型和结构类型, 那么这两个值的大小总是相等.</p><p>事实上, 对于标准的 Go 编译器/运行时, 两个字符串值的大小也总是相等, 对于两个接口值的大小也是一样的.</p><p>对于标准的 Go 编译器/运行时, 相同类型的值具有相同的值大小. 因此, 我们通常将值的大小称为值类型的大小.</p><p>数组类型的大小取决于元素类型的大小和数组类型的长度. 数组类型大小是数组元素类型大小与数组长度的乘积.</p><p>结构类型的大小取决于它的所有字段. 因为在两个相邻字段之间可能存在一些填充字节, 所以结构类型大小不小于(并且通常大于)结构字段的相应类型大小之和.</p><p>下表列出了各种类型的值大小. 在表中, 一个字表示一个本地字, 它在 32 位操作系统上是 4 字节, 在 64 位操作系统上是 8 字节.</p><h3 id="值拷贝代价"><a href="#值拷贝代价" class="headerlink" title="值拷贝代价"></a>值拷贝代价</h3><p>一般来说, 拷贝值的成本与值的大小成正比. 但是, 值的大小并不是计算值拷贝的唯一因素. 不同的 CPU 体系结构可能会针对具有特定大小的值专门优化值拷贝. 在实践中, 我们可以将大小小于四个本地字的值视为小值. 拷贝小值的成本很小.</p><p>除了大型结构和数组类型的值(对于标准的 Go 编译器), Go 中的大部分值都是小值.</p><p>为避免参数传递和 channel 值发送和接收操作中的大值复制成本, 我们应该尽量避免使用大型结构和数组类型作为函数和方法参数类型(包括方法接收器类型) 并避免使用大型结构和数组类型作为 channel 元素类型. 我们可以使用基类型为大型结构和数组类型的指针类型来应对这种情况.</p><p>另一方面, 我们还应该考虑在运行时使用太多指针造成的垃圾回收的负面影响. 因此, 是否应该使用大型结构体和数组类型或其相应的指针类型取决于特定的场景.</p><p>通常, 我们不应该使用基类型为 slice, map, channel map, function, string 和接口类型的指针类型. 这些假定的基本类型的值拷贝的成本很小.</p><p>如果元素类型是大值类型, 我们还应该尝试避免使用两次迭代变量形式来迭代数组和切片元素, 因为每个元素值都将被复制到迭代过程中的第二个迭代变量(译注: for range 中的 v).</p><p>以下是一个示例, 用于对 slice 元素迭代的不同方式进行基准测试.</p><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">"testing"</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> S <span class="keyword">struct</span>&#123;a, b, c, d, e <span class="keyword">int64</span>&#125;</span><br><span class="line"><span class="keyword">var</span> sX, sY, sZ = <span class="built_in">make</span>([]S, <span class="number">1000</span>), <span class="built_in">make</span>([]S, <span class="number">1000</span>), <span class="built_in">make</span>([]S, <span class="number">1000</span>)</span><br><span class="line"><span class="keyword">var</span> sumX, sumY, sumZ <span class="keyword">int64</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Benchmark_Loop</span><span class="params">(b *testing.B)</span></span> &#123;</span><br><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; b.N; i++ &#123;</span><br><span class="line">sumX = <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> j := <span class="number">0</span>; j &lt; <span class="built_in">len</span>(sX); j++ &#123;</span><br><span class="line">sumX += sX[j].a</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Benchmark_Range_OneIterVar</span><span class="params">(b *testing.B)</span></span> &#123;</span><br><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; b.N; i++ &#123;</span><br><span class="line">sumZ = <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> j := <span class="keyword">range</span> sY &#123;</span><br><span class="line">sumZ += sY[j].a</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Benchmark_Range_TwoIterVar</span><span class="params">(b *testing.B)</span></span> &#123;</span><br><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; b.N; i++ &#123;</span><br><span class="line">sumY = <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> _, v := <span class="keyword">range</span> sY &#123;</span><br><span class="line">sumY += v.a</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>在测试文件的目录中运行基准测试, 我们将得到类似于以下的结果:</p><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Benchmark_Loop-4                500000   3228 ns/op</span><br><span class="line">Benchmark_Range_OneIterVar-4    500000   3203 ns/op</span><br><span class="line">Benchmark_Range_TwoIterVars-4   200000   6616 ns/op</span><br></pre></td></tr></table></figure><p>我们可以发现, 双迭代变量形式的效率远低于其他两种形式.</p>]]></content>
+      <content type="html"><![CDATA[<p>本文译自 <a href="https://go101.org/article/value-copy-cost.html" target="_blank" rel="noopener">Go Value Copy Costs</a> 版权@归原文所有.</p><p>值拷贝在 Go 语言编程中普遍发生. 赋值, 参数传递, channel 值发送以及接收操作都会涉及值拷贝. 本文将讨论 Go 中的值拷贝代价.</p><h3 id="值大小"><a href="#值大小" class="headerlink" title="值大小"></a>值大小</h3><p>值的大小意味着该值(<a href="https://go101.org/article/value-part.html" target="_blank" rel="noopener">直接部分</a>)将在内存中占用多少字节. 值的间接底层部分不影响值的大小.</p><p>在 Go 中, 如果两个值的类型属于同一类型, 并且类型不是基本类型, 字符串类型, 接口类型, 数组类型和结构体类型, 那么这两个值的大小总是相等.</p><p>事实上, 对于标准的 Go 编译器/运行时, 两个字符串值的大小也总是相等, 对于两个接口值的大小也是一样的.</p><p>对于标准的 Go 编译器/运行时, 相同类型的值具有相同的值大小. 因此, 我们通常将值的大小称为值类型的大小.</p><p>数组类型的大小取决于元素类型的大小和数组类型的长度. 数组类型大小是数组元素类型大小与数组长度的乘积.</p><p>结构类型的大小取决于它的所有字段. 因为在两个相邻字段之间可能存在一些填充字节, 所以结构类型大小不小于(并且通常大于)结构字段的相应类型大小之和.</p><p>下表列出了各种类型的值大小. 在表中, 一个字表示一个本地字, 它在 32 位操作系统上是 4 字节, 在 64 位操作系统上是 8 字节.</p><table><thead><tr><th style="text-align:left">类型</th><th style="text-align:left">Go 1.10 的值大小</th><th style="text-align:left">Go 规范要求</th></tr></thead><tbody><tr><td style="text-align:left">bool</td><td style="text-align:left">1 字节</td><td style="text-align:left">未要求</td></tr><tr><td style="text-align:left">int8, uint8(byte)</td><td style="text-align:left">1 字节</td><td style="text-align:left">1 字节</td></tr><tr><td style="text-align:left">int16, uint16</td><td style="text-align:left">2 字节</td><td style="text-align:left">2 字节</td></tr><tr><td style="text-align:left">int32 (rune), uint32, float32</td><td style="text-align:left">4 字节</td><td style="text-align:left">4 字节</td></tr><tr><td style="text-align:left">int64, uint64, float64, complex64</td><td style="text-align:left">8 字节</td><td style="text-align:left">8 字节</td></tr><tr><td style="text-align:left">complex128</td><td style="text-align:left">16 字节</td><td style="text-align:left">16 字节</td></tr><tr><td style="text-align:left">int, uint</td><td style="text-align:left">1 个字</td><td style="text-align:left">体系结构相关, 4 或 8 个字节</td></tr><tr><td style="text-align:left">uintptr</td><td style="text-align:left">1 字</td><td style="text-align:left">足够大以存储指针值的未解释位</td></tr><tr><td style="text-align:left">string</td><td style="text-align:left">2 字</td><td style="text-align:left">未要求</td></tr><tr><td style="text-align:left">pointer</td><td style="text-align:left">1 字</td><td style="text-align:left">未要求</td></tr><tr><td style="text-align:left">slice</td><td style="text-align:left">3 字</td><td style="text-align:left">未要求</td></tr><tr><td style="text-align:left">map</td><td style="text-align:left">1 字</td><td style="text-align:left">未要求</td></tr><tr><td style="text-align:left">channel</td><td style="text-align:left">1 字</td><td style="text-align:left">未要求</td></tr><tr><td style="text-align:left">function</td><td style="text-align:left">1 字</td><td style="text-align:left">未要求</td></tr><tr><td style="text-align:left">interface</td><td style="text-align:left">2 字</td><td style="text-align:left">未要求</td></tr><tr><td style="text-align:left">struct</td><td style="text-align:left">所有字段的大小总和 + 填充字节数</td><td style="text-align:left">如果结构体类型不包含大于零的字段, 则其大小为零</td></tr><tr><td style="text-align:left">array</td><td style="text-align:left">(元素值大小) * (数组长度)</td><td style="text-align:left">如果数组的元素类型大小为零, 则其大小为零</td></tr></tbody></table><h3 id="值拷贝代价"><a href="#值拷贝代价" class="headerlink" title="值拷贝代价"></a>值拷贝代价</h3><p>一般来说, 拷贝值的成本与值的大小成正比. 但是, 值的大小并不是计算值拷贝的唯一因素. 不同的 CPU 体系结构可能会针对具有特定大小的值专门优化值拷贝. 在实践中, 我们可以将大小小于四个本地字的值视为小值. 拷贝小值的成本很小.</p><p>除了大型结构和数组类型的值(对于标准的 Go 编译器), Go 中的大部分值都是小值.</p><p>为避免参数传递和 channel 值发送和接收操作中的大值复制成本, 我们应该尽量避免使用大型结构和数组类型作为函数和方法参数类型(包括方法接收器类型) 并避免使用大型结构和数组类型作为 channel 元素类型. 我们可以使用基类型为大型结构和数组类型的指针类型来应对这种情况.</p><p>另一方面, 我们还应该考虑在运行时使用太多指针造成的垃圾回收的负面影响. 因此, 是否应该使用大型结构体和数组类型或其相应的指针类型取决于特定的场景.</p><p>通常, 我们不应该使用基类型为 slice, map, channel map, function, 字符串和接口类型的指针类型. 这些假定的基本类型的值拷贝的成本很小.</p><p>如果元素类型是大值类型, 我们还应该尝试避免使用两次迭代变量形式来迭代数组和切片元素, 因为每个元素值都将被复制到迭代过程中的第二个迭代变量(译注: for range 中的 v).</p><p>以下是一个示例, 用于对 slice 元素迭代的不同方式进行基准测试.</p><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">"testing"</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> S <span class="keyword">struct</span>&#123;a, b, c, d, e <span class="keyword">int64</span>&#125;</span><br><span class="line"><span class="keyword">var</span> sX, sY, sZ = <span class="built_in">make</span>([]S, <span class="number">1000</span>), <span class="built_in">make</span>([]S, <span class="number">1000</span>), <span class="built_in">make</span>([]S, <span class="number">1000</span>)</span><br><span class="line"><span class="keyword">var</span> sumX, sumY, sumZ <span class="keyword">int64</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Benchmark_Loop</span><span class="params">(b *testing.B)</span></span> &#123;</span><br><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; b.N; i++ &#123;</span><br><span class="line">sumX = <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> j := <span class="number">0</span>; j &lt; <span class="built_in">len</span>(sX); j++ &#123;</span><br><span class="line">sumX += sX[j].a</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Benchmark_Range_OneIterVar</span><span class="params">(b *testing.B)</span></span> &#123;</span><br><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; b.N; i++ &#123;</span><br><span class="line">sumZ = <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> j := <span class="keyword">range</span> sY &#123;</span><br><span class="line">sumZ += sY[j].a</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Benchmark_Range_TwoIterVar</span><span class="params">(b *testing.B)</span></span> &#123;</span><br><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; b.N; i++ &#123;</span><br><span class="line">sumY = <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> _, v := <span class="keyword">range</span> sY &#123;</span><br><span class="line">sumY += v.a</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>在测试文件的目录中运行基准测试, 我们将得到类似于以下的结果:</p><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Benchmark_Loop-4                500000   3228 ns/op</span><br><span class="line">Benchmark_Range_OneIterVar-4    500000   3203 ns/op</span><br><span class="line">Benchmark_Range_TwoIterVars-4   200000   6616 ns/op</span><br></pre></td></tr></table></figure><p>我们可以发现, 双迭代变量形式的效率远低于其他两种形式.</p>]]></content>
       
       
         <tags>
             
-            <tag> translation </tag>
-            
             <tag> go </tag>
+            
+            <tag> translation </tag>
             
             <tag> go101 </tag>
             
@@ -30,9 +30,9 @@
       
         <tags>
             
-            <tag> translation </tag>
-            
             <tag> go </tag>
+            
+            <tag> translation </tag>
             
         </tags>
       
@@ -47,9 +47,9 @@
       
         <tags>
             
-            <tag> translation </tag>
-            
             <tag> go </tag>
+            
+            <tag> translation </tag>
             
             <tag> go101 </tag>
             
@@ -98,9 +98,9 @@
       
         <tags>
             
-            <tag> translation </tag>
-            
             <tag> go </tag>
+            
+            <tag> translation </tag>
             
             <tag> go101 </tag>
             
@@ -117,9 +117,9 @@
       
         <tags>
             
-            <tag> translation </tag>
-            
             <tag> go </tag>
+            
+            <tag> translation </tag>
             
         </tags>
       
@@ -149,9 +149,9 @@
       
         <tags>
             
-            <tag> translation </tag>
-            
             <tag> go </tag>
+            
+            <tag> translation </tag>
             
             <tag> vgo </tag>
             
@@ -168,9 +168,9 @@
       
         <tags>
             
-            <tag> translation </tag>
-            
             <tag> go </tag>
+            
+            <tag> translation </tag>
             
             <tag> vgo </tag>
             
@@ -187,9 +187,9 @@
       
         <tags>
             
-            <tag> translation </tag>
-            
             <tag> go </tag>
+            
+            <tag> translation </tag>
             
             <tag> vgo </tag>
             
@@ -206,9 +206,9 @@
       
         <tags>
             
-            <tag> translation </tag>
-            
             <tag> go </tag>
+            
+            <tag> translation </tag>
             
             <tag> vgo </tag>
             
@@ -225,9 +225,9 @@
       
         <tags>
             
-            <tag> translation </tag>
-            
             <tag> go </tag>
+            
+            <tag> translation </tag>
             
             <tag> vgo </tag>
             
@@ -244,9 +244,9 @@
       
         <tags>
             
-            <tag> translation </tag>
-            
             <tag> go </tag>
+            
+            <tag> translation </tag>
             
             <tag> vgo </tag>
             
@@ -263,9 +263,9 @@
       
         <tags>
             
-            <tag> software development </tag>
-            
             <tag> translation </tag>
+            
+            <tag> software development </tag>
             
         </tags>
       
@@ -295,9 +295,9 @@
       
         <tags>
             
-            <tag> translation </tag>
-            
             <tag> go </tag>
+            
+            <tag> translation </tag>
             
         </tags>
       
@@ -312,9 +312,9 @@
       
         <tags>
             
-            <tag> translation </tag>
-            
             <tag> go </tag>
+            
+            <tag> translation </tag>
             
         </tags>
       
@@ -329,9 +329,9 @@
       
         <tags>
             
-            <tag> translation </tag>
-            
             <tag> go </tag>
+            
+            <tag> translation </tag>
             
         </tags>
       
@@ -346,9 +346,9 @@
       
         <tags>
             
-            <tag> translation </tag>
-            
             <tag> go </tag>
+            
+            <tag> translation </tag>
             
         </tags>
       
@@ -380,9 +380,9 @@
       
         <tags>
             
-            <tag> translation </tag>
-            
             <tag> go </tag>
+            
+            <tag> translation </tag>
             
         </tags>
       
@@ -397,9 +397,9 @@
       
         <tags>
             
-            <tag> translation </tag>
-            
             <tag> go </tag>
+            
+            <tag> translation </tag>
             
         </tags>
       
@@ -414,9 +414,9 @@
       
         <tags>
             
-            <tag> translation </tag>
-            
             <tag> go </tag>
+            
+            <tag> translation </tag>
             
             <tag> gc </tag>
             
@@ -433,9 +433,9 @@
       
         <tags>
             
-            <tag> translation </tag>
-            
             <tag> go </tag>
+            
+            <tag> translation </tag>
             
         </tags>
       
@@ -482,9 +482,9 @@
       
         <tags>
             
-            <tag> gin </tag>
-            
             <tag> go </tag>
+            
+            <tag> gin </tag>
             
             <tag> web </tag>
             
