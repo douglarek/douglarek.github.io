@@ -7,14 +7,14 @@
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <meta name="description" content="本文译自 Go Value Copy Costs 版权@归原文所有. 值拷贝在 Go 语言编程中普遍发生. 赋值, 参数传递, channel 值发送以及接收操作都会涉及值拷贝. 本文将讨论 Go 中的值拷贝代价. 值大小值的大小意味着该值(直接部分)将在内存中占用多少字节. 值的间接底层部分不影响值的大小. 在 Go 中, 如果两个值的类型属于同一类型, 并且类型不是基本类型, 字符串类型, 接">
-<meta name="keywords" content="go,translation,go101">
+<meta name="keywords" content="translation,go,go101">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Go 的值拷贝代价">
 <meta property="og:url" content="https://lingchao.xin/post/go-value-copy-cost.html">
 <meta property="og:site_name" content="Coding talks">
 <meta property="og:description" content="本文译自 Go Value Copy Costs 版权@归原文所有. 值拷贝在 Go 语言编程中普遍发生. 赋值, 参数传递, channel 值发送以及接收操作都会涉及值拷贝. 本文将讨论 Go 中的值拷贝代价. 值大小值的大小意味着该值(直接部分)将在内存中占用多少字节. 值的间接底层部分不影响值的大小. 在 Go 中, 如果两个值的类型属于同一类型, 并且类型不是基本类型, 字符串类型, 接">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2018-04-27T12:10:51.000Z">
+<meta property="og:updated_time" content="2018-04-27T12:12:03.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Go 的值拷贝代价">
 <meta name="twitter:description" content="本文译自 Go Value Copy Costs 版权@归原文所有. 值拷贝在 Go 语言编程中普遍发生. 赋值, 参数传递, channel 值发送以及接收操作都会涉及值拷贝. 本文将讨论 Go 中的值拷贝代价. 值大小值的大小意味着该值(直接部分)将在内存中占用多少字节. 值的间接底层部分不影响值的大小. 在 Go 中, 如果两个值的类型属于同一类型, 并且类型不是基本类型, 字符串类型, 接">
@@ -188,7 +188,7 @@
 </tr>
 <tr>
 <td style="text-align:left">int, uint</td>
-<td style="text-align:left">1 个字</td>
+<td style="text-align:left">1 字</td>
 <td style="text-align:left">体系结构相关, 4 或 8 个字节</td>
 </tr>
 <tr>
