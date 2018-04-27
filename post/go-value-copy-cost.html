@@ -9,14 +9,14 @@
     <meta name="description" content="本文译自 Go Value Copy Costs 版权@归原文所有. 值拷贝在 Go 语言编程中普遍发生. 赋值, 参数传递, channel 值发送以及接收操作都会涉及值拷贝. 本文将讨论 Go 中的值拷贝代价. 值大小值的大小意味着该值(直接部分)将在内存中占用多少字节. 值的间接底层部分不影响值的大小. 在 Go 中, 如果两个值的类型属于同一类型, 并且类型不是基本类型, 字符串类型, 接">
 <meta name="keywords" content="translation,go,go101">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Go 值拷贝代价">
+<meta property="og:title" content="Go 的值拷贝代价">
 <meta property="og:url" content="https://lingchao.xin/post/go-value-copy-cost.html">
 <meta property="og:site_name" content="Coding talks">
 <meta property="og:description" content="本文译自 Go Value Copy Costs 版权@归原文所有. 值拷贝在 Go 语言编程中普遍发生. 赋值, 参数传递, channel 值发送以及接收操作都会涉及值拷贝. 本文将讨论 Go 中的值拷贝代价. 值大小值的大小意味着该值(直接部分)将在内存中占用多少字节. 值的间接底层部分不影响值的大小. 在 Go 中, 如果两个值的类型属于同一类型, 并且类型不是基本类型, 字符串类型, 接">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2018-04-27T11:46:41.000Z">
+<meta property="og:updated_time" content="2018-04-27T11:47:01.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Go 值拷贝代价">
+<meta name="twitter:title" content="Go 的值拷贝代价">
 <meta name="twitter:description" content="本文译自 Go Value Copy Costs 版权@归原文所有. 值拷贝在 Go 语言编程中普遍发生. 赋值, 参数传递, channel 值发送以及接收操作都会涉及值拷贝. 本文将讨论 Go 中的值拷贝代价. 值大小值的大小意味着该值(直接部分)将在内存中占用多少字节. 值的间接底层部分不影响值的大小. 在 Go 中, 如果两个值的类型属于同一类型, 并且类型不是基本类型, 字符串类型, 接">
     
     
@@ -37,7 +37,7 @@
         
     
     <!-- title -->
-    <title>Go 值拷贝代价</title>
+    <title>Go 的值拷贝代价</title>
     <!-- styles -->
     <link rel="stylesheet" href="/css/style.css">
     <!-- rss -->
@@ -86,15 +86,15 @@
     <div id="share" style="display: none">
       <ul>
   <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://lingchao.xin/post/go-value-copy-cost.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://twitter.com/share?url=https://lingchao.xin/post/go-value-copy-cost.html&text=Go 值拷贝代价"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://lingchao.xin/post/go-value-copy-cost.html&title=Go 值拷贝代价"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lingchao.xin/post/go-value-copy-cost.html&is_video=false&description=Go 值拷贝代价"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=Go 值拷贝代价&body=Check out this article: https://lingchao.xin/post/go-value-copy-cost.html"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://getpocket.com/save?url=https://lingchao.xin/post/go-value-copy-cost.html&title=Go 值拷贝代价"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/go-value-copy-cost.html&title=Go 值拷贝代价"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/go-value-copy-cost.html&title=Go 值拷贝代价"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/go-value-copy-cost.html&title=Go 值拷贝代价"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/go-value-copy-cost.html&name=Go 值拷贝代价&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://lingchao.xin/post/go-value-copy-cost.html&text=Go 的值拷贝代价"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://lingchao.xin/post/go-value-copy-cost.html&title=Go 的值拷贝代价"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lingchao.xin/post/go-value-copy-cost.html&is_video=false&description=Go 的值拷贝代价"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Go 的值拷贝代价&body=Check out this article: https://lingchao.xin/post/go-value-copy-cost.html"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://lingchao.xin/post/go-value-copy-cost.html&title=Go 的值拷贝代价"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/go-value-copy-cost.html&title=Go 的值拷贝代价"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/go-value-copy-cost.html&title=Go 的值拷贝代价"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/go-value-copy-cost.html&title=Go 的值拷贝代价"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/go-value-copy-cost.html&name=Go 的值拷贝代价&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -111,7 +111,7 @@
   <header>
     
     <h1 class="posttitle" itemprop="name headline">
-        Go 值拷贝代价
+        Go 的值拷贝代价
     </h1>
 
 
@@ -196,15 +196,15 @@
     <div id="share-footer" style="display: none">
       <ul>
   <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://lingchao.xin/post/go-value-copy-cost.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://twitter.com/share?url=https://lingchao.xin/post/go-value-copy-cost.html&text=Go 值拷贝代价"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://lingchao.xin/post/go-value-copy-cost.html&title=Go 值拷贝代价"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lingchao.xin/post/go-value-copy-cost.html&is_video=false&description=Go 值拷贝代价"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=Go 值拷贝代价&body=Check out this article: https://lingchao.xin/post/go-value-copy-cost.html"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://getpocket.com/save?url=https://lingchao.xin/post/go-value-copy-cost.html&title=Go 值拷贝代价"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/go-value-copy-cost.html&title=Go 值拷贝代价"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/go-value-copy-cost.html&title=Go 值拷贝代价"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/go-value-copy-cost.html&title=Go 值拷贝代价"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/go-value-copy-cost.html&name=Go 值拷贝代价&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://lingchao.xin/post/go-value-copy-cost.html&text=Go 的值拷贝代价"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://lingchao.xin/post/go-value-copy-cost.html&title=Go 的值拷贝代价"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lingchao.xin/post/go-value-copy-cost.html&is_video=false&description=Go 的值拷贝代价"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Go 的值拷贝代价&body=Check out this article: https://lingchao.xin/post/go-value-copy-cost.html"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://lingchao.xin/post/go-value-copy-cost.html&title=Go 的值拷贝代价"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/go-value-copy-cost.html&title=Go 的值拷贝代价"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/go-value-copy-cost.html&title=Go 的值拷贝代价"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/go-value-copy-cost.html&title=Go 的值拷贝代价"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/go-value-copy-cost.html&name=Go 的值拷贝代价&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
