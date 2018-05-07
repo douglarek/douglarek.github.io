@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://lingchao.xin/"/>
-  <updated>2018-04-27T12:14:09.000Z</updated>
+  <updated>2018-05-07T09:30:57.230Z</updated>
   <id>https://lingchao.xin/</id>
   
   <author>
@@ -15,6 +15,34 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Go 类型系统概述</title>
+    <link href="https://lingchao.xin/post/type-system-overview.html"/>
+    <id>https://lingchao.xin/post/type-system-overview.html</id>
+    <published>2018-05-07T06:48:57.000Z</published>
+    <updated>2018-05-07T09:30:57.230Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div
+        
+      
+    
+    </summary>
+    
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
+    
+      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+      <category term="go101" scheme="https://lingchao.xin/tags/go101/"/>
+    
+  </entry>
   
   <entry>
     <title>Go 的值拷贝代价</title>
@@ -440,26 +468,6 @@
           &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div
         
       
-    
-    </summary>
-    
-    
-      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
-    
-      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Go 调度工作机制</title>
-    <link href="https://lingchao.xin/post/how-does-the-golang-scheduler-work.html"/>
-    <id>https://lingchao.xin/post/how-does-the-golang-scheduler-work.html</id>
-    <published>2018-01-27T05:25:04.000Z</published>
-    <updated>2018-04-20T05:40:59.628Z</updated>
-    
-    <summary type="html">
-    
-      &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div class=&quot;.article-gallery&quot; &lt;p=&quot;&quot;&gt;本文是来自 Quora 上面一个 Go 相关的&lt;a href=&quot;https://www.quora.com/How-does-the-golang-scheduler-work/answer/Ian-Lance-Taylor?share=508736a1&amp;amp;srid=imO0&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;问题&lt;/a&gt;.&lt;br&gt;
     
     </summary>
     
