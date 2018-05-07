@@ -6,18 +6,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="不像 Go 的其他流程控制(if, for, switch, goto, go) 一样, defer, panic 和 recover 用的比较少.">
-<meta name="keywords" content="go">
+    <meta name="keywords" content="go">
 <meta property="og:type" content="article">
 <meta property="og:title" content="理解 Go defer, panic, recover">
 <meta property="og:url" content="https://lingchao.xin/post/go-defer-panic-and-recover.html">
 <meta property="og:site_name" content="Coding talks">
-<meta property="og:description" content="不像 Go 的其他流程控制(if, for, switch, goto, go) 一样, defer, panic 和 recover 用的比较少.">
 <meta property="og:locale" content="en">
 <meta property="og:updated_time" content="2018-04-20T05:40:59.625Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="理解 Go defer, panic, recover">
-<meta name="twitter:description" content="不像 Go 的其他流程控制(if, for, switch, goto, go) 一样, defer, panic 和 recover 用的比较少.">
     
     
         
@@ -96,7 +93,7 @@
   <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/go-defer-panic-and-recover.html&title=理解 Go defer, panic, recover"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/go-defer-panic-and-recover.html&title=理解 Go defer, panic, recover"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/go-defer-panic-and-recover.html&title=理解 Go defer, panic, recover"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/go-defer-panic-and-recover.html&name=理解 Go defer, panic, recover&description=&lt;p&gt;不像 Go 的其他流程控制(if, for, switch, goto, go) 一样, defer, panic 和 recover 用的比较少.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/go-defer-panic-and-recover.html&name=理解 Go defer, panic, recover&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34;&gt;&lt;div class=&#34;.article-gallery&#34; &lt;p=&#34;&#34;&gt;不像 Go 的其他流程控制(if, for, switch, goto, go) 一样, defer, panic 和 recover 用的比较少.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -140,7 +137,7 @@
   
 
   <div class="content" itemprop="articleBody">
-    <p>不像 Go 的其他流程控制(if, for, switch, goto, go) 一样, defer, panic 和 recover 用的比较少.<br><a id="more"></a></p>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css"><div class=".article-gallery" <p="">不像 Go 的其他流程控制(if, for, switch, goto, go) 一样, defer, panic 和 recover 用的比较少.<br><a id="more"></a><p></p>
 <h3 id="Defer"><a href="#Defer" class="headerlink" title="Defer"></a>Defer</h3><p>defer 语句会将函数调用放入一个列表. 当外围的函数执行返回后列表内保存的函数调用会被执行. defer 像 Python 的 with, finally 一样都具有类似资源情理的作用. 当然 defer 在这方面更灵活.</p>
 <p>defer 的行为遵循 3 个简单的原则:</p>
 <ul>
@@ -198,7 +195,12 @@
 <li><a href="https://golang.org/ref/mem/" target="_blank" rel="noopener">The Go Memory Model</a></li>
 <li><a href="https://golang.org/doc/articles/race_detector.html" target="_blank" rel="noopener">Data Race Detector</a></li>
 </ul>
-
+</div><script src="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/js/lightgallery.min.js"></script><script>if (typeof lightGallery !== 'undefined') {
+        var options = {
+            selector: '.gallery-item'
+        };
+        lightGallery(document.getElementsByClassName('.article-gallery')[0], options);
+        }</script>
   </div>
 </article>
 
@@ -244,7 +246,7 @@
   <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/go-defer-panic-and-recover.html&title=理解 Go defer, panic, recover"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/go-defer-panic-and-recover.html&title=理解 Go defer, panic, recover"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/go-defer-panic-and-recover.html&title=理解 Go defer, panic, recover"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/go-defer-panic-and-recover.html&name=理解 Go defer, panic, recover&description=&lt;p&gt;不像 Go 的其他流程控制(if, for, switch, goto, go) 一样, defer, panic 和 recover 用的比较少.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/go-defer-panic-and-recover.html&name=理解 Go defer, panic, recover&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34;&gt;&lt;div class=&#34;.article-gallery&#34; &lt;p=&#34;&#34;&gt;不像 Go 的其他流程控制(if, for, switch, goto, go) 一样, defer, panic 和 recover 用的比较少.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>

@@ -6,18 +6,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="本文译自 Reproducible, Verifiable, Verified Builds, Go &amp;amp; Versioning 的第 5 部分, 版权@归原文所有.">
-<meta name="keywords" content="translation,go,vgo">
+    <meta name="keywords" content="translation,go,vgo">
 <meta property="og:type" content="article">
 <meta property="og:title" content="可复制, 可验证, 已验证的构建">
 <meta property="og:url" content="https://lingchao.xin/post/vgo-repro.html">
 <meta property="og:site_name" content="Coding talks">
-<meta property="og:description" content="本文译自 Reproducible, Verifiable, Verified Builds, Go &amp;amp; Versioning 的第 5 部分, 版权@归原文所有.">
 <meta property="og:locale" content="en">
 <meta property="og:updated_time" content="2018-04-20T05:40:59.632Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="可复制, 可验证, 已验证的构建">
-<meta name="twitter:description" content="本文译自 Reproducible, Verifiable, Verified Builds, Go &amp;amp; Versioning 的第 5 部分, 版权@归原文所有.">
     
     
         
@@ -96,7 +93,7 @@
   <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/vgo-repro.html&title=可复制, 可验证, 已验证的构建"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/vgo-repro.html&title=可复制, 可验证, 已验证的构建"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/vgo-repro.html&title=可复制, 可验证, 已验证的构建"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/vgo-repro.html&name=可复制, 可验证, 已验证的构建&description=&lt;p&gt;本文译自 &lt;a href=&#34;https://research.swtch.com/vgo-repro&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Reproducible, Verifiable, Verified Builds&lt;/a&gt;, &lt;a href=&#34;https://lingchao.xin/tag/vgo.html&#34;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 5 部分, 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/vgo-repro.html&name=可复制, 可验证, 已验证的构建&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34;&gt;&lt;div class=&#34;.article-gallery&#34; &lt;p=&#34;&#34;&gt;本文译自 &lt;a href=&#34;https://research.swtch.com/vgo-repro&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Reproducible, Verifiable, Verified Builds&lt;/a&gt;, &lt;a href=&#34;https://lingchao.xin/tag/vgo.html&#34;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 5 部分, 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -140,7 +137,7 @@
   
 
   <div class="content" itemprop="articleBody">
-    <p>本文译自 <a href="https://research.swtch.com/vgo-repro" target="_blank" rel="noopener">Reproducible, Verifiable, Verified Builds</a>, <a href="https://lingchao.xin/tag/vgo.html">Go &amp; Versioning</a> 的第 5 部分, 版权@归原文所有.<br><a id="more"></a></p>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css"><div class=".article-gallery" <p="">本文译自 <a href="https://research.swtch.com/vgo-repro" target="_blank" rel="noopener">Reproducible, Verifiable, Verified Builds</a>, <a href="https://lingchao.xin/tag/vgo.html">Go &amp; Versioning</a> 的第 5 部分, 版权@归原文所有.<br><a id="more"></a><p></p>
 <p>一旦 Go 开发人员和工具都共享了包版本控制的词汇表, 那么在工具链中添加可复制, 可验证以及已验证的构建就相对简单了. 事实上, 这基本上已经在 vgo 原型中了.</p>
 <p>由于人们有时对这些术语的确切定义不一致，让我们来建立一些基本的术语. 针对这篇文章:</p>
 <ul>
@@ -187,7 +184,12 @@
 <h3 id="接下来呢"><a href="#接下来呢" class="headerlink" title="接下来呢 ?"></a>接下来呢 ?</h3><p>这已经在 vgo 中实现. 你可以尝试一下并使用它. 与 vgo 的其他部分一样, 对于哪些工作不正常(或工作出色)的反馈表示感激.</p>
 <p>这里展示的功能更多的是一些东西的开始, 而不是一个完成的功能. 文件树的加密哈希是一个构建块. 建立在它之上的 go.modverify 检查开发人员是否都使用完全相同的依赖构建特定的模块, 但是在下载新版本的模块时没有验证(除非其他人已经将其添加到 go.modverify), 模块之间也没有共享预期的哈希值.</p>
 <p>如何解决这两个缺点的确切细节并不明显. 允许某种类型的文件树的加密签名是有意义的, 并且要验证升级发现的版本与上一个版本的密钥相同. 或者, 在更新框架(<a href="https://theupdateframework.github.io/" target="_blank" rel="noopener">TUF</a>)中采用一种方法是有意义的, 尽管直接使用它们的网络协议是不实际的. 或者, 不要使用每个代码库 go.modverify 日志, 建立某种共享的全局日志可能有意义, 有点像<a href="https://www.certificate-transparency.org/" target="_blank" rel="noopener">证书透明度</a>, 或者使用一个类似 <a href="https://upspin.io/" target="_blank" rel="noopener">Upspin</a> 的公共身份服务器. 我们可能会探索很多途径, 但这些都有点超前了. 目前, 我们的重点是成功地将版本控制集成到 go 命令中.</p>
-
+</div><script src="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/js/lightgallery.min.js"></script><script>if (typeof lightGallery !== 'undefined') {
+        var options = {
+            selector: '.gallery-item'
+        };
+        lightGallery(document.getElementsByClassName('.article-gallery')[0], options);
+        }</script>
   </div>
 </article>
 
@@ -233,7 +235,7 @@
   <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/vgo-repro.html&title=可复制, 可验证, 已验证的构建"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/vgo-repro.html&title=可复制, 可验证, 已验证的构建"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/vgo-repro.html&title=可复制, 可验证, 已验证的构建"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/vgo-repro.html&name=可复制, 可验证, 已验证的构建&description=&lt;p&gt;本文译自 &lt;a href=&#34;https://research.swtch.com/vgo-repro&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Reproducible, Verifiable, Verified Builds&lt;/a&gt;, &lt;a href=&#34;https://lingchao.xin/tag/vgo.html&#34;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 5 部分, 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/vgo-repro.html&name=可复制, 可验证, 已验证的构建&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34;&gt;&lt;div class=&#34;.article-gallery&#34; &lt;p=&#34;&#34;&gt;本文译自 &lt;a href=&#34;https://research.swtch.com/vgo-repro&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Reproducible, Verifiable, Verified Builds&lt;/a&gt;, &lt;a href=&#34;https://lingchao.xin/tag/vgo.html&#34;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 5 部分, 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>

@@ -6,18 +6,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="本文译自 Functional Options Pattern in Go 版权@归原文所有.">
-<meta name="keywords" content="translation,go">
+    <meta name="keywords" content="translation,go">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Go 函数选项模式">
 <meta property="og:url" content="https://lingchao.xin/post/functional-options-pattern-in-go.html">
 <meta property="og:site_name" content="Coding talks">
-<meta property="og:description" content="本文译自 Functional Options Pattern in Go 版权@归原文所有.">
 <meta property="og:locale" content="en">
 <meta property="og:updated_time" content="2018-03-26T07:25:06.568Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Go 函数选项模式">
-<meta name="twitter:description" content="本文译自 Functional Options Pattern in Go 版权@归原文所有.">
     
     
         
@@ -96,7 +93,7 @@
   <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/functional-options-pattern-in-go.html&title=Go 函数选项模式"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/functional-options-pattern-in-go.html&title=Go 函数选项模式"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/functional-options-pattern-in-go.html&title=Go 函数选项模式"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/functional-options-pattern-in-go.html&name=Go 函数选项模式&description=&lt;p&gt;本文译自 &lt;a href=&#34;https://halls-of-valhalla.org/beta/articles/functional-options-pattern-in-go,54/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Functional Options Pattern in Go&lt;/a&gt; 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/functional-options-pattern-in-go.html&name=Go 函数选项模式&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34;&gt;&lt;div class=&#34;.article-gallery&#34; &lt;p=&#34;&#34;&gt;本文译自 &lt;a href=&#34;https://halls-of-valhalla.org/beta/articles/functional-options-pattern-in-go,54/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Functional Options Pattern in Go&lt;/a&gt; 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -140,7 +137,7 @@
   
 
   <div class="content" itemprop="articleBody">
-    <p>本文译自 <a href="https://halls-of-valhalla.org/beta/articles/functional-options-pattern-in-go,54/" target="_blank" rel="noopener">Functional Options Pattern in Go</a> 版权@归原文所有.<br><a id="more"></a></p>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css"><div class=".article-gallery" <p="">本文译自 <a href="https://halls-of-valhalla.org/beta/articles/functional-options-pattern-in-go,54/" target="_blank" rel="noopener">Functional Options Pattern in Go</a> 版权@归原文所有.<br><a id="more"></a><p></p>
 <p>Golang 开发者遇到的许多问题之一是尝试将一个函数的参数设置为可选. 这是一个非常常见的用例, 有些对象应该使用一些基本的默认设置来开箱即用, 并且你偶尔可能需要提供一些更详细的配置.</p>
 <p>在很多语言中这很容易; 在 C 族语言中, 可以使用不同数量的参数提供相同函数的多个版本; 在像 PHP 这样的语言中, 可以给参数一个默认值，并在调用方法时忽略它们. 但是在 Golang 中, 这两种方式你哪个也用不了. 那么你如何创建一个函数, 用户可以指定一些额外的配置?</p>
 <p>有很多可能的方法可以做到这一点, 但是大多数都不能满足要求, 或者需要在服务端的代码中进行额外的检查和验证, 或者通过传递额外的客户端不关心的参数来为客户端做额外的工作.</p>
@@ -169,7 +166,12 @@
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> defaultStuffClient = stuffClient&#123;</span><br><span class="line">    retries: <span class="number">3</span>,</span><br><span class="line">    timeout: <span class="number">2</span>,</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> StuffClientOption <span class="function"><span class="keyword">func</span><span class="params">(*stuffClient)</span></span></span><br><span class="line"><span class="function"><span class="title">func</span> <span class="title">WithRetries</span><span class="params">(r <span class="keyword">int</span>)</span> <span class="title">StuffClientOption</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(o *stuffClient)</span></span> &#123;</span><br><span class="line">        o.retries = r</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithTimeout</span><span class="params">(t <span class="keyword">int</span>)</span> <span class="title">StuffClientOption</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(o *stuffClient)</span></span> &#123;</span><br><span class="line">        o.timeout = t</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> StuffClient <span class="keyword">interface</span> &#123;</span><br><span class="line">    DoStuff() error</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> stuffClient <span class="keyword">struct</span> &#123;</span><br><span class="line">    conn    Connection</span><br><span class="line">    timeout <span class="keyword">int</span></span><br><span class="line">    retries <span class="keyword">int</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">type</span> Connection <span class="keyword">struct</span>&#123;&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewStuffClient</span><span class="params">(conn Connection, opts ...StuffClientOption)</span> <span class="title">StuffClient</span></span> &#123;</span><br><span class="line">    client := defaultStuffClient</span><br><span class="line">    <span class="keyword">for</span> _, o := <span class="keyword">range</span> opts &#123;</span><br><span class="line">        o(&amp;client)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    client.conn = conn</span><br><span class="line">    <span class="keyword">return</span> client</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c stuffClient)</span> <span class="title">DoStuff</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>可以在<a href="https://play.golang.org/p/Z5P5Om4KDL" target="_blank" rel="noopener">这里</a>尝试一下. 在我们的示例中, 我们只是直接将配置应用到我们的结构中, 在中间有一个额外的配置结构是没有意义的. 但是请注意, 在许多情况下, 您可能仍然想使用前面示例中的 config 结构体; 例如, 如果你的构造器使用配置选项来执行一些操作, 但不把它们存储到结构中, 或者传递到其他地方. 配置结构变体是更通用的实现.</p>
 <p>感谢 Rob Pike 和 Dave Cheney 推广这种设计模式.</p>
-
+</div><script src="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/js/lightgallery.min.js"></script><script>if (typeof lightGallery !== 'undefined') {
+        var options = {
+            selector: '.gallery-item'
+        };
+        lightGallery(document.getElementsByClassName('.article-gallery')[0], options);
+        }</script>
   </div>
 </article>
 
@@ -215,7 +217,7 @@
   <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/functional-options-pattern-in-go.html&title=Go 函数选项模式"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/functional-options-pattern-in-go.html&title=Go 函数选项模式"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/functional-options-pattern-in-go.html&title=Go 函数选项模式"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/functional-options-pattern-in-go.html&name=Go 函数选项模式&description=&lt;p&gt;本文译自 &lt;a href=&#34;https://halls-of-valhalla.org/beta/articles/functional-options-pattern-in-go,54/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Functional Options Pattern in Go&lt;/a&gt; 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/functional-options-pattern-in-go.html&name=Go 函数选项模式&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34;&gt;&lt;div class=&#34;.article-gallery&#34; &lt;p=&#34;&#34;&gt;本文译自 &lt;a href=&#34;https://halls-of-valhalla.org/beta/articles/functional-options-pattern-in-go,54/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Functional Options Pattern in Go&lt;/a&gt; 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>

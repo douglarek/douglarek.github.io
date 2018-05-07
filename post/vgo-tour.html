@@ -6,18 +6,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="本文译自 A Tour of Versioned Go (vgo), Go &amp;amp; Versioning 的第 2 部分, 版权@归原文所有.">
-<meta name="keywords" content="translation,go,vgo">
+    <meta name="keywords" content="translation,go,vgo">
 <meta property="og:type" content="article">
 <meta property="og:title" content="版本化 Go 之旅">
 <meta property="og:url" content="https://lingchao.xin/post/vgo-tour.html">
 <meta property="og:site_name" content="Coding talks">
-<meta property="og:description" content="本文译自 A Tour of Versioned Go (vgo), Go &amp;amp; Versioning 的第 2 部分, 版权@归原文所有.">
 <meta property="og:locale" content="en">
 <meta property="og:updated_time" content="2018-04-20T05:40:59.632Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="版本化 Go 之旅">
-<meta name="twitter:description" content="本文译自 A Tour of Versioned Go (vgo), Go &amp;amp; Versioning 的第 2 部分, 版权@归原文所有.">
     
     
         
@@ -96,7 +93,7 @@
   <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/vgo-tour.html&title=版本化 Go 之旅"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/vgo-tour.html&title=版本化 Go 之旅"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/vgo-tour.html&title=版本化 Go 之旅"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/vgo-tour.html&name=版本化 Go 之旅&description=&lt;p&gt;本文译自 &lt;a href=&#34;https://research.swtch.com/vgo-tour&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;A Tour of Versioned Go (vgo)&lt;/a&gt;, &lt;a href=&#34;https://lingchao.xin/tag/vgo.html&#34;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 2 部分, 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/vgo-tour.html&name=版本化 Go 之旅&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34;&gt;&lt;div class=&#34;.article-gallery&#34; &lt;p=&#34;&#34;&gt;本文译自 &lt;a href=&#34;https://research.swtch.com/vgo-tour&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;A Tour of Versioned Go (vgo)&lt;/a&gt;, &lt;a href=&#34;https://lingchao.xin/tag/vgo.html&#34;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 2 部分, 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -140,7 +137,7 @@
   
 
   <div class="content" itemprop="articleBody">
-    <p>本文译自 <a href="https://research.swtch.com/vgo-tour" target="_blank" rel="noopener">A Tour of Versioned Go (vgo)</a>, <a href="https://lingchao.xin/tag/vgo.html">Go &amp; Versioning</a> 的第 2 部分, 版权@归原文所有.<br><a id="more"></a></p>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css"><div class=".article-gallery" <p="">本文译自 <a href="https://research.swtch.com/vgo-tour" target="_blank" rel="noopener">A Tour of Versioned Go (vgo)</a>, <a href="https://lingchao.xin/tag/vgo.html">Go &amp; Versioning</a> 的第 2 部分, 版权@归原文所有.<br><a id="more"></a><p></p>
 <p>对我而言, 设计意味着一遍又一遍地构建, 拆除和再构建. 为了编写<a href="https://research.swtch.com/vgo-intro" target="_blank" rel="noopener">新的版本控制提案</a>, 我构建了一个原型 vgo, 来处理许多细微的细节. 这篇博文展示了如何使用 vgo.</p>
 <p>你现在可以通过运行 go get golang.org/x/vgo 下载并尝试 vgo. Vgo 是 go 命令的一个直接替换(和分支拷贝). 你运行 vgo 而不是 go, 它将使用你安装在 $GOROOT (Go 1.10 beta1 或更高版本) 的编译器和标准库.</p>
 <p>随着我们更多地了解什么可行, 什么不可行, vgo 的语义和命令行细节可能会发生变化. 但是, 我们打算避免 go.mod 文件格式的向后不兼容的更改, 以便今天添加了 go.mod 的项目以后也可以工作. 在我们完善提案时, 我们也会相应地更新 vgo.</p>
@@ -225,7 +222,12 @@
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ go tool nm hello | grep sampler.hello</span><br><span class="line"> 1170908 B rsc.io/sampler.hello</span><br><span class="line">$ go tool nm vhello | grep sampler.hello</span><br><span class="line"> 11718e8 B github.com/you/hello/vendor/rsc.io/sampler.hello</span><br><span class="line">$</span><br></pre></td></tr></table></figure>
 <p>除了这种差异, 构建应该产生相同的二进制文件. 为了提供优雅的转换, 基于 vgo 的构建完全忽略 vendor 目录, 一如既往的模块感知 go 命令构建.</p>
 <h2 id="接下来"><a href="#接下来" class="headerlink" title="接下来 ?"></a>接下来 ?</h2><p>请尝试 vgo. 在存储库中开始标记(tagging)版本. 创建并检入(check in) go.mod 文件. 在 golang.org/issue 上上报问题, 并在标题开头添加 “x/vgo:” 明天会有更多的博文. 谢谢, 玩得开心!</p>
-
+</div><script src="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/js/lightgallery.min.js"></script><script>if (typeof lightGallery !== 'undefined') {
+        var options = {
+            selector: '.gallery-item'
+        };
+        lightGallery(document.getElementsByClassName('.article-gallery')[0], options);
+        }</script>
   </div>
 </article>
 
@@ -271,7 +273,7 @@
   <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/vgo-tour.html&title=版本化 Go 之旅"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/vgo-tour.html&title=版本化 Go 之旅"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/vgo-tour.html&title=版本化 Go 之旅"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/vgo-tour.html&name=版本化 Go 之旅&description=&lt;p&gt;本文译自 &lt;a href=&#34;https://research.swtch.com/vgo-tour&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;A Tour of Versioned Go (vgo)&lt;/a&gt;, &lt;a href=&#34;https://lingchao.xin/tag/vgo.html&#34;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 2 部分, 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/vgo-tour.html&name=版本化 Go 之旅&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34;&gt;&lt;div class=&#34;.article-gallery&#34; &lt;p=&#34;&#34;&gt;本文译自 &lt;a href=&#34;https://research.swtch.com/vgo-tour&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;A Tour of Versioned Go (vgo)&lt;/a&gt;, &lt;a href=&#34;https://lingchao.xin/tag/vgo.html&#34;&gt;Go &amp;amp; Versioning&lt;/a&gt; 的第 2 部分, 版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>

@@ -6,18 +6,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="本文译自(Go 没有传引用)版权@归原文所有.">
-<meta name="keywords" content="translation,go">
+    <meta name="keywords" content="translation,go">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Go 没有传引用">
 <meta property="og:url" content="https://lingchao.xin/post/there-is-no-pass-by-reference-in-go.html">
 <meta property="og:site_name" content="Coding talks">
-<meta property="og:description" content="本文译自(Go 没有传引用)版权@归原文所有.">
 <meta property="og:locale" content="en">
 <meta property="og:updated_time" content="2018-03-26T07:31:48.227Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Go 没有传引用">
-<meta name="twitter:description" content="本文译自(Go 没有传引用)版权@归原文所有.">
     
     
         
@@ -96,7 +93,7 @@
   <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/there-is-no-pass-by-reference-in-go.html&title=Go 没有传引用"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/there-is-no-pass-by-reference-in-go.html&title=Go 没有传引用"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/there-is-no-pass-by-reference-in-go.html&title=Go 没有传引用"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/there-is-no-pass-by-reference-in-go.html&name=Go 没有传引用&description=&lt;p&gt;本文译自(&lt;a href=&#34;https://dave.cheney.net/2017/04/29/there-is-no-pass-by-reference-in-go&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Go 没有传引用&lt;/a&gt;)版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/there-is-no-pass-by-reference-in-go.html&name=Go 没有传引用&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34;&gt;&lt;div class=&#34;.article-gallery&#34; &lt;p=&#34;&#34;&gt;本文译自(&lt;a href=&#34;https://dave.cheney.net/2017/04/29/there-is-no-pass-by-reference-in-go&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Go 没有传引用&lt;/a&gt;)版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -140,7 +137,7 @@
   
 
   <div class="content" itemprop="articleBody">
-    <p>本文译自(<a href="https://dave.cheney.net/2017/04/29/there-is-no-pass-by-reference-in-go" target="_blank" rel="noopener">Go 没有传引用</a>)版权@归原文所有.<br><a id="more"></a></p>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css"><div class=".article-gallery" <p="">本文译自(<a href="https://dave.cheney.net/2017/04/29/there-is-no-pass-by-reference-in-go" target="_blank" rel="noopener">Go 没有传引用</a>)版权@归原文所有.<br><a id="more"></a><p></p>
 <p>要清楚的是, Go 没有引用变量, 所以 Go 没有传递引用函数的调用语义.</p>
 <h3 id="什么是引用变量-reference-variable"><a href="#什么是引用变量-reference-variable" class="headerlink" title="什么是引用变量(reference variable) ?"></a>什么是引用变量(reference variable) ?</h3><p>在像 C++ 这样的语言中, 你可以声明一个别名, 或者一个现有变量的替代名称. 这被称为引用变量.</p>
 <figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> a = <span class="number">10</span>;</span><br><span class="line">        <span class="keyword">int</span> &amp;b = a;</span><br><span class="line">        <span class="keyword">int</span> &amp;c = b;</span><br><span class="line"></span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"%p %p %p\n"</span>, &amp;a, &amp;b, &amp;c); <span class="comment">// 0x7ffe114f0b14 0x7ffe114f0b14 0x7ffe114f0b14</span></span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -154,7 +151,12 @@
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">"fmt"</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">fn</span><span class="params">(m <span class="keyword">map</span>[<span class="keyword">int</span>]<span class="keyword">int</span>)</span></span> &#123;</span><br><span class="line">        m = <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="keyword">int</span>]<span class="keyword">int</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">var</span> m <span class="keyword">map</span>[<span class="keyword">int</span>]<span class="keyword">int</span></span><br><span class="line">        fn(m)</span><br><span class="line">        fmt.Println(m == <span class="literal">nil</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>如果map m 是一个 C++ 风格的引用变量, 则在 main 中声明的 m 和 在 fn 中声明的 m 将在内存中占据相同的存储位置. 但是, 因为对 fn 内的 m 的赋值对 m 的值没有影响, 所以我们可以看到 m 不是引用变量.</p>
 <h3 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h3><p>Go 没有传递引用语义, 因为 Go 没有引用变量.</p>
-
+</div><script src="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/js/lightgallery.min.js"></script><script>if (typeof lightGallery !== 'undefined') {
+        var options = {
+            selector: '.gallery-item'
+        };
+        lightGallery(document.getElementsByClassName('.article-gallery')[0], options);
+        }</script>
   </div>
 </article>
 
@@ -200,7 +202,7 @@
   <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/there-is-no-pass-by-reference-in-go.html&title=Go 没有传引用"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/there-is-no-pass-by-reference-in-go.html&title=Go 没有传引用"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
   <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/there-is-no-pass-by-reference-in-go.html&title=Go 没有传引用"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/there-is-no-pass-by-reference-in-go.html&name=Go 没有传引用&description=&lt;p&gt;本文译自(&lt;a href=&#34;https://dave.cheney.net/2017/04/29/there-is-no-pass-by-reference-in-go&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Go 没有传引用&lt;/a&gt;)版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/there-is-no-pass-by-reference-in-go.html&name=Go 没有传引用&description=&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&#34;&gt;&lt;div class=&#34;.article-gallery&#34; &lt;p=&#34;&#34;&gt;本文译自(&lt;a href=&#34;https://dave.cheney.net/2017/04/29/there-is-no-pass-by-reference-in-go&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;Go 没有传引用&lt;/a&gt;)版权@归原文所有.&lt;br&gt;"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>

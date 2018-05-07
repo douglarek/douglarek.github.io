@@ -6,18 +6,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="What is EmacsEMACS may stand for Editing MACroS, but it has some more creative definitions. Here they are.  Emacs Makes A Computer Slow Emacs May Annihilate Command Structures Evenings, Mornings, And">
-<meta name="keywords" content="emacs,editor">
+    <meta name="keywords" content="emacs,editor">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Emacs is A Habit">
 <meta property="og:url" content="https://lingchao.xin/post/emacs-is-a-habit.html">
 <meta property="og:site_name" content="Coding talks">
-<meta property="og:description" content="What is EmacsEMACS may stand for Editing MACroS, but it has some more creative definitions. Here they are.  Emacs Makes A Computer Slow Emacs May Annihilate Command Structures Evenings, Mornings, And">
 <meta property="og:locale" content="en">
 <meta property="og:updated_time" content="2018-04-23T02:40:15.816Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Emacs is A Habit">
-<meta name="twitter:description" content="What is EmacsEMACS may stand for Editing MACroS, but it has some more creative definitions. Here they are.  Emacs Makes A Computer Slow Emacs May Annihilate Command Structures Evenings, Mornings, And">
     
     
         
@@ -101,7 +98,7 @@
 
     </div>
     <div id="toc">
-      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#What-is-Emacs"><span class="toc-number">1.</span> <span class="toc-text">What is Emacs</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#My-road-to-mutiny"><span class="toc-number">2.</span> <span class="toc-text">My road to mutiny</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Interactive-Mode"><span class="toc-number">2.1.</span> <span class="toc-text">Interactive Mode</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Package-management"><span class="toc-number">2.2.</span> <span class="toc-text">Package management</span></a></li></ol></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#My-road-to-mutiny"><span class="toc-number">1.</span> <span class="toc-text">My road to mutiny</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Interactive-Mode"><span class="toc-number">1.1.</span> <span class="toc-text">Interactive Mode</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Package-management"><span class="toc-number">1.2.</span> <span class="toc-text">Package management</span></a></li></ol></li></ol>
     </div>
   </span>
 </div>
@@ -140,7 +137,7 @@
   
 
   <div class="content" itemprop="articleBody">
-    <h3 id="What-is-Emacs"><a href="#What-is-Emacs" class="headerlink" title="What is Emacs"></a>What is Emacs</h3><p>EMACS may stand for <em>Editing MACroS</em>, but it has some more creative <a href="https://www.gnu.org/fun/jokes/gnuemacs.acro.exp.html" target="_blank" rel="noopener">definitions</a>. Here they are.</p>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css"><div class=".article-gallery" <h3="" id="What-is-Emacs"><a href="#What-is-Emacs" class="headerlink" title="What is Emacs"></a>What is Emacs<p>EMACS may stand for <em>Editing MACroS</em>, but it has some more creative <a href="https://www.gnu.org/fun/jokes/gnuemacs.acro.exp.html" target="_blank" rel="noopener">definitions</a>. Here they are.</p>
 <ul>
 <li><em>Emacs Makes A Computer Slow</em></li>
 <li>Emacs May Annihilate Command Structures</li>
@@ -164,7 +161,12 @@
 <p>Relative to Vim, I’m more optimistic about <a href="https://github.com/neovim" target="_blank" rel="noopener">Neovim</a>, I hope it can be better than Vim in plugin system, and I donated <em>$15</em> to it.</p>
 <p>Emacs package interface is very good, you can not only use <em>GNU ELPA Packages</em> but also third ones.</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">(require &apos;package)</span><br><span class="line"></span><br><span class="line">(add-to-list &apos;package-archives &apos;(&quot;melpa&quot; . &quot;http://melpa.org/packages/&quot;) t)</span><br><span class="line"></span><br><span class="line">(when (&lt; emacs-major-version 24)</span><br><span class="line">  ;; For important compatibility libraries like cl-lib</span><br><span class="line">  (add-to-list &apos;package-archives &apos;(&quot;gnu&quot; . &quot;http://elpa.gnu.org/packages/&quot;)))</span><br><span class="line"></span><br><span class="line">(package-initialize)</span><br></pre></td></tr></table></figure>
-
+</div><script src="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/js/lightgallery.min.js"></script><script>if (typeof lightGallery !== 'undefined') {
+        var options = {
+            selector: '.gallery-item'
+        };
+        lightGallery(document.getElementsByClassName('.article-gallery')[0], options);
+        }</script>
   </div>
 </article>
 
@@ -196,7 +198,7 @@
     </div>
 
     <div id="toc-footer" style="display: none">
-      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#What-is-Emacs"><span class="toc-number">1.</span> <span class="toc-text">What is Emacs</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#My-road-to-mutiny"><span class="toc-number">2.</span> <span class="toc-text">My road to mutiny</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Interactive-Mode"><span class="toc-number">2.1.</span> <span class="toc-text">Interactive Mode</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Package-management"><span class="toc-number">2.2.</span> <span class="toc-text">Package management</span></a></li></ol></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#My-road-to-mutiny"><span class="toc-number">1.</span> <span class="toc-text">My road to mutiny</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Interactive-Mode"><span class="toc-number">1.1.</span> <span class="toc-text">Interactive Mode</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Package-management"><span class="toc-number">1.2.</span> <span class="toc-text">Package management</span></a></li></ol></li></ol>
     </div>
 
     <div id="share-footer" style="display: none">
