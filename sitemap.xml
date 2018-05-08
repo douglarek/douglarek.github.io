@@ -4,7 +4,7 @@
   <url>
     <loc>https://lingchao.xin/post/go-details.html</loc>
     
-    <lastmod>2018-05-08T09:43:26.338Z</lastmod>
+    <lastmod>2018-05-08T09:52:16.543Z</lastmod>
     
   </url>
   
@@ -65,14 +65,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/vgo-import.html</loc>
+    <loc>https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html</loc>
     
     <lastmod>2018-04-23T02:01:23.435Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html</loc>
+    <loc>https://lingchao.xin/post/vgo-import.html</loc>
     
     <lastmod>2018-04-23T02:01:23.435Z</lastmod>
     
@@ -135,14 +135,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/synchronization-queues-in-golang.html</loc>
+    <loc>https://lingchao.xin/post/postgresql-10-full-text-search-support-for-json-and-jsonb.html</loc>
     
     <lastmod>2018-04-20T05:40:59.629Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/postgresql-10-full-text-search-support-for-json-and-jsonb.html</loc>
+    <loc>https://lingchao.xin/post/synchronization-queues-in-golang.html</loc>
     
     <lastmod>2018-04-20T05:40:59.629Z</lastmod>
     
@@ -163,13 +163,6 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/golang-internals-part-2-nice-benefits-of-named-return-values.html</loc>
-    
-    <lastmod>2018-04-20T05:40:59.627Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>https://lingchao.xin/post/golang-graceful-restart-server.html</loc>
     
     <lastmod>2018-04-20T05:40:59.627Z</lastmod>
@@ -177,9 +170,9 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/go-range-loop-internals.html</loc>
+    <loc>https://lingchao.xin/post/golang-internals-part-2-nice-benefits-of-named-return-values.html</loc>
     
-    <lastmod>2018-04-20T05:40:59.626Z</lastmod>
+    <lastmod>2018-04-20T05:40:59.627Z</lastmod>
     
   </url>
   
@@ -192,6 +185,13 @@
   
   <url>
     <loc>https://lingchao.xin/post/go-proverbs.html</loc>
+    
+    <lastmod>2018-04-20T05:40:59.626Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://lingchao.xin/post/go-range-loop-internals.html</loc>
     
     <lastmod>2018-04-20T05:40:59.626Z</lastmod>
     
