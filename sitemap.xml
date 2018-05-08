@@ -4,7 +4,7 @@
   <url>
     <loc>https://lingchao.xin/post/go-details.html</loc>
     
-    <lastmod>2018-05-08T09:12:45.911Z</lastmod>
+    <lastmod>2018-05-08T09:14:01.405Z</lastmod>
     
   </url>
   
@@ -51,14 +51,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/why-are-there-nil-channels-in-go.html</loc>
+    <loc>https://lingchao.xin/post/vgo-module.html</loc>
     
     <lastmod>2018-04-23T02:01:23.436Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/vgo-module.html</loc>
+    <loc>https://lingchao.xin/post/why-are-there-nil-channels-in-go.html</loc>
     
     <lastmod>2018-04-23T02:01:23.436Z</lastmod>
     
@@ -107,14 +107,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/vgo-repro.html</loc>
+    <loc>https://lingchao.xin/post/vgo-tour.html</loc>
     
     <lastmod>2018-04-20T05:40:59.632Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/vgo-tour.html</loc>
+    <loc>https://lingchao.xin/post/vgo-repro.html</loc>
     
     <lastmod>2018-04-20T05:40:59.632Z</lastmod>
     
@@ -149,14 +149,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/memory-leaking.html</loc>
+    <loc>https://lingchao.xin/post/how-does-the-golang-scheduler-work.html</loc>
     
     <lastmod>2018-04-20T05:40:59.628Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/how-does-the-golang-scheduler-work.html</loc>
+    <loc>https://lingchao.xin/post/memory-leaking.html</loc>
     
     <lastmod>2018-04-20T05:40:59.628Z</lastmod>
     
@@ -177,6 +177,13 @@
   </url>
   
   <url>
+    <loc>https://lingchao.xin/post/go-range-loop-internals.html</loc>
+    
+    <lastmod>2018-04-20T05:40:59.626Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://lingchao.xin/post/go-errors-stack-traces.html</loc>
     
     <lastmod>2018-04-20T05:40:59.626Z</lastmod>
@@ -185,13 +192,6 @@
   
   <url>
     <loc>https://lingchao.xin/post/go-proverbs.html</loc>
-    
-    <lastmod>2018-04-20T05:40:59.626Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://lingchao.xin/post/go-range-loop-internals.html</loc>
     
     <lastmod>2018-04-20T05:40:59.626Z</lastmod>
     
