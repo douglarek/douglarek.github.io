@@ -4,7 +4,7 @@
   <url>
     <loc>https://lingchao.xin/post/go-details.html</loc>
     
-    <lastmod>2018-05-08T09:14:01.405Z</lastmod>
+    <lastmod>2018-05-08T09:42:30.836Z</lastmod>
     
   </url>
   
@@ -65,14 +65,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/vgo-import.html</loc>
+    <loc>https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html</loc>
     
     <lastmod>2018-04-23T02:01:23.435Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html</loc>
+    <loc>https://lingchao.xin/post/vgo-import.html</loc>
     
     <lastmod>2018-04-23T02:01:23.435Z</lastmod>
     
@@ -107,14 +107,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/vgo-tour.html</loc>
+    <loc>https://lingchao.xin/post/vgo-repro.html</loc>
     
     <lastmod>2018-04-20T05:40:59.632Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/vgo-repro.html</loc>
+    <loc>https://lingchao.xin/post/vgo-tour.html</loc>
     
     <lastmod>2018-04-20T05:40:59.632Z</lastmod>
     
@@ -163,13 +163,6 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/golang-graceful-restart-server.html</loc>
-    
-    <lastmod>2018-04-20T05:40:59.627Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>https://lingchao.xin/post/golang-internals-part-2-nice-benefits-of-named-return-values.html</loc>
     
     <lastmod>2018-04-20T05:40:59.627Z</lastmod>
@@ -177,14 +170,21 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/go-range-loop-internals.html</loc>
+    <loc>https://lingchao.xin/post/golang-graceful-restart-server.html</loc>
+    
+    <lastmod>2018-04-20T05:40:59.627Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://lingchao.xin/post/go-errors-stack-traces.html</loc>
     
     <lastmod>2018-04-20T05:40:59.626Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/go-errors-stack-traces.html</loc>
+    <loc>https://lingchao.xin/post/go-range-loop-internals.html</loc>
     
     <lastmod>2018-04-20T05:40:59.626Z</lastmod>
     
