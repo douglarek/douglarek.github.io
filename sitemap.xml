@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://lingchao.xin/post/go-details.html</loc>
+    
+    <lastmod>2018-05-08T09:07:36.467Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://lingchao.xin/post/type-system-overview.html</loc>
     
     <lastmod>2018-05-07T09:58:20.492Z</lastmod>
@@ -44,14 +51,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/vgo-module.html</loc>
+    <loc>https://lingchao.xin/post/why-are-there-nil-channels-in-go.html</loc>
     
     <lastmod>2018-04-23T02:01:23.436Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/why-are-there-nil-channels-in-go.html</loc>
+    <loc>https://lingchao.xin/post/vgo-module.html</loc>
     
     <lastmod>2018-04-23T02:01:23.436Z</lastmod>
     
@@ -72,14 +79,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/json-tips-in-go.html</loc>
+    <loc>https://lingchao.xin/post/gos-work-stealing-scheduler.html</loc>
     
     <lastmod>2018-04-23T02:01:23.434Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/gos-work-stealing-scheduler.html</loc>
+    <loc>https://lingchao.xin/post/json-tips-in-go.html</loc>
     
     <lastmod>2018-04-23T02:01:23.434Z</lastmod>
     
@@ -100,14 +107,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/vgo-tour.html</loc>
+    <loc>https://lingchao.xin/post/vgo-repro.html</loc>
     
     <lastmod>2018-04-20T05:40:59.632Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/vgo-repro.html</loc>
+    <loc>https://lingchao.xin/post/vgo-tour.html</loc>
     
     <lastmod>2018-04-20T05:40:59.632Z</lastmod>
     
@@ -156,13 +163,6 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/golang-graceful-restart-server.html</loc>
-    
-    <lastmod>2018-04-20T05:40:59.627Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>https://lingchao.xin/post/golang-internals-part-2-nice-benefits-of-named-return-values.html</loc>
     
     <lastmod>2018-04-20T05:40:59.627Z</lastmod>
@@ -170,14 +170,21 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/go-proverbs.html</loc>
+    <loc>https://lingchao.xin/post/golang-graceful-restart-server.html</loc>
+    
+    <lastmod>2018-04-20T05:40:59.627Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://lingchao.xin/post/go-errors-stack-traces.html</loc>
     
     <lastmod>2018-04-20T05:40:59.626Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/go-errors-stack-traces.html</loc>
+    <loc>https://lingchao.xin/post/go-proverbs.html</loc>
     
     <lastmod>2018-04-20T05:40:59.626Z</lastmod>
     
