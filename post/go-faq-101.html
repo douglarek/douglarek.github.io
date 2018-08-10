@@ -6,13 +6,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="keywords" content="go,translation,go101">
+    <meta name="keywords" content="translation,go,go101">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Go 问答 101">
 <meta property="og:url" content="https://lingchao.xin/post/go-faq-101.html">
 <meta property="og:site_name" content="Coding talks">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2018-08-10T05:09:57.567Z">
+<meta property="og:updated_time" content="2018-08-10T05:11:17.392Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Go 问答 101">
     
@@ -164,7 +164,7 @@
 <p>一个结构体中的字段顺序会影响填充, 并且填充会影响后续结构体的大小. 在 AMD64 系统, <code>T1</code> 的大小是 24, 但 <code>T2</code> 的大小是 16.</p>
 <p>Go 编译器不会重排结构体字段来减小结构体大小. 这样做会引起一些不可预知的结果. 然而, 程序员可以通过手动重排字段来减少填充.</p>
 <h4 id="为什么一个结构体中结尾的零大小类型的字段有时会影响结构体的大小"><a href="#为什么一个结构体中结尾的零大小类型的字段有时会影响结构体的大小" class="headerlink" title="为什么一个结构体中结尾的零大小类型的字段有时会影响结构体的大小"></a>为什么一个结构体中结尾的零大小类型的字段有时会影响结构体的大小</h4><p>(这不是 Go 规范的规则. 它是一个编译器的具体实现. 这里的编译器是标准编译器. 具体细节查看 <a href="https://github.com/golang/go/issues/9401" target="_blank" rel="noopener">issue#9401</a>)</p>
-<p>在当前的标准 GO 运行时实现中, 如果一个内存块至少被一个活跃的指针引用, 那么这个内存块将不会被视作垃圾并且不会被回收. 一个可寻址的结构体值的所有字段都可以寻址. 如果一个非零大小的结构体的结尾字段的大小是零, 那么对结构体值结尾字段的寻址将会返回一个地址, 该地址在结构体值分配的内存块之外. 返回的地址可能:</p>
+<p>在当前的标准 Go 运行时实现中, 如果一个内存块至少被一个活跃的指针引用, 那么这个内存块将不会被视作垃圾并且不会被回收. 一个可寻址的结构体值的所有字段都可以寻址. 如果一个非零大小的结构体的结尾字段的大小是零, 那么对结构体值结尾字段的寻址将会返回一个地址, 该地址在结构体值分配的内存块之外. 返回的地址可能:</p>
 <ul>
 <li>指向其他分配的内存块. 如果一个活跃的指针存储了该地址, 它会阻止垃圾回收器回收其他分配的内存块的回收, 这将引起内存泄漏.</li>
 <li>指向一个未分配内存区. 这会导致垃圾回收器重新收集未分配内存并且可能会引起程序崩溃.</li>
