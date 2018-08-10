@@ -127,6 +127,34 @@
   </entry>
   
   <entry>
+    <title>Go 问答 101</title>
+    <link href="https://lingchao.xin/post/go-faq-101.html"/>
+    <id>https://lingchao.xin/post/go-faq-101.html</id>
+    <published>2018-04-20T05:41:26.000Z</published>
+    <updated>2018-08-10T05:08:14.870Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div
+        
+      
+    
+    </summary>
+    
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
+    
+      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+      <category term="go101" scheme="https://lingchao.xin/tags/go101/"/>
+    
+  </entry>
+  
+  <entry>
     <title>Go 中的 nil</title>
     <link href="https://lingchao.xin/post/go-nils.html"/>
     <id>https://lingchao.xin/post/go-nils.html</id>
@@ -450,26 +478,6 @@
     <summary type="html">
     
       &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div class=&quot;.article-gallery&quot; &lt;p=&quot;&quot;&gt;本文译自 &lt;a href=&quot;https://halls-of-valhalla.org/beta/articles/functional-options-pattern-in-go,54/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Functional Options Pattern in Go&lt;/a&gt; 版权@归原文所有.&lt;br&gt;
-    
-    </summary>
-    
-    
-      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
-    
-      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Go work-stealing 调度器</title>
-    <link href="https://lingchao.xin/post/gos-work-stealing-scheduler.html"/>
-    <id>https://lingchao.xin/post/gos-work-stealing-scheduler.html</id>
-    <published>2018-01-31T06:35:04.000Z</published>
-    <updated>2018-04-23T02:01:23.434Z</updated>
-    
-    <summary type="html">
-    
-      &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div class=&quot;.article-gallery&quot; &lt;p=&quot;&quot;&gt;本文译自 Rakyll 的 &lt;a href=&quot;https://rakyll.org/scheduler/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;scheduler&lt;/a&gt; 版权@归原文所有.&lt;br&gt;
     
     </summary>
     
