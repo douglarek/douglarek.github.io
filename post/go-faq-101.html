@@ -12,7 +12,7 @@
 <meta property="og:url" content="https://lingchao.xin/post/go-faq-101.html">
 <meta property="og:site_name" content="Coding talks">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2018-08-10T10:53:58.416Z">
+<meta property="og:updated_time" content="2018-08-10T10:54:55.760Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Go 问答 101">
     
@@ -144,7 +144,7 @@
 <blockquote>
 <p>:= 左侧的所有条目必须是纯标识符, 并且至少有一个是新变量名.</p>
 </blockquote>
-<p>这意味着容器元素(<code>x[i]</code>), 结构体字段(<code>x.f</code>), 指针解引用(<code>*</code>)以及限制性标识符不能出现在 <code>:=</code> 的左侧. 目前, 针对这个问题有一个<a href="https://github.com/golang/go/issues/377" target="_blank" rel="noopener">公开 issue</a>. 看起来Go作者们想把这个问题留到Go 2.0.</p>
+<p>这意味着容器元素(<code>x[i]</code>), 结构体字段(<code>x.f</code>), 指针解引用(<code>*</code>)以及限制性标识符不能出现在 <code>:=</code> 的左侧. 目前, 针对这个问题有一个<a href="https://github.com/golang/go/issues/377" target="_blank" rel="noopener">公开 issue</a>. 看起来 Go 作者们想把这个问题留到 Go 2.0.</p>
 <h4 id="编译错误-unexpected-newline-expecting-…-什么意思"><a href="#编译错误-unexpected-newline-expecting-…-什么意思" class="headerlink" title="编译错误 unexpected newline, expecting { … 什么意思"></a>编译错误 unexpected newline, expecting { … 什么意思</h4><p>在 Go 中, 我们不能在随意的位置折断一行代码. 具体细节可以阅读 <a href="https://go101.org/article/line-break-rules.html" target="_blank" rel="noopener">Go 换行规则</a>. 通过该规则, 一般来说, 在大括号之前不允许换行.</p>
 <p>比如下面的代码:</p>
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> <span class="literal">true</span></span><br><span class="line">&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++</span><br><span class="line">&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> _ = []<span class="keyword">int</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
