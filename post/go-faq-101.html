@@ -12,7 +12,7 @@
 <meta property="og:url" content="https://lingchao.xin/post/go-faq-101.html">
 <meta property="og:site_name" content="Coding talks">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2018-08-10T10:51:13.461Z">
+<meta property="og:updated_time" content="2018-08-10T10:53:58.416Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Go 问答 101">
     
@@ -144,7 +144,7 @@
 <blockquote>
 <p>:= 左侧的所有条目必须是纯标识符, 并且至少有一个是新变量名.</p>
 </blockquote>
-<p>这意味着容器元素(<code>x[i]</code>), 结构体字段(<code>x.f</code>), 指针解引用(<code>*</code>)以及限制性标识符不能出现在 <code>:=</code> 的左侧. 目前, 针对这个问题有一个<a href="https://github.com/golang/go/issues/377" target="_blank" rel="noopener">公开 issue</a>. 看起来 Go 作者们想把这个问题留到 Go 2.0.</p>
+<p>这意味着容器元素(<code>x[i]</code>), 结构体字段(<code>x.f</code>), 指针解引用(<code>*</code>)以及限制性标识符不能出现在 <code>:=</code> 的左侧. 目前, 针对这个问题有一个<a href="https://github.com/golang/go/issues/377" target="_blank" rel="noopener">公开 issue</a>. 看起来Go作者们想把这个问题留到Go 2.0.</p>
 <h4 id="编译错误-unexpected-newline-expecting-…-什么意思"><a href="#编译错误-unexpected-newline-expecting-…-什么意思" class="headerlink" title="编译错误 unexpected newline, expecting { … 什么意思"></a>编译错误 unexpected newline, expecting { … 什么意思</h4><p>在 Go 中, 我们不能在随意的位置折断一行代码. 具体细节可以阅读 <a href="https://go101.org/article/line-break-rules.html" target="_blank" rel="noopener">Go 换行规则</a>. 通过该规则, 一般来说, 在大括号之前不允许换行.</p>
 <p>比如下面的代码:</p>
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> <span class="literal">true</span></span><br><span class="line">&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++</span><br><span class="line">&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> _ = []<span class="keyword">int</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -245,7 +245,7 @@
 <p>如果你确实需要这样一个函数, 可以自己毫不费力的实现一个. 阅读<a href="https://go101.org/article/channel-closing.html" target="_blank" rel="noopener">这篇文章</a>来获取如何写这样一个 <code>closed</code> 函数以及如何避免使用它.</p>
 <h4 id="一个函数返回本地变量的指针安全吗"><a href="#一个函数返回本地变量的指针安全吗" class="headerlink" title="一个函数返回本地变量的指针安全吗"></a>一个函数返回本地变量的指针安全吗</h4><p>是的, 这在 Go 中是完全安全的.</p>
 <p>支持栈的 Go 编译器会做逃逸分析. 对于标准 Go 编译器, 如果逃逸分析器认为一个内存块确定只在当前的函数调用时使用, 那么它会分配内存块到栈上, 否则内存块会分配到堆上.</p>
-<h4 id="单词-gopher-在-Go-社区有什么意义"><a href="#单词-gopher-在-Go-社区有什么意义" class="headerlink" title="单词 gopher 在 Go 社区有什么意义"></a>单词 gopher 在 Go 社区有什么意义</h4><p>在 Go 社区, 一个 <em>gopher</em>(地鼠) 意味着一个 Go 程序员. 这个绰号来源于 Go 语言采用<a href="https://blog.golang.org/gopher" target="_blank" rel="noopener">一个卡通地鼠</a> 作为吉祥物的事实. 随便说一句, 卡通地鼠由 <em>Renee French</em> 设计, 她是 Go 项目领导者 <em>Rob Pike</em> 的妻子.</p>
+<h4 id="单词-gopher-在-Go-社区有什么意义"><a href="#单词-gopher-在-Go-社区有什么意义" class="headerlink" title="单词 gopher 在 Go 社区有什么意义"></a>单词 gopher 在 Go 社区有什么意义</h4><p>在 Go 社区, 一个 <em>gopher</em>(地鼠) 意味着一个 Go 程序员. 这个绰号来源于 Go 语言采用<a href="https://blog.golang.org/gopher" target="_blank" rel="noopener">一个卡通地鼠</a>作为吉祥物的事实. 随便说一句, 卡通地鼠由 <em>Renee French</em> 设计, 她是 Go 项目领导者 <em>Rob Pike</em> 的妻子.</p>
 </div><script src="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/js/lightgallery.min.js"></script><script>if (typeof lightGallery !== 'undefined') {
         var options = {
             selector: '.gallery-item'
