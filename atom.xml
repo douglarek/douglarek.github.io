@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://lingchao.xin/"/>
-  <updated>2018-05-14T06:24:46.838Z</updated>
+  <updated>2018-08-10T05:09:57.567Z</updated>
   <id>https://lingchao.xin/</id>
   
   <author>
@@ -15,6 +15,34 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Go 问答 101</title>
+    <link href="https://lingchao.xin/post/go-faq-101.html"/>
+    <id>https://lingchao.xin/post/go-faq-101.html</id>
+    <published>2018-07-20T05:41:26.000Z</published>
+    <updated>2018-08-10T05:09:57.567Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div
+        
+      
+    
+    </summary>
+    
+    
+      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
+    
+      <category term="go101" scheme="https://lingchao.xin/tags/go101/"/>
+    
+  </entry>
   
   <entry>
     <title>Go 细节</title>
@@ -36,9 +64,9 @@
     </summary>
     
     
-      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
-    
       <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
     
       <category term="go101" scheme="https://lingchao.xin/tags/go101/"/>
     
@@ -64,9 +92,9 @@
     </summary>
     
     
-      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
-    
       <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
     
       <category term="go101" scheme="https://lingchao.xin/tags/go101/"/>
     
@@ -92,9 +120,9 @@
     </summary>
     
     
-      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
-    
       <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
     
       <category term="go101" scheme="https://lingchao.xin/tags/go101/"/>
     
@@ -120,37 +148,9 @@
     </summary>
     
     
-      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
-    
       <category term="go" scheme="https://lingchao.xin/tags/go/"/>
     
-  </entry>
-  
-  <entry>
-    <title>Go 问答 101</title>
-    <link href="https://lingchao.xin/post/go-faq-101.html"/>
-    <id>https://lingchao.xin/post/go-faq-101.html</id>
-    <published>2018-04-20T05:41:26.000Z</published>
-    <updated>2018-08-10T05:08:14.870Z</updated>
-    
-    <summary type="html">
-    
-      
-      
-        
-        
-          &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div
-        
-      
-    
-    </summary>
-    
-    
       <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
-    
-      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
-    
-      <category term="go101" scheme="https://lingchao.xin/tags/go101/"/>
     
   </entry>
   
@@ -174,9 +174,9 @@
     </summary>
     
     
-      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
-    
       <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
     
       <category term="go101" scheme="https://lingchao.xin/tags/go101/"/>
     
@@ -252,9 +252,9 @@
     </summary>
     
     
-      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
-    
       <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
     
       <category term="go101" scheme="https://lingchao.xin/tags/go101/"/>
     
@@ -274,9 +274,9 @@
     </summary>
     
     
-      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
-    
       <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
     
   </entry>
   
@@ -312,9 +312,9 @@
     </summary>
     
     
-      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
-    
       <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
     
       <category term="vgo" scheme="https://lingchao.xin/tags/vgo/"/>
     
@@ -334,9 +334,9 @@
     </summary>
     
     
-      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
-    
       <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
     
       <category term="vgo" scheme="https://lingchao.xin/tags/vgo/"/>
     
@@ -356,9 +356,9 @@
     </summary>
     
     
-      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
-    
       <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
     
       <category term="vgo" scheme="https://lingchao.xin/tags/vgo/"/>
     
@@ -378,9 +378,9 @@
     </summary>
     
     
-      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
-    
       <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
     
       <category term="vgo" scheme="https://lingchao.xin/tags/vgo/"/>
     
@@ -400,9 +400,9 @@
     </summary>
     
     
-      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
-    
       <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
     
       <category term="vgo" scheme="https://lingchao.xin/tags/vgo/"/>
     
@@ -422,9 +422,9 @@
     </summary>
     
     
-      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
-    
       <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
     
       <category term="vgo" scheme="https://lingchao.xin/tags/vgo/"/>
     
@@ -482,9 +482,9 @@
     </summary>
     
     
-      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
-    
       <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
     
   </entry>
   
