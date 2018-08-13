@@ -4,7 +4,7 @@
   <url>
     <loc>https://lingchao.xin/post/go-faq-101.html</loc>
     
-    <lastmod>2018-08-13T10:17:49.308Z</lastmod>
+    <lastmod>2018-08-13T10:24:15.794Z</lastmod>
     
   </url>
   
@@ -170,13 +170,6 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/golang-internals-part-2-nice-benefits-of-named-return-values.html</loc>
-    
-    <lastmod>2018-04-20T05:40:59.627Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>https://lingchao.xin/post/golang-graceful-restart-server.html</loc>
     
     <lastmod>2018-04-20T05:40:59.627Z</lastmod>
@@ -184,7 +177,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/go-proverbs.html</loc>
+    <loc>https://lingchao.xin/post/golang-internals-part-2-nice-benefits-of-named-return-values.html</loc>
+    
+    <lastmod>2018-04-20T05:40:59.627Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://lingchao.xin/post/go-errors-stack-traces.html</loc>
     
     <lastmod>2018-04-20T05:40:59.626Z</lastmod>
     
@@ -198,7 +198,7 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/go-errors-stack-traces.html</loc>
+    <loc>https://lingchao.xin/post/go-proverbs.html</loc>
     
     <lastmod>2018-04-20T05:40:59.626Z</lastmod>
     
