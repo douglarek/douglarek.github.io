@@ -12,7 +12,7 @@
 <meta property="og:url" content="https://lingchao.xin/post/go-faq-101.html">
 <meta property="og:site_name" content="Coding talks">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2018-08-13T06:53:27.749Z">
+<meta property="og:updated_time" content="2018-08-13T06:59:58.543Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Go 问答 101">
     
@@ -251,7 +251,7 @@
 <p>不可比较类型不能用作 map 类型的 key 类型.</p>
 <p>请注意,</p>
 <ul>
-<li>尽管 map, slice 和 function 类型不支持比较, 他们的值可以和 裸 <code>nil</code> 标识符比较.</li>
+<li>尽管 map, slice 和 function 类型不支持比较, 他们的值可以和裸 <code>nil</code> 标识符比较.</li>
 <li><a href="https://go101.org/article/interface.html#comparison" target="_blank" rel="noopener">比较两个接口值</a> 会在运行时发生崩溃如果这两个接口值的动态类型一致并且不可比较.</li>
 </ul>
 <p>关于为什么 map, slice 以及 function 类型不支持比较, 可以阅读官方 Go FAQ 的<a href="https://golang.org/doc/faq#map_keys" target="_blank" rel="noopener">这个回答</a>.</p>
@@ -296,21 +296,21 @@
 <li>字面量值</li>
 <li>包级函数</li>
 <li>方法(作为函数值使用**</li>
-<li>中间值</li>
-</ul>
-<ul>
+<li>中间值<ul>
 <li>函数调用</li>
 <li>明确的值转换</li>
-<li>各种各样的操作, 指针解引用除外:</li>
-</ul>
-<ul>
+<li>各种各样的操作, 指针解引用除外:<ul>
 <li>channel 接收操作</li>
 <li>sub-string 操作</li>
 <li>sub-slice 操作</li>
 <li>加法, 减法, 乘法, 除法, 等.</li>
 </ul>
+</li>
+</ul>
+</li>
+</ul>
 <blockquote>
-<p>请注意, Go 中有一个语法糖 <code>&amp;T{}</code>. 它是 <code>tmp:= T{}; (&amp;tmp)</code> 的缩写形式. 所以 <code>&amp;T{}</code> 是合法的不意味着 <code>T{}</code> 可寻址.</p>
+<p>请注意, Go 中有一个语法糖 <code>&amp;T{}</code>. 它是 <code>tmp:= T{}; (&amp;tmp)</code> 的缩写形式. 所以 <code>&amp;T{}</code> 是合法的并不意味着 <code>T{}</code> 可寻址.</p>
 </blockquote>
 <p>以下值是可寻址的:</p>
 <ul>

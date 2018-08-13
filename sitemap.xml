@@ -4,7 +4,7 @@
   <url>
     <loc>https://lingchao.xin/post/go-faq-101.html</loc>
     
-    <lastmod>2018-08-13T06:53:27.749Z</lastmod>
+    <lastmod>2018-08-13T06:59:58.543Z</lastmod>
     
   </url>
   
@@ -156,13 +156,6 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/how-does-the-golang-scheduler-work.html</loc>
-    
-    <lastmod>2018-04-20T05:40:59.628Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>https://lingchao.xin/post/memory-leaking.html</loc>
     
     <lastmod>2018-04-20T05:40:59.628Z</lastmod>
@@ -170,9 +163,9 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/golang-internals-part-2-nice-benefits-of-named-return-values.html</loc>
+    <loc>https://lingchao.xin/post/how-does-the-golang-scheduler-work.html</loc>
     
-    <lastmod>2018-04-20T05:40:59.627Z</lastmod>
+    <lastmod>2018-04-20T05:40:59.628Z</lastmod>
     
   </url>
   
@@ -184,7 +177,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/go-range-loop-internals.html</loc>
+    <loc>https://lingchao.xin/post/golang-internals-part-2-nice-benefits-of-named-return-values.html</loc>
+    
+    <lastmod>2018-04-20T05:40:59.627Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://lingchao.xin/post/go-proverbs.html</loc>
     
     <lastmod>2018-04-20T05:40:59.626Z</lastmod>
     
@@ -198,7 +198,7 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/go-proverbs.html</loc>
+    <loc>https://lingchao.xin/post/go-range-loop-internals.html</loc>
     
     <lastmod>2018-04-20T05:40:59.626Z</lastmod>
     
