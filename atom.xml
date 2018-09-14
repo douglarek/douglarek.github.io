@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://lingchao.xin/"/>
-  <updated>2018-08-13T10:24:15.794Z</updated>
+  <updated>2018-09-14T07:19:28.957Z</updated>
   <id>https://lingchao.xin/</id>
   
   <author>
@@ -15,6 +15,34 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>一些常见的并发编程错误</title>
+    <link href="https://lingchao.xin/post/concurrent-common-mistakes.html"/>
+    <id>https://lingchao.xin/post/concurrent-common-mistakes.html</id>
+    <published>2018-09-14T02:11:27.000Z</published>
+    <updated>2018-09-14T07:19:28.957Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div
+        
+      
+    
+    </summary>
+    
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
+    
+      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+      <category term="go101" scheme="https://lingchao.xin/tags/go101/"/>
+    
+  </entry>
   
   <entry>
     <title>Go 问答 101</title>
@@ -463,26 +491,6 @@
     
     </summary>
     
-    
-      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Go 函数选项模式</title>
-    <link href="https://lingchao.xin/post/functional-options-pattern-in-go.html"/>
-    <id>https://lingchao.xin/post/functional-options-pattern-in-go.html</id>
-    <published>2018-02-01T04:00:04.000Z</published>
-    <updated>2018-03-26T07:25:06.568Z</updated>
-    
-    <summary type="html">
-    
-      &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div class=&quot;.article-gallery&quot; &lt;p=&quot;&quot;&gt;本文译自 &lt;a href=&quot;https://halls-of-valhalla.org/beta/articles/functional-options-pattern-in-go,54/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Functional Options Pattern in Go&lt;/a&gt; 版权@归原文所有.&lt;br&gt;
-    
-    </summary>
-    
-    
-      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
     
       <category term="go" scheme="https://lingchao.xin/tags/go/"/>
     

@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://lingchao.xin/post/concurrent-common-mistakes.html</loc>
+    
+    <lastmod>2018-09-14T07:19:28.957Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://lingchao.xin/post/go-faq-101.html</loc>
     
     <lastmod>2018-08-13T10:24:15.794Z</lastmod>
@@ -72,13 +79,6 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/vgo-import.html</loc>
-    
-    <lastmod>2018-04-23T02:01:23.435Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>https://lingchao.xin/post/ordering-by-specific-field-values-with-mysql.html</loc>
     
     <lastmod>2018-04-23T02:01:23.435Z</lastmod>
@@ -86,14 +86,21 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/gos-work-stealing-scheduler.html</loc>
+    <loc>https://lingchao.xin/post/vgo-import.html</loc>
+    
+    <lastmod>2018-04-23T02:01:23.435Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://lingchao.xin/post/json-tips-in-go.html</loc>
     
     <lastmod>2018-04-23T02:01:23.434Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/json-tips-in-go.html</loc>
+    <loc>https://lingchao.xin/post/gos-work-stealing-scheduler.html</loc>
     
     <lastmod>2018-04-23T02:01:23.434Z</lastmod>
     
@@ -142,14 +149,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/postgresql-10-full-text-search-support-for-json-and-jsonb.html</loc>
+    <loc>https://lingchao.xin/post/synchronization-queues-in-golang.html</loc>
     
     <lastmod>2018-04-20T05:40:59.629Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/synchronization-queues-in-golang.html</loc>
+    <loc>https://lingchao.xin/post/postgresql-10-full-text-search-support-for-json-and-jsonb.html</loc>
     
     <lastmod>2018-04-20T05:40:59.629Z</lastmod>
     
@@ -170,14 +177,14 @@
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/golang-graceful-restart-server.html</loc>
+    <loc>https://lingchao.xin/post/golang-internals-part-2-nice-benefits-of-named-return-values.html</loc>
     
     <lastmod>2018-04-20T05:40:59.627Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://lingchao.xin/post/golang-internals-part-2-nice-benefits-of-named-return-values.html</loc>
+    <loc>https://lingchao.xin/post/golang-graceful-restart-server.html</loc>
     
     <lastmod>2018-04-20T05:40:59.627Z</lastmod>
     

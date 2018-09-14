@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="keywords" content="translation,go,go101">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一些常见的并发编程错误">
+<meta property="og:url" content="https://lingchao.xin/post/concurrent-common-mistakes.html">
+<meta property="og:site_name" content="Coding talks">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2018-09-14T07:19:28.957Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="一些常见的并发编程错误">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="https://www.gravatar.com/avatar/f4254a13e728ba649241e5776b4884db?s=16">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="https://www.gravatar.com/avatar/f4254a13e728ba649241e5776b4884db?s=192" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="https://www.gravatar.com/avatar/f4254a13e728ba649241e5776b4884db?s=180">
+          
+        
+    
+    <!-- title -->
+    <title>一些常见的并发编程错误</title>
+    <!-- styles -->
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- persian styles -->
+    
+      <link rel="stylesheet" href="/css/rtl.css">
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="Coding talks" type="application/atom+xml" />
+    
+</head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Archives</a></li>
+         
+          <li><a href="/atom.xml">Feed</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" href="/post/go-faq-101.html"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://lingchao.xin/post/concurrent-common-mistakes.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://lingchao.xin/post/concurrent-common-mistakes.html&text=一些常见的并发编程错误"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://lingchao.xin/post/concurrent-common-mistakes.html&title=一些常见的并发编程错误"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lingchao.xin/post/concurrent-common-mistakes.html&is_video=false&description=一些常见的并发编程错误"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=一些常见的并发编程错误&body=Check out this article: https://lingchao.xin/post/concurrent-common-mistakes.html"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://lingchao.xin/post/concurrent-common-mistakes.html&title=一些常见的并发编程错误"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/concurrent-common-mistakes.html&title=一些常见的并发编程错误"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/concurrent-common-mistakes.html&title=一些常见的并发编程错误"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/concurrent-common-mistakes.html&title=一些常见的并发编程错误"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/concurrent-common-mistakes.html&name=一些常见的并发编程错误&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#需要同步的时候没有同步"><span class="toc-number">1.</span> <span class="toc-text">需要同步的时候没有同步</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#使用-time-Sleep-做同步"><span class="toc-number">2.</span> <span class="toc-text">使用 time.Sleep 做同步</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#任由-Goroutines-挂起-Hanging"><span class="toc-number">3.</span> <span class="toc-text">任由 Goroutines 挂起(Hanging)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#在-sync-标准库中复制类型的值"><span class="toc-number">4.</span> <span class="toc-text">在 sync 标准库中复制类型的值</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#在错误的地方调用-sync-WaitGroup"><span class="toc-number">5.</span> <span class="toc-text">在错误的地方调用 sync.WaitGroup</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#错误使用-Channels-作为-Futures"><span class="toc-number">6.</span> <span class="toc-text">错误使用 Channels 作为 Futures</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#不是从最后一个活跃的发送者-Goroutine-关闭-Channels"><span class="toc-number">7.</span> <span class="toc-text">不是从最后一个活跃的发送者 Goroutine 关闭 Channels</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#64-位值的原子操作不保证-64-位对齐"><span class="toc-number">8.</span> <span class="toc-text">64 位值的原子操作不保证 64 位对齐</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#不重视-time-After-调用带来的大量资源消耗"><span class="toc-number">9.</span> <span class="toc-text">不重视 time.After 调用带来的大量资源消耗</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#错误的使用-time-Timer"><span class="toc-number">10.</span> <span class="toc-text">错误的使用 time.Timer</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index my4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        一些常见的并发编程错误
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Coding talks</span>
+      </span>
+      
+    <div class="postdate">
+        <time datetime="2018-09-14T02:11:27.000Z" itemprop="datePublished">2018-09-14</time>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/go/">go</a>, <a class="tag-link" href="/tags/go101/">go101</a>, <a class="tag-link" href="/tags/translation/">translation</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css"><div class=".article-gallery" <p="">本文译自 <a href="https://go101.org/article/concurrent-common-mistakes.html" target="_blank" rel="noopener">Some Common Concurrent Programming Mistakes</a> 版权@归原文所有.<p></p>
+<p>Go 是内置了并发编程支持的语言. 通过使用关键字 <code>go</code> 来创建 goroutines (轻量级线程), 并且<a href="https://go101.org/article/channel-use-cases.html" target="_blank" rel="noopener">使用</a> <a href="https://go101.org/article/channel.html" target="_blank" rel="noopener">channels</a> 和 Go 提供的<a href="https://go101.org/article/concurrent-atomic-operation.html" target="_blank" rel="noopener">其他并发</a><a href="https://go101.org/article/concurrent-synchronization-more.html&lt;Paste" target="_blank" rel="noopener">同步的技术</a>, 并发编程变得简单, 灵活, 并且富有乐趣.</p>
+<p>另一方面, Go 不会阻止 Go 程序员由于粗心或者缺乏经验导致的一些并发编程的错误. 本文接下来的部分将展示一些常见的 Go 并发编程错误, 来帮助 Go 程序避免类似的错误.</p>
+<h3 id="需要同步的时候没有同步"><a href="#需要同步的时候没有同步" class="headerlink" title="需要同步的时候没有同步"></a>需要同步的时候没有同步</h3><p>代码行可能<a href="https://go101.org/article/memory-model.html" target="_blank" rel="noopener">不会按书写代码的顺序执行</a>.</p>
+<p>如下的程序有两个错误:</p>
+<ul>
+<li>首先, 主 goroutine 中 <code>b</code> 的读取和新 goroutine 中 <code>b</code> 的写入可能存在数据竞争.</li>
+<li>其次, 条件 <code>b == true</code> 无法确保主 goroutine 满足 <code>a != nil</code>. 编译器和 CPU 在新 goroutine 中通过重排序进行优化, 所以运行时 <code>b</code> 的赋值可能发生在 <code>a</code> 的赋值之前, 导致当主 goroutine 中 <code>a</code> 的元素被修改的时候, <code>a</code> 仍旧是 <code>nil</code>. </li>
+</ul>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"time"</span></span><br><span class="line">	<span class="string">"runtime"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> a []<span class="keyword">int</span> <span class="comment">// nil</span></span><br><span class="line">	<span class="keyword">var</span> b <span class="keyword">bool</span>  <span class="comment">// false</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// a new goroutine</span></span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span> <span class="params">()</span></span> &#123;</span><br><span class="line">		a = <span class="built_in">make</span>([]<span class="keyword">int</span>, <span class="number">3</span>)</span><br><span class="line">		b = <span class="literal">true</span> <span class="comment">// write b</span></span><br><span class="line">	&#125;()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> !b &#123; <span class="comment">// read b</span></span><br><span class="line">		time.Sleep(time.Second)</span><br><span class="line">		runtime.Gosched()</span><br><span class="line">	&#125;</span><br><span class="line">	a[<span class="number">0</span>], a[<span class="number">1</span>], a[<span class="number">2</span>] = <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span> <span class="comment">// might panic</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面的程序可能在一台电脑上运行良好, 在另一台电脑上 panic. 或者它可能 N 次运行良好, N+1 次 panic.</p>
+<p>我们应该使用 channels 或者 <code>sync</code> 标准库提供的同步技术来确保内存序. 比如,</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> a []<span class="keyword">int</span> = <span class="literal">nil</span></span><br><span class="line">	c := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// a new goroutine</span></span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span> <span class="params">()</span></span> &#123;</span><br><span class="line">		a = <span class="built_in">make</span>([]<span class="keyword">int</span>, <span class="number">3</span>)</span><br><span class="line">		c &lt;- <span class="keyword">struct</span>&#123;&#125;&#123;&#125;</span><br><span class="line">	&#125;()</span><br><span class="line"></span><br><span class="line">	&lt;-c</span><br><span class="line">	a[<span class="number">0</span>], a[<span class="number">1</span>], a[<span class="number">2</span>] = <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="使用-time-Sleep-做同步"><a href="#使用-time-Sleep-做同步" class="headerlink" title="使用 time.Sleep 做同步"></a>使用 time.Sleep 做同步</h3><p>让我们先看一个简单的例子.</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"time"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> x = <span class="number">123</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		x = <span class="number">789</span> <span class="comment">// write x</span></span><br><span class="line">	&#125;()</span><br><span class="line"></span><br><span class="line">	time.Sleep(time.Second)</span><br><span class="line">	fmt.Println(x) <span class="comment">// read x</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们期望程序打印 <code>789</code>. 如果我们运行它, 它确实打印 <code>789</code>, 差不多总是这样. 但是它是否是一个具有良好同步的程序 ? 不 ! 原因是 Go 运行时不保证 <code>x</code> 的写入发生在 <code>x</code> 的读取之前. 某些条件下, 比如大部分 CPU 资源被运行在同一 OS 的程序消费, <code>x</code> 的写入可能发生在 <code>x</code> 的读取之后. 这就是为什么我们永远不要使用 <code>time.Sleep</code> 在正式项目中做同步.</p>
+<p>让我们再看另一个例子.</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"time"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> x = <span class="number">0</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> num = <span class="number">123</span></span><br><span class="line">	<span class="keyword">var</span> p = &amp;num</span><br><span class="line"></span><br><span class="line">	c := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		c &lt;- *p + x</span><br><span class="line">	&#125;()</span><br><span class="line"></span><br><span class="line">	time.Sleep(time.Second)</span><br><span class="line">	num = <span class="number">789</span></span><br><span class="line">	fmt.Println(&lt;-c)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>你期望程序输出什么 ? <code>123</code> 还是 <code>789</code> ? 事实上, 该输出是编译器相关的. 对于标准 Go 编译器 1.11, 程序非常有可能输出 <code>123</code>. 但是理论上, 它也可能输出 <code>789</code>, 或者另一个不期望的数.</p>
+<p>现在, 让我们把 <code>c &lt;- *p + x</code> 改成 <code>c &lt;- *p</code>, 并且重新运行程序. 你会发现输出变成 <code>789</code> (对于标准 Go 编译器 1.11). 再说一次, 该输出是编译器相关的.</p>
+<p>是的, 上面的程序有数据竞争. 表达式 <code>*p</code> 可能会在 <code>num = 789</code> 赋值操作之前,之后抑或同时求值. <code>time.Sleep</code> 无法确保 <code>*p</code> 的求值发生在赋值操作之前.</p>
+<p>对于这个特殊的例子, 我们应该在创建新的 goroutine 之前存储要发送的值到一个临时的值里面, 并且在新 goroutine 里发送该临时值来移除数据竞争.</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line">...</span><br><span class="line">	tmp := *p + x</span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		c &lt;- tmp</span><br><span class="line">	&#125;()</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<h3 id="任由-Goroutines-挂起-Hanging"><a href="#任由-Goroutines-挂起-Hanging" class="headerlink" title="任由 Goroutines 挂起(Hanging)"></a>任由 Goroutines 挂起(Hanging)</h3><p>挂起的 goroutines 是指永远保持阻塞的 goroutines. 有许多原因导致 goroutines 挂起. 比如,</p>
+<ul>
+<li>一个 goroutine 尝试从一个 nil channel 接收值或者从一个没有任何 goroutine 发送数据的 channel 接收值.</li>
+<li>一个 goroutine 尝试发送值到 nil channel 或者发送值到一个没有任何 goroutine 从中读取值的 channel.</li>
+<li>一个 goroutine 自己死锁.</li>
+<li>一组 goroutines 相互死锁.</li>
+<li>一个 goroutine 在执行没有 <code>default</code> 分支的 <code>select</code> 代码块时阻塞, 并且 <code>select</code> 代码块中 <code>case</code> 关键字之后的所有 channel 操作永远阻塞.</li>
+</ul>
+<p>除了有时候我们故意让主 goroutine 挂起来避免程序退出, 大多数其他的挂起 goroutine 案例都是不期望的. 对于 Go 运行时来说很难判断一个处于阻塞状态的 goroutine 是否挂起还是处于临时的阻塞状态. 所以 Go 运行时从来不会释放由挂起的 goroutine 消费的资源.</p>
+<p>在<a href="https://go101.org/article/channel-use-cases.html#first-response-wins" target="_blank" rel="noopener">谁先响应谁赢</a>的 channel 使用案例中, 如果未来使用的 channel 容量不够大, 那么当尝试将结果发送到未来 channel 时, 一些较慢的响应 goroutines 将会挂起. 例如, 如果调用以下函数, 将会有 4 个 goroutine 永远处于阻塞状态.</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">request</span><span class="params">()</span> <span class="title">int</span></span> &#123;</span><br><span class="line">	c := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">5</span>; i++ &#123;</span><br><span class="line">		i := i</span><br><span class="line">		<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">			c &lt;- i <span class="comment">// 4 goroutines will hang here.</span></span><br><span class="line">		&#125;()</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> &lt;-c</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>为避免这四个 goroutines 挂起, channel c 的容量必须至少为 4.</p>
+<p>在<a href="https://go101.org/article/channel-use-cases.html#first-response-wins-2" target="_blank" rel="noopener">谁先响应谁赢的第二种方式的</a> channel 使用案例中, 如果用的 channel 是无缓冲的，则 channel 接收者可能永远不会得到响应并挂起. 例如, 如果在 goroutine 中调用以下函数, 则 goroutine 可能会挂起. 原因是, 如果五个try-send 操作都发生在接收操作 <code>&lt;-c</code> 准备就绪之前, 则所有五个 try-send 操作都将无法发送值, 因此调用者 goroutine 将永远不会收到值.</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">request</span><span class="params">()</span> <span class="title">int</span></span> &#123;</span><br><span class="line">	c := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">5</span>; i++ &#123;</span><br><span class="line">		i := i</span><br><span class="line">		<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">			<span class="keyword">select</span> &#123;</span><br><span class="line">			<span class="keyword">case</span> c &lt;- i:</span><br><span class="line">			<span class="keyword">default</span>:</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;()</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> &lt;-c</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>将 channel <code>c</code> 更改为缓冲 channel 将保证五个尝试发送操作中的至少一个成功, 以便调用方 goroutine 永远不会挂起在上述函数中.</p>
+<h3 id="在-sync-标准库中复制类型的值"><a href="#在-sync-标准库中复制类型的值" class="headerlink" title="在 sync 标准库中复制类型的值"></a>在 sync 标准库中复制类型的值</h3><p>在实践中, <code>sync</code> 标准库中(<code>Locker</code> 接口值除外)类型的值不应该被拷贝. 我们应该只拷贝这些值的指针.</p>
+<p>以下是(不好的并发编程)的例子. 这个例子中, 当调用 <code>Counter.Value</code> 时, 一个 <code>Counter</code> 接收值会被拷贝. 作为接收值的一个字段, <code>Counter</code> 接收值的 <code>Mutex</code> 字段也会被拷贝. 该拷贝不是同步的, 所以拷贝的 <code>Mutex</code> 可能已经被破坏. 即使它没有损坏, 它所保护的是复制的 <code>Counter</code> 接收者值的访问, 这通常是没有意义的.</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">"sync"</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Counter <span class="keyword">struct</span> &#123;</span><br><span class="line">	sync.Mutex</span><br><span class="line">	n <span class="keyword">int64</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// This method is okay.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Counter)</span> <span class="title">Increase</span><span class="params">(d <span class="keyword">int64</span>)</span> <span class="params">(r <span class="keyword">int64</span>)</span></span> &#123;</span><br><span class="line">	c.Lock()</span><br><span class="line">	c.n += d</span><br><span class="line">	r = c.n</span><br><span class="line">	c.Unlock()</span><br><span class="line">	<span class="keyword">return</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// The method is bad. When it is called, a Counter</span></span><br><span class="line"><span class="comment">// receiver value will be copied.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c Counter)</span> <span class="title">Value</span><span class="params">()</span> <span class="params">(r <span class="keyword">int64</span>)</span></span> &#123;</span><br><span class="line">	c.Lock()</span><br><span class="line">	r = c.n</span><br><span class="line">	c.Unlock()</span><br><span class="line">	<span class="keyword">return</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们应该将 <code>Value</code> 方法的接收者类型更改为指针类型 <code>*Counter</code>, 以避免复制 <code>Mutex</code> 值.</p>
+<p>官方 Go SDK 中提供的 <code>go vet</code> 命令将报告潜在的错误值拷贝.</p>
+<h3 id="在错误的地方调用-sync-WaitGroup"><a href="#在错误的地方调用-sync-WaitGroup" class="headerlink" title="在错误的地方调用 sync.WaitGroup"></a>在错误的地方调用 sync.WaitGroup</h3><p>每个 <code>sync.WaitGroup</code> 值在内部维护一个计数器, 计数器的初始值为零. 如果 <code>WaitGroup</code> 值的计数器为零, 则对 <code>WaitGroup</code> 值的 <code>Wait</code> 方法的调用将不会阻塞, 否则调用将阻塞, 直到计数器值变为零.</p>
+<p>要使 WaitGroup 值的使用有意义, 当 WaitGroup 值的计数器为零时, 对 <code>WaitGroup</code> 值的 <code>Wait</code> 方法的相应调用必须发生在调用 <code>WaitGroup</code> 值的 <code>Add</code> 方法之前.</p>
+<p>例如, 在以下程序中, 在不正确的位置调用 <code>Add</code> 方法, 这使得最终打印的数字不总是 <code>100</code>. 实际上, 程序的最终打印数可以是 <code>[0, 100]</code> 范围内的任意数字. 原因是在 <code>Wait</code> 方法调用之前不保证发生 <code>Add</code> 方法调用.</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"sync"</span></span><br><span class="line">	<span class="string">"sync/atomic"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> wg sync.WaitGroup</span><br><span class="line">	<span class="keyword">var</span> x <span class="keyword">int32</span> = <span class="number">0</span></span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">100</span>; i++ &#123;</span><br><span class="line">		<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">			wg.Add(<span class="number">1</span>)</span><br><span class="line">			atomic.AddInt32(&amp;x, <span class="number">1</span>)</span><br><span class="line">			wg.Done()</span><br><span class="line">		&#125;()</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	fmt.Println(<span class="string">"To wait ..."</span>)</span><br><span class="line">	wg.Wait()</span><br><span class="line">	fmt.Println(atomic.LoadInt32(&amp;x))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>为了使程序按预期运行, 我们应该将 <code>Add</code> 方法调用移出 <code>for</code> 循环中创建的新 goroutine, 如下面的代码所示.</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line">...</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">100</span>; i++ &#123;</span><br><span class="line">		wg.Add(<span class="number">1</span>)</span><br><span class="line">		<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">			atomic.AddInt32(&amp;x, <span class="number">1</span>)</span><br><span class="line">			wg.Done()</span><br><span class="line">		&#125;()</span><br><span class="line">	&#125;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<h3 id="错误使用-Channels-作为-Futures"><a href="#错误使用-Channels-作为-Futures" class="headerlink" title="错误使用 Channels 作为 Futures"></a>错误使用 Channels 作为 Futures</h3><p>从文章<a href="https://go101.org/article/channel-use-cases.html" target="_blank" rel="noopener">channel 使用案例</a>中, 我们知道一些函数会返回 <a href="https://go101.org/article/channel-use-cases.html#future-promise" target="_blank" rel="noopener">channels 作为 futures</a>. 假设 <code>fa</code> 和<code>fb</code> 是两个这样的函数, 那么下面的调用将不正确地使用 future 参数.</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line">doSomethingWithFutureArguments(&lt;-fa(), &lt;-fb())</span><br></pre></td></tr></table></figure>
+<p>在上面的代码行中, 两个 channel 接收操作是顺序处理的, 而不是同时处理的. 我们应该将其修改为以下内容以同时处理它们.</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line">ca, cb := fa(), fb()</span><br><span class="line">doSomethingWithFutureArguments(&lt;-ca, &lt;-cb)</span><br></pre></td></tr></table></figure>
+<h3 id="不是从最后一个活跃的发送者-Goroutine-关闭-Channels"><a href="#不是从最后一个活跃的发送者-Goroutine-关闭-Channels" class="headerlink" title="不是从最后一个活跃的发送者 Goroutine 关闭 Channels"></a>不是从最后一个活跃的发送者 Goroutine 关闭 Channels</h3><p>Go 程序员常犯的一个错误就是当还有一些其他 goroutine 可能会在之后向该 channel 发送值时关闭一个 channel. 当这种潜在的发送(到关闭的 channel)真的发生时，会发生 panic.</p>
+<p>一些有名的 Go 项目也犯过这样的错误, 比如 Kubernetes 项目中的<a href="https://github.com/kubernetes/kubernetes/pull/45291/files?diff=split" target="_blank" rel="noopener">这个</a>以及<a href="https://github.com/kubernetes/kubernetes/pull/39479/files?diff=split" target="_blank" rel="noopener">这个 bug</a>.</p>
+<p>请阅读<a href="https://go101.org/article/channel-closing.html" target="_blank" rel="noopener">这篇文章</a>, 了解如何安全, 优雅地关闭 channel.</p>
+<h3 id="64-位值的原子操作不保证-64-位对齐"><a href="#64-位值的原子操作不保证-64-位对齐" class="headerlink" title="64 位值的原子操作不保证 64 位对齐"></a>64 位值的原子操作不保证 64 位对齐</h3><p>到目前为止(Go 1.11), 对于标准的 Go 编译器, 64 位原子操作所涉及的值的地址需要 64 位对齐. 如果不这样做可能会导致 panic. 对于标准 Go 编译器, 此类故障只会发生在32位体系架构上. 请阅读<a href="https://go101.org/article/memory-layout.html" target="_blank" rel="noopener">内存布局</a>, 了解如何保证 64 位字地址在 32 位操作系统上 64 位对齐.</p>
+<h3 id="不重视-time-After-调用带来的大量资源消耗"><a href="#不重视-time-After-调用带来的大量资源消耗" class="headerlink" title="不重视 time.After 调用带来的大量资源消耗"></a>不重视 time.After 调用带来的大量资源消耗</h3><p><code>time</code> 标准库中的 <code>After</code> 函数返回<a href="https://go101.org/article/channel-use-cases.html#timer" target="_blank" rel="noopener">一个延迟通知的 channel</a>. 该函数很方便, 但每次调用都会创建 <code>time.Timer</code> 类型的新值. 新创建的 <code>Timer</code> 值将在 <code>After</code> 函数传递的参数指定的持续时间内保持活跃状态. 如果在持续时间内多次调用该函数, 则会有许多 <code>Timer</code> 值存活并消耗大量内存和计算.</p>
+<p>例如, 如果调用以下 <code>longRunning</code> 函数, 并且在一分钟内有数百万条消息进来, 那么在一定时期内将有数百万个 <code>Timer</code> 值存活, 即使这些 <code>Timer</code> 值中的大部分已经变得无用.</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"time"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// The function will return if a message arrival interval</span></span><br><span class="line"><span class="comment">// is larger than one minute.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">longRunning</span><span class="params">(messages &lt;-<span class="keyword">chan</span> <span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> &lt;-time.After(time.Minute):</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		<span class="keyword">case</span> msg := &lt;-messages:</span><br><span class="line">			fmt.Println(msg)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>为避免在上面的代码中创建太多的 <code>Timer</code> 值, 我们应该使用单个 <code>Timer</code> 值来完成相同的工作.</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">longRunning</span><span class="params">(messages &lt;-<span class="keyword">chan</span> <span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">	timer := time.NewTimer(time.Minute)</span><br><span class="line">	<span class="keyword">defer</span> timer.Stop()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		<span class="keyword">select</span> &#123;</span><br><span class="line">		<span class="keyword">case</span> &lt;-timer.C:</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		<span class="keyword">case</span> msg := &lt;-messages:</span><br><span class="line">			fmt.Println(msg)</span><br><span class="line">			<span class="keyword">if</span> !timer.Stop() &#123;</span><br><span class="line">				&lt;-timer.C</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// The above "if" block can also be put here.</span></span><br><span class="line"></span><br><span class="line">		timer.Reset(time.Minute)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="错误的使用-time-Timer"><a href="#错误的使用-time-Timer" class="headerlink" title="错误的使用 time.Timer"></a>错误的使用 time.Timer</h3><p>上一节中展示了 <code>time.Timer</code> 值的惯用法的例子. 应该注意的一个细节是应该始终调用 <code>Reset</code> 方法来停止或者过期 <code>time.Timer</code> 值.</p>
+<p>在 <code>select</code> 块的第一个 <code>case</code> 分支的末尾, <code>time.Timer</code> 值已经过期, 因此我们不需要停止它. 但是我们必须在第二个分支中停止计时器. 如果第二个分支缺失 <code>if</code> 代码块, 发送(通过 Go 运行时)到 channel (<code>timer.C</code>) 可能会和 <code>Reset</code> 方法调用产生竞争, 并且 <code>longRunning</code> 函数可能比预期早返回, 因为 <code>Reset</code> 方法仅会重设内部计时器为零, 它不会清除已经发送到 <code>timer.C</code> channel 的值.</p>
+<p>比如, 如下的程序非常可能在 1 秒内退出而不是 10 秒. 而且更重要的是, 程序没有数据竞争.</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"time"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	start := time.Now()</span><br><span class="line">	timer := time.NewTimer(time.Second/<span class="number">2</span>)</span><br><span class="line">	<span class="keyword">select</span> &#123;</span><br><span class="line">	<span class="keyword">case</span> &lt;-timer.C:</span><br><span class="line">	<span class="keyword">default</span>:</span><br><span class="line">		time.Sleep(time.Second) <span class="comment">// go here</span></span><br><span class="line">	&#125;</span><br><span class="line">	timer.Reset(time.Second * <span class="number">10</span>)</span><br><span class="line">	&lt;-timer.C</span><br><span class="line">	fmt.Println(time.Since(start)) <span class="comment">// 1.000188181s</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>time.Timer</code> 值可以在不再使用时保持非停止状态, 但建议最后停止它.</p>
+<p>它很容易出错, 不建议在多个 goroutine 中同时使用 <code>time.Timer</code> 值.</p>
+<p>我们不应该依赖 <code>Reset</code> 方法调用的返回值. <code>Reset</code> 方法的返回结果仅用于兼容性目的.</p>
+</div><script src="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/js/lightgallery.min.js"></script><script>if (typeof lightGallery !== 'undefined') {
+        var options = {
+            selector: '.gallery-item'
+        };
+        lightGallery(document.getElementsByClassName('.article-gallery')[0], options);
+        }</script>
+  </div>
+</article>
+
+    <div class="blog-post-comments">
+        <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the comments.</noscript>
+        </div>
+    </div>
+
+
+
+    </div>
+    
+      <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Archives</a></li>
+         
+          <li><a href="/atom.xml">Feed</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#需要同步的时候没有同步"><span class="toc-number">1.</span> <span class="toc-text">需要同步的时候没有同步</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#使用-time-Sleep-做同步"><span class="toc-number">2.</span> <span class="toc-text">使用 time.Sleep 做同步</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#任由-Goroutines-挂起-Hanging"><span class="toc-number">3.</span> <span class="toc-text">任由 Goroutines 挂起(Hanging)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#在-sync-标准库中复制类型的值"><span class="toc-number">4.</span> <span class="toc-text">在 sync 标准库中复制类型的值</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#在错误的地方调用-sync-WaitGroup"><span class="toc-number">5.</span> <span class="toc-text">在错误的地方调用 sync.WaitGroup</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#错误使用-Channels-作为-Futures"><span class="toc-number">6.</span> <span class="toc-text">错误使用 Channels 作为 Futures</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#不是从最后一个活跃的发送者-Goroutine-关闭-Channels"><span class="toc-number">7.</span> <span class="toc-text">不是从最后一个活跃的发送者 Goroutine 关闭 Channels</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#64-位值的原子操作不保证-64-位对齐"><span class="toc-number">8.</span> <span class="toc-text">64 位值的原子操作不保证 64 位对齐</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#不重视-time-After-调用带来的大量资源消耗"><span class="toc-number">9.</span> <span class="toc-text">不重视 time.After 调用带来的大量资源消耗</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#错误的使用-time-Timer"><span class="toc-number">10.</span> <span class="toc-text">错误的使用 time.Timer</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://lingchao.xin/post/concurrent-common-mistakes.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://lingchao.xin/post/concurrent-common-mistakes.html&text=一些常见的并发编程错误"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://lingchao.xin/post/concurrent-common-mistakes.html&title=一些常见的并发编程错误"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lingchao.xin/post/concurrent-common-mistakes.html&is_video=false&description=一些常见的并发编程错误"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=一些常见的并发编程错误&body=Check out this article: https://lingchao.xin/post/concurrent-common-mistakes.html"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://lingchao.xin/post/concurrent-common-mistakes.html&title=一些常见的并发编程错误"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/concurrent-common-mistakes.html&title=一些常见的并发编程错误"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/concurrent-common-mistakes.html&title=一些常见的并发编程错误"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/concurrent-common-mistakes.html&title=一些常见的并发编程错误"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/concurrent-common-mistakes.html&name=一些常见的并发编程错误&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+    
+    <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; 2018 Lingchao Xin
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Archives</a></li>
+         
+          <li><a href="/atom.xml">Feed</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>
+<!-- styles -->
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+<!-- jquery -->
+<script src="/lib/jquery/jquery.min.js"></script>
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+<script src="/js/main.js"></script>
+<!-- search -->
+
+<!-- Google Analytics -->
+
+    <script type="text/javascript">
+        (function(i,s,o,g,r,a,m) {i['GoogleAnalyticsObject']=r;i[r]=i[r]||function() {
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+        ga('create', 'UA-47053188-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'douglarek';
+
+        (function(){
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        }());
+    </script>
+
+
