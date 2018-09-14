@@ -12,7 +12,7 @@
 <meta property="og:url" content="https://lingchao.xin/post/concurrent-common-mistakes.html">
 <meta property="og:site_name" content="Coding talks">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2018-09-14T07:52:30.790Z">
+<meta property="og:updated_time" content="2018-09-14T07:54:31.670Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="一些常见的并发编程错误">
     
@@ -146,7 +146,7 @@
 <p>如下的程序有两个错误:</p>
 <ul>
 <li>首先, 主 goroutine 中 <code>b</code> 的读取和新 goroutine 中 <code>b</code> 的写入可能存在数据竞争.</li>
-<li>其次, 条件 <code>b == true</code> 无法确保主 goroutine 满足 <code>a != nil</code>. 编译器和 CPU 在新 goroutine 中通过重排序进行优化, 所以运行时 <code>b</code> 的赋值可能发生在 <code>a</code> 的赋值之前, 导致当主 goroutine 中 <code>a</code> 的元素被修改的时候, <code>a</code> 仍旧是 <code>nil</code>. </li>
+<li>其次, 条件 <code>b == true</code> 无法确保主 goroutine 满足 <code>a != nil</code>. 编译器和 CPU 在新 goroutine 中通过重排序进行优化, 所以运行时 <code>b</code> 的赋值可能发生在 <code>a</code> 的赋值之前, 导致当主 goroutine 中 <code>a</code> 的元素被修改的时候, <code>a</code> 仍旧是 <code>nil</code>.</li>
 </ul>
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"time"</span></span><br><span class="line">	<span class="string">"runtime"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> a []<span class="keyword">int</span> <span class="comment">// nil</span></span><br><span class="line">	<span class="keyword">var</span> b <span class="keyword">bool</span>  <span class="comment">// false</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// a new goroutine</span></span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span> <span class="params">()</span></span> &#123;</span><br><span class="line">		a = <span class="built_in">make</span>([]<span class="keyword">int</span>, <span class="number">3</span>)</span><br><span class="line">		b = <span class="literal">true</span> <span class="comment">// write b</span></span><br><span class="line">	&#125;()</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> !b &#123; <span class="comment">// read b</span></span><br><span class="line">		time.Sleep(time.Second)</span><br><span class="line">		runtime.Gosched()</span><br><span class="line">	&#125;</span><br><span class="line">	a[<span class="number">0</span>], a[<span class="number">1</span>], a[<span class="number">2</span>] = <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span> <span class="comment">// might panic</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>上面的程序可能在一台电脑上运行良好, 在另一台电脑上 panic. 或者它可能 N 次运行良好, N+1 次 panic.</p>
