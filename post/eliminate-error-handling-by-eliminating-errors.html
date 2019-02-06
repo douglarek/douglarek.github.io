@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang=en>
+<head><meta name="generator" content="Hexo 3.8.0">
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="translation,go">
+<meta property="og:type" content="article">
+<meta property="og:title" content="通过消除错误消除错误处理">
+<meta property="og:url" content="https://lingchao.xin/post/eliminate-error-handling-by-eliminating-errors.html">
+<meta property="og:site_name" content="Coding talks">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2019-02-06T08:16:27.342Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="通过消除错误消除错误处理">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="https://www.gravatar.com/avatar/f4254a13e728ba649241e5776b4884db?s=16">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="https://www.gravatar.com/avatar/f4254a13e728ba649241e5776b4884db?s=192" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="https://www.gravatar.com/avatar/f4254a13e728ba649241e5776b4884db?s=180">
+          
+        
+    
+    <!-- title -->
+    <title>通过消除错误消除错误处理</title>
+    <!-- styles -->
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- persian styles -->
+    
+      <link rel="stylesheet" href="/css/rtl.css">
+    
+    <!-- rss -->
+    
+    
+      <link rel="alternate" href="/atom.xml" title="Coding talks" type="application/atom+xml">
+    
+</head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Archives</a></li>
+         
+          <li><a href="/atom.xml">Feed</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </span>
+    <br>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" href="/post/concurrent-common-mistakes.html"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://lingchao.xin/post/eliminate-error-handling-by-eliminating-errors.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://lingchao.xin/post/eliminate-error-handling-by-eliminating-errors.html&text=通过消除错误消除错误处理"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://lingchao.xin/post/eliminate-error-handling-by-eliminating-errors.html&title=通过消除错误消除错误处理"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lingchao.xin/post/eliminate-error-handling-by-eliminating-errors.html&is_video=false&description=通过消除错误消除错误处理"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=通过消除错误消除错误处理&body=Check out this article: https://lingchao.xin/post/eliminate-error-handling-by-eliminating-errors.html"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://lingchao.xin/post/eliminate-error-handling-by-eliminating-errors.html&title=通过消除错误消除错误处理"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/eliminate-error-handling-by-eliminating-errors.html&title=通过消除错误消除错误处理"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/eliminate-error-handling-by-eliminating-errors.html&title=通过消除错误消除错误处理"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/eliminate-error-handling-by-eliminating-errors.html&title=通过消除错误消除错误处理"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/eliminate-error-handling-by-eliminating-errors.html&name=通过消除错误消除错误处理&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index my4">
+        
+        <article class="post" itemscope="" itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        通过消除错误消除错误处理
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+        <span itemprop="name">Coding talks</span>
+      </span>
+      
+    <div class="postdate">
+        <time datetime="2019-02-06T06:46:28.000Z" itemprop="datePublished">2019-02-06</time>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/go/">go</a>, <a class="tag-link" href="/tags/translation/">translation</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css"><div class=".article-gallery" <p="">本文译自 <a href="https://dave.cheney.net/2019/01/27/eliminate-error-handling-by-eliminating-errors" target="_blank" rel="noopener">Eliminate error handling by eliminating errors</a> 版权@归原文所有.<p></p>
+<p>Go 2 旨在改善<a href="https://go.googlesource.com/proposal/+/master/design/go2draft-error-handling-overview.md" target="_blank" rel="noopener">错误处理</a>的开销, 但是你知道什么比处理错误的改进语法更好吗? 根本不需要处理错误. 现在, 我不是说 “删除你的错误处理代码”, 相反我建议改变你的代码, 这样你就没有多少错误需要处理.</p>
+<p>本文从 John Ousterhout <a href="https://www.amazon.com/Philosophy-Software-Design-John-Ousterhout/dp/1732102201" target="_blank" rel="noopener">软件设计的哲学</a>的一章中汲取灵感, “定义不存在的错误”. 我尝试将他的建议应用于 Go.</p>
+<p>这是一个计算文件行数的函数,</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">CountLines</span><span class="params">(r io.Reader)</span> <span class="params">(<span class="keyword">int</span>, error)</span></span> &#123;</span><br><span class="line">        <span class="keyword">var</span> (</span><br><span class="line">                br    = bufio.NewReader(r)</span><br><span class="line">                lines <span class="keyword">int</span></span><br><span class="line">                err   error</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> &#123;</span><br><span class="line">                _, err = br.ReadString(<span class="string">'\n'</span>)</span><br><span class="line">                lines++</span><br><span class="line">                <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">                        <span class="keyword">break</span></span><br><span class="line">                &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> err != io.EOF &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="number">0</span>, err</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> lines, <span class="literal">nil</span></span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>我们构造一个 bufio.Reader, 然后在一个循环中调用 ReadString 方法, 递增计数器直到我们到达文件的末尾, 然后我们返回读取的行数. 这是我们<em>想</em>编写的代码, 而 CountLines 因错误处理而变得更加复杂.</p>
+<p>例如, 有这种奇怪的结构:</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"> _, err = br.ReadString(<span class="string">'\n'</span>)</span><br><span class="line">lines++</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="keyword">break</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们在检查错误之前增加行数, 这看起来很奇怪. 我们必须以这种方式编写它的原因是, 如果在遇到换行符之前遇到文件结尾-io.EOF, 则 ReadString 将返回错误. 如果没有尾换行符, 则会发生这种情况.</p>
+<p>为了定位这个问题, 我们重整逻辑以增加行数, 然后查看是否需要退出循环.</p>
+<p>但是我们还没有完成错误检查. 当 ReadString 到达文件末尾时, 它将返回 io.EOF. 这是预期的, ReadString 需要某种方式来终止, 没有更多内容需要读取. 所以在我们将错误返回给 CountLine 的调用者之前, 我们需要检查错误是不是 io.EOF, 并且在这种情况下将其传递, 否则我们返回 nil 表示一切正常. 这就是为什么函数的最后一行不是简单的:</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">return</span> lines, err</span><br></pre></td></tr></table></figure>
+<p>我认为这是 Russ Cox <a href="https://www.youtube.com/watch?v=6wIP3rO6On8" target="_blank" rel="noopener">错误的处理可能会模​​糊函数操作</a>的一个很好的例子. 我们来看一个改进的版本:</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">CountLines</span><span class="params">(r io.Reader)</span> <span class="params">(<span class="keyword">int</span>, error)</span></span> &#123;</span><br><span class="line">        sc := bufio.NewScanner(r)</span><br><span class="line">        lines := <span class="number">0</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> sc.Scan() &#123;</span><br><span class="line">                lines++</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> lines, sc.Err()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个改进的版本从使用 bufio.Reader 切换到 bufio.Scanner. 本质上 bufio.Scanner 使用 bufio.Reader添加一层抽象, 这有助于消除掩盖我们之前版本的 CountLines 的操作的错误处理.</p>
+<p>如果扫描器匹配了一行文本并且没有遇到错误, 则 sc.Scan() 方法返回 true. 因此, 只有当扫描器的缓冲区中有一行文本时, 才会调用 for 循环体. 这意味着我们修改后的 CountLines 正确处理了没有尾换行符的情况, 它还正确处理了文件为空的情况.</p>
+<p>其次, 当 sc.Scan 遇到错误时返回 false, 当到达文件结尾或遇到错误时, 我们的 for 循环将退出. bufio.Scanner 类型会记住遇到的第一个错误, 一旦我们使用 sc.Err() 方法退出循环, 我们就恢复该错误.</p>
+<p>最后, buffo.Scanner 负责处理 io.EOF 并在到文件末尾时将其转换为 nil, 而不会遇到其他错误.</p>
+<p>我的第二个例子的灵感来自于 Rob Pike 的<a href="https://blog.golang.org/errors-are-values" target="_blank" rel="noopener">错误是值</a>的博客文章.</p>
+<p>在处理打开, 写入和关闭文件时, 错误处理存在但不是压倒性的, 因为操作可以封装在诸如 ioutil.ReadFile 和 ioutil.WriteFile 之类的帮助程序中. 但是, 在处理低级网络协议时, 通常需要使用 I/O 原语直接构建响应, 因此错误处理可能变得重复. 考虑构建 HTTP/1.1 响应的 HTTP 服务器的这个片段:</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">type</span> Header <span class="keyword">struct</span> &#123;</span><br><span class="line">        Key, Value <span class="keyword">string</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Status <span class="keyword">struct</span> &#123;</span><br><span class="line">        Code   <span class="keyword">int</span></span><br><span class="line">        Reason <span class="keyword">string</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WriteResponse</span><span class="params">(w io.Writer, st Status, headers []Header, body io.Reader)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">        _, err := fmt.Fprintf(w, <span class="string">"HTTP/1.1 %d %s\r\n"</span>, st.Code, st.Reason)</span><br><span class="line">        <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> err</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> _, h := <span class="keyword">range</span> headers &#123;</span><br><span class="line">                _, err := fmt.Fprintf(w, <span class="string">"%s: %s\r\n"</span>, h.Key, h.Value)</span><br><span class="line">                <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">                        <span class="keyword">return</span> err</span><br><span class="line">                &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> _, err := fmt.Fprint(w, <span class="string">"\r\n"</span>); err != <span class="literal">nil</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> err</span><br><span class="line">        &#125; </span><br><span class="line"></span><br><span class="line">        _, err = io.Copy(w, body) </span><br><span class="line">        <span class="keyword">return</span> err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>首先, 我们使用 fmt.Fprintf 构造状态行, 并检查错误. 然后对于每个头, 我们写入键和值, 每次都检查错误. 最后, 我们使用额外的 \r\n 终止头部分, 检查错误, 并将响应体复制到客户端. 最后, 虽然我们不需要检查来自 io.Copy 的错误, 但我们需要将它从 io.Copy 返回的两个返回值形式转换为 WriteResponse 期望的单个返回值.</p>
+<p>这不仅是大量的重复工作, 每个操作 - 从根本上将字节写入 io.Writer - 具有不同形式的错误处理. 但是我们可以通过引入一个小包装类型来变得容易:</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">type</span> errWriter <span class="keyword">struct</span> &#123;</span><br><span class="line">        io.Writer</span><br><span class="line">        err error</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *errWriter)</span> <span class="title">Write</span><span class="params">(buf []<span class="keyword">byte</span>)</span> <span class="params">(<span class="keyword">int</span>, error)</span></span> &#123;</span><br><span class="line">        <span class="keyword">if</span> e.err != <span class="literal">nil</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="number">0</span>, e.err</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">var</span> n <span class="keyword">int</span></span><br><span class="line">        n, e.err = e.Writer.Write(buf)</span><br><span class="line">        <span class="keyword">return</span> n, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>errWriter 实现了 io.Writer 接口, 所以可以用它来包装现有的 io.Writer. errWriter 将写入传递给其底层写入器(writer), 直到检测到错误. 从那起, 它会丢弃任何写入并返回先前的错误.</p>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WriteResponse</span><span class="params">(w io.Writer, st Status, headers []Header, body io.Reader)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">        ew := &amp;errWriter&#123;Writer: w&#125; </span><br><span class="line">        fmt.Fprintf(ew, <span class="string">"HTTP/1.1 %d %s\r\n"</span>, st.Code, st.Reason)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> _, h := <span class="keyword">range</span> headers &#123;</span><br><span class="line">                fmt.Fprintf(ew, <span class="string">"%s: %s\r\n"</span>, h.Key, h.Value)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        fmt.Fprint(ew, <span class="string">"\r\n"</span>)</span><br><span class="line">        io.Copy(ew, body)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> ew.err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>将 errWriter 应用于 WriteResponse 可以显著提高代码的清晰度. 每个操作不再依附在一个错误处理块. 通过检查 ew.err 字段, 将错误报告移动到函数的末尾, 避免从 io.Copy 的返回值进行恼人的转换.</p>
+<p>当你发现自己面临恼人的错误处理时, 请尝试将某些操作提取到帮助程序类型中.</p>
+</div><script src="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/js/lightgallery.min.js"></script><script>if (typeof lightGallery !== 'undefined') {
+        var options = {
+            selector: '.gallery-item'
+        };
+        lightGallery(document.getElementsByClassName('.article-gallery')[0], options);
+        }</script>
+  </div>
+</article>
+
+    <div class="blog-post-comments">
+        <div id="disqus_thread">
+            <noscript>Please enable JavaScript to view the comments.</noscript>
+        </div>
+    </div>
+
+
+
+    </div>
+    
+      <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Archives</a></li>
+         
+          <li><a href="/atom.xml">Feed</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://lingchao.xin/post/eliminate-error-handling-by-eliminating-errors.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://lingchao.xin/post/eliminate-error-handling-by-eliminating-errors.html&text=通过消除错误消除错误处理"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://lingchao.xin/post/eliminate-error-handling-by-eliminating-errors.html&title=通过消除错误消除错误处理"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://lingchao.xin/post/eliminate-error-handling-by-eliminating-errors.html&is_video=false&description=通过消除错误消除错误处理"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=通过消除错误消除错误处理&body=Check out this article: https://lingchao.xin/post/eliminate-error-handling-by-eliminating-errors.html"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://lingchao.xin/post/eliminate-error-handling-by-eliminating-errors.html&title=通过消除错误消除错误处理"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://lingchao.xin/post/eliminate-error-handling-by-eliminating-errors.html&title=通过消除错误消除错误处理"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://lingchao.xin/post/eliminate-error-handling-by-eliminating-errors.html&title=通过消除错误消除错误处理"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://lingchao.xin/post/eliminate-error-handling-by-eliminating-errors.html&title=通过消除错误消除错误处理"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://lingchao.xin/post/eliminate-error-handling-by-eliminating-errors.html&name=通过消除错误消除错误处理&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+    
+    <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy; 2019 Lingchao Xin
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/archives/">Archives</a></li>
+         
+          <li><a href="/atom.xml">Feed</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>
+<!-- styles -->
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+<!-- jquery -->
+<script src="/lib/jquery/jquery.min.js"></script>
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+<script src="/js/main.js"></script>
+<!-- search -->
+
+<!-- Google Analytics -->
+
+    <script type="text/javascript">
+        (function(i,s,o,g,r,a,m) {i['GoogleAnalyticsObject']=r;i[r]=i[r]||function() {
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+        ga('create', 'UA-47053188-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+    <script type="text/javascript">
+        var disqus_shortname = 'douglarek';
+
+        (function(){
+            var dsq = document.createElement('script');
+            dsq.type = 'text/javascript';
+            dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        }());
+    </script>
+
+

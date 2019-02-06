@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://lingchao.xin/"/>
-  <updated>2019-02-06T06:11:41.622Z</updated>
+  <updated>2019-02-06T08:16:27.342Z</updated>
   <id>https://lingchao.xin/</id>
   
   <author>
@@ -15,6 +15,32 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>通过消除错误消除错误处理</title>
+    <link href="https://lingchao.xin/post/eliminate-error-handling-by-eliminating-errors.html"/>
+    <id>https://lingchao.xin/post/eliminate-error-handling-by-eliminating-errors.html</id>
+    <published>2019-02-06T06:46:28.000Z</published>
+    <updated>2019-02-06T08:16:27.342Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div
+        
+      
+    
+    </summary>
+    
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
+    
+      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+  </entry>
   
   <entry>
     <title>一些常见的并发编程错误</title>
@@ -475,24 +501,6 @@
       <category term="software development" scheme="https://lingchao.xin/tags/software-development/"/>
     
       <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Go JSON 技巧</title>
-    <link href="https://lingchao.xin/post/json-tips-in-go.html"/>
-    <id>https://lingchao.xin/post/json-tips-in-go.html</id>
-    <published>2018-02-10T06:30:04.000Z</published>
-    <updated>2018-04-22T01:22:42.000Z</updated>
-    
-    <summary type="html">
-    
-      &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div class=&quot;.article-gallery&quot; &lt;p=&quot;&quot;&gt;相对于很多的语言来说, Go 的 JSON 解析可谓简单至极.&lt;br&gt;
-    
-    </summary>
-    
-    
-      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
     
   </entry>
   
