@@ -12,7 +12,7 @@
 <meta property="og:url" content="https://lingchao.xin/post/eliminate-error-handling-by-eliminating-errors.html">
 <meta property="og:site_name" content="Coding talks">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2019-02-06T08:16:27.342Z">
+<meta property="og:updated_time" content="2019-02-06T08:22:02.471Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="通过消除错误消除错误处理">
     
@@ -140,20 +140,20 @@
 
   <div class="content" itemprop="articleBody">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css"><div class=".article-gallery" <p="">本文译自 <a href="https://dave.cheney.net/2019/01/27/eliminate-error-handling-by-eliminating-errors" target="_blank" rel="noopener">Eliminate error handling by eliminating errors</a> 版权@归原文所有.<p></p>
-<p>Go 2 旨在改善<a href="https://go.googlesource.com/proposal/+/master/design/go2draft-error-handling-overview.md" target="_blank" rel="noopener">错误处理</a>的开销, 但是你知道什么比处理错误的改进语法更好吗? 根本不需要处理错误. 现在, 我不是说 “删除你的错误处理代码”, 相反我建议改变你的代码, 这样你就没有多少错误需要处理.</p>
+<p>Go 2 旨在改善<a href="https://go.googlesource.com/proposal/+/master/design/go2draft-error-handling-overview.md" target="_blank" rel="noopener">错误处理</a>的开销, 但是你知道有什么比处理错误的改进语法更好吗? 根本不需要处理错误. 现在, 我不是说 “删除你的错误处理代码”, 相反我建议改变你的代码, 这样你就没有多少错误需要处理.</p>
 <p>本文从 John Ousterhout <a href="https://www.amazon.com/Philosophy-Software-Design-John-Ousterhout/dp/1732102201" target="_blank" rel="noopener">软件设计的哲学</a>的一章中汲取灵感, “定义不存在的错误”. 我尝试将他的建议应用于 Go.</p>
-<p>这是一个计算文件行数的函数,</p>
+<p>这是一个计算文件行数的函数:</p>
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">CountLines</span><span class="params">(r io.Reader)</span> <span class="params">(<span class="keyword">int</span>, error)</span></span> &#123;</span><br><span class="line">        <span class="keyword">var</span> (</span><br><span class="line">                br    = bufio.NewReader(r)</span><br><span class="line">                lines <span class="keyword">int</span></span><br><span class="line">                err   error</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> &#123;</span><br><span class="line">                _, err = br.ReadString(<span class="string">'\n'</span>)</span><br><span class="line">                lines++</span><br><span class="line">                <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">                        <span class="keyword">break</span></span><br><span class="line">                &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> err != io.EOF &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="number">0</span>, err</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> lines, <span class="literal">nil</span></span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
 <p>我们构造一个 bufio.Reader, 然后在一个循环中调用 ReadString 方法, 递增计数器直到我们到达文件的末尾, 然后我们返回读取的行数. 这是我们<em>想</em>编写的代码, 而 CountLines 因错误处理而变得更加复杂.</p>
 <p>例如, 有这种奇怪的结构:</p>
-<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"> _, err = br.ReadString(<span class="string">'\n'</span>)</span><br><span class="line">lines++</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="keyword">break</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="code"><pre><span class="line"> _, err = br.ReadString(<span class="string">'\n'</span>)</span><br><span class="line">lines++</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">break</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>我们在检查错误之前增加行数, 这看起来很奇怪. 我们必须以这种方式编写它的原因是, 如果在遇到换行符之前遇到文件结尾-io.EOF, 则 ReadString 将返回错误. 如果没有尾换行符, 则会发生这种情况.</p>
 <p>为了定位这个问题, 我们重整逻辑以增加行数, 然后查看是否需要退出循环.</p>
 <p>但是我们还没有完成错误检查. 当 ReadString 到达文件末尾时, 它将返回 io.EOF. 这是预期的, ReadString 需要某种方式来终止, 没有更多内容需要读取. 所以在我们将错误返回给 CountLine 的调用者之前, 我们需要检查错误是不是 io.EOF, 并且在这种情况下将其传递, 否则我们返回 nil 表示一切正常. 这就是为什么函数的最后一行不是简单的:</p>
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">return</span> lines, err</span><br></pre></td></tr></table></figure>
 <p>我认为这是 Russ Cox <a href="https://www.youtube.com/watch?v=6wIP3rO6On8" target="_blank" rel="noopener">错误的处理可能会模​​糊函数操作</a>的一个很好的例子. 我们来看一个改进的版本:</p>
 <figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">CountLines</span><span class="params">(r io.Reader)</span> <span class="params">(<span class="keyword">int</span>, error)</span></span> &#123;</span><br><span class="line">        sc := bufio.NewScanner(r)</span><br><span class="line">        lines := <span class="number">0</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> sc.Scan() &#123;</span><br><span class="line">                lines++</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> lines, sc.Err()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这个改进的版本从使用 bufio.Reader 切换到 bufio.Scanner. 本质上 bufio.Scanner 使用 bufio.Reader添加一层抽象, 这有助于消除掩盖我们之前版本的 CountLines 的操作的错误处理.</p>
+<p>这个改进的版本从使用 bufio.Reader 切换到 bufio.Scanner. 本质上 bufio.Scanner 使用 bufio.Reader 添加一层抽象, 这有助于消除掩盖我们之前版本的 CountLines 的操作的错误处理.</p>
 <p>如果扫描器匹配了一行文本并且没有遇到错误, 则 sc.Scan() 方法返回 true. 因此, 只有当扫描器的缓冲区中有一行文本时, 才会调用 for 循环体. 这意味着我们修改后的 CountLines 正确处理了没有尾换行符的情况, 它还正确处理了文件为空的情况.</p>
 <p>其次, 当 sc.Scan 遇到错误时返回 false, 当到达文件结尾或遇到错误时, 我们的 for 循环将退出. bufio.Scanner 类型会记住遇到的第一个错误, 一旦我们使用 sc.Err() 方法退出循环, 我们就恢复该错误.</p>
 <p>最后, buffo.Scanner 负责处理 io.EOF 并在到文件末尾时将其转换为 nil, 而不会遇到其他错误.</p>
