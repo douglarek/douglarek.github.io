@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <title>Coding talks</title>
+  <title>Code talks</title>
   
   
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://lingchao.xin/"/>
-  <updated>2019-02-06T08:22:02.471Z</updated>
+  <updated>2019-02-14T10:12:49.607Z</updated>
   <id>https://lingchao.xin/</id>
   
   <author>
@@ -21,7 +21,7 @@
     <link href="https://lingchao.xin/post/eliminate-error-handling-by-eliminating-errors.html"/>
     <id>https://lingchao.xin/post/eliminate-error-handling-by-eliminating-errors.html</id>
     <published>2019-02-06T06:46:28.000Z</published>
-    <updated>2019-02-06T08:22:02.471Z</updated>
+    <updated>2019-02-14T10:12:49.607Z</updated>
     
     <summary type="html">
     
@@ -47,7 +47,7 @@
     <link href="https://lingchao.xin/post/concurrent-common-mistakes.html"/>
     <id>https://lingchao.xin/post/concurrent-common-mistakes.html</id>
     <published>2018-09-14T02:11:27.000Z</published>
-    <updated>2019-02-06T06:11:41.622Z</updated>
+    <updated>2018-09-14T07:54:31.670Z</updated>
     
     <summary type="html">
     
@@ -75,7 +75,7 @@
     <link href="https://lingchao.xin/post/go-faq-101.html"/>
     <id>https://lingchao.xin/post/go-faq-101.html</id>
     <published>2018-07-20T05:41:26.000Z</published>
-    <updated>2018-08-14T13:13:15.170Z</updated>
+    <updated>2018-08-13T10:24:15.794Z</updated>
     
     <summary type="html">
     
@@ -103,7 +103,7 @@
     <link href="https://lingchao.xin/post/go-details.html"/>
     <id>https://lingchao.xin/post/go-details.html</id>
     <published>2018-05-08T08:45:15.000Z</published>
-    <updated>2018-08-10T13:27:51.834Z</updated>
+    <updated>2018-05-14T06:24:46.838Z</updated>
     
     <summary type="html">
     
@@ -131,7 +131,7 @@
     <link href="https://lingchao.xin/post/type-system-overview.html"/>
     <id>https://lingchao.xin/post/type-system-overview.html</id>
     <published>2018-05-07T06:48:57.000Z</published>
-    <updated>2018-08-10T13:27:51.838Z</updated>
+    <updated>2018-05-07T09:58:20.492Z</updated>
     
     <summary type="html">
     
@@ -159,7 +159,7 @@
     <link href="https://lingchao.xin/post/go-value-copy-cost.html"/>
     <id>https://lingchao.xin/post/go-value-copy-cost.html</id>
     <published>2018-04-27T11:13:51.000Z</published>
-    <updated>2018-08-10T13:27:51.835Z</updated>
+    <updated>2018-04-27T12:14:09.000Z</updated>
     
     <summary type="html">
     
@@ -187,7 +187,7 @@
     <link href="https://lingchao.xin/post/why-are-there-nil-channels-in-go.html"/>
     <id>https://lingchao.xin/post/why-are-there-nil-channels-in-go.html</id>
     <published>2018-04-21T14:25:15.000Z</published>
-    <updated>2018-04-22T01:02:34.000Z</updated>
+    <updated>2018-04-23T02:01:23.436Z</updated>
     
     <summary type="html">
     
@@ -213,7 +213,7 @@
     <link href="https://lingchao.xin/post/go-nils.html"/>
     <id>https://lingchao.xin/post/go-nils.html</id>
     <published>2018-04-20T05:41:26.000Z</published>
-    <updated>2018-04-21T15:35:57.000Z</updated>
+    <updated>2018-04-23T02:01:23.433Z</updated>
     
     <summary type="html">
     
@@ -241,7 +241,7 @@
     <link href="https://lingchao.xin/post/go-errors-stack-traces.html"/>
     <id>https://lingchao.xin/post/go-errors-stack-traces.html</id>
     <published>2018-04-12T02:10:21.000Z</published>
-    <updated>2018-04-15T09:57:19.000Z</updated>
+    <updated>2018-04-20T05:40:59.626Z</updated>
     
     <summary type="html">
     
@@ -265,7 +265,7 @@
     <link href="https://lingchao.xin/post/sicp-quickstart.html"/>
     <id>https://lingchao.xin/post/sicp-quickstart.html</id>
     <published>2018-04-06T13:11:49.000Z</published>
-    <updated>2018-04-06T14:15:40.000Z</updated>
+    <updated>2018-04-08T05:16:11.529Z</updated>
     
     <summary type="html">
     
@@ -291,7 +291,7 @@
     <link href="https://lingchao.xin/post/memory-leaking.html"/>
     <id>https://lingchao.xin/post/memory-leaking.html</id>
     <published>2018-04-02T06:58:32.000Z</published>
-    <updated>2018-04-15T09:59:18.000Z</updated>
+    <updated>2018-04-20T05:40:59.628Z</updated>
     
     <summary type="html">
     
@@ -319,7 +319,7 @@
     <link href="https://lingchao.xin/post/synchronization-queues-in-golang.html"/>
     <id>https://lingchao.xin/post/synchronization-queues-in-golang.html</id>
     <published>2018-03-27T13:14:05.000Z</published>
-    <updated>2018-04-15T10:01:42.000Z</updated>
+    <updated>2018-04-20T05:40:59.629Z</updated>
     
     <summary type="html">
     
@@ -339,7 +339,7 @@
     <link href="https://lingchao.xin/post/go-defer-panic-and-recover.html"/>
     <id>https://lingchao.xin/post/go-defer-panic-and-recover.html</id>
     <published>2018-03-23T02:05:04.000Z</published>
-    <updated>2018-04-15T10:04:07.000Z</updated>
+    <updated>2018-04-20T05:40:59.625Z</updated>
     
     <summary type="html">
     
@@ -357,7 +357,7 @@
     <link href="https://lingchao.xin/post/vgo-module.html"/>
     <id>https://lingchao.xin/post/vgo-module.html</id>
     <published>2018-02-25T07:00:04.000Z</published>
-    <updated>2018-04-22T01:14:30.000Z</updated>
+    <updated>2018-04-23T02:01:23.436Z</updated>
     
     <summary type="html">
     
@@ -379,7 +379,7 @@
     <link href="https://lingchao.xin/post/vgo-repro.html"/>
     <id>https://lingchao.xin/post/vgo-repro.html</id>
     <published>2018-02-24T11:00:04.000Z</published>
-    <updated>2018-04-15T07:42:54.000Z</updated>
+    <updated>2018-04-20T05:40:59.632Z</updated>
     
     <summary type="html">
     
@@ -401,7 +401,7 @@
     <link href="https://lingchao.xin/post/vgo-mvs.html"/>
     <id>https://lingchao.xin/post/vgo-mvs.html</id>
     <published>2018-02-23T11:24:04.000Z</published>
-    <updated>2018-04-15T08:02:51.000Z</updated>
+    <updated>2018-04-20T05:40:59.631Z</updated>
     
     <summary type="html">
     
@@ -423,7 +423,7 @@
     <link href="https://lingchao.xin/post/vgo-import.html"/>
     <id>https://lingchao.xin/post/vgo-import.html</id>
     <published>2018-02-22T14:01:04.000Z</published>
-    <updated>2018-04-22T01:17:50.000Z</updated>
+    <updated>2018-04-23T02:01:23.435Z</updated>
     
     <summary type="html">
     
@@ -445,7 +445,7 @@
     <link href="https://lingchao.xin/post/vgo-tour.html"/>
     <id>https://lingchao.xin/post/vgo-tour.html</id>
     <published>2018-02-22T03:01:04.000Z</published>
-    <updated>2018-04-15T09:11:08.000Z</updated>
+    <updated>2018-04-20T05:40:59.632Z</updated>
     
     <summary type="html">
     
@@ -467,7 +467,7 @@
     <link href="https://lingchao.xin/post/vgo-intro.html"/>
     <id>https://lingchao.xin/post/vgo-intro.html</id>
     <published>2018-02-21T07:01:04.000Z</published>
-    <updated>2018-04-15T09:27:20.000Z</updated>
+    <updated>2018-04-20T05:40:59.630Z</updated>
     
     <summary type="html">
     
@@ -489,7 +489,7 @@
     <link href="https://lingchao.xin/post/a-developer-relations-bill-of-rights.html"/>
     <id>https://lingchao.xin/post/a-developer-relations-bill-of-rights.html</id>
     <published>2018-02-19T12:01:04.000Z</published>
-    <updated>2018-04-15T09:30:59.000Z</updated>
+    <updated>2018-04-20T05:40:59.623Z</updated>
     
     <summary type="html">
     
