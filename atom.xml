@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://lingchao.xin/"/>
-  <updated>2019-02-14T10:12:49.607Z</updated>
+  <updated>2019-03-28T07:37:50.535Z</updated>
   <id>https://lingchao.xin/</id>
   
   <author>
@@ -15,6 +15,32 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>使用 Go Module</title>
+    <link href="https://lingchao.xin/post/using-go-modules.html"/>
+    <id>https://lingchao.xin/post/using-go-modules.html</id>
+    <published>2019-03-27T09:07:21.000Z</published>
+    <updated>2019-03-28T07:37:50.535Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div
+        
+      
+    
+    </summary>
+    
+    
+      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
+    
+      <category term="go" scheme="https://lingchao.xin/tags/go/"/>
+    
+  </entry>
   
   <entry>
     <title>通过消除错误消除错误处理</title>
@@ -481,26 +507,6 @@
       <category term="go" scheme="https://lingchao.xin/tags/go/"/>
     
       <category term="vgo" scheme="https://lingchao.xin/tags/vgo/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>开发者关系权利法案</title>
-    <link href="https://lingchao.xin/post/a-developer-relations-bill-of-rights.html"/>
-    <id>https://lingchao.xin/post/a-developer-relations-bill-of-rights.html</id>
-    <published>2018-02-19T12:01:04.000Z</published>
-    <updated>2018-04-20T05:40:59.623Z</updated>
-    
-    <summary type="html">
-    
-      &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://cdn.jsdelivr.net/lightgallery.js/1.0.1/css/lightgallery.min.css&quot;&gt;&lt;div class=&quot;.article-gallery&quot; &lt;p=&quot;&quot;&gt;本文译自 &lt;a href=&quot;https://medium.com/glitch/a-developer-relations-bill-of-rights-21381920e273&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;A Developer Relations Bill of Rights&lt;/a&gt; 版权@归原文所有.&lt;br&gt;
-    
-    </summary>
-    
-    
-      <category term="software development" scheme="https://lingchao.xin/tags/software-development/"/>
-    
-      <category term="translation" scheme="https://lingchao.xin/tags/translation/"/>
     
   </entry>
   
