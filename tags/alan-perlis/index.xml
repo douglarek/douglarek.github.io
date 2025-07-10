@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Alan-Perlis on Code talks</title><link>/tags/alan-perlis/</link><description>Recent content in Alan-Perlis on Code talks</description><generator>Hugo</generator><language>zh-CN</language><copyright> Copyright © 2025 Leo Douglas</copyright><lastBuildDate>Mon, 07 Jul 2025 10:00:00 +0800</lastBuildDate><atom:link href="/tags/alan-perlis/index.xml" rel="self" type="application/rss+xml"/><item><title>编程警句 by Alan J. Perlis</title><link>/post/alan-perlis-quotes/</link><pubDate>Mon, 07 Jul 2025 10:00:00 +0800</pubDate><guid>/post/alan-perlis-quotes/</guid><description>&lt;p>本文翻译自 &lt;a href="https://web.archive.org/web/20230127130734/http://pu.inf.uni-tuebingen.de/users/klaeren/epigrams.html">Yale CS Alan J. Perlis - Epigrams in Programming&lt;/a>，作者 Alan J. Perlis。&lt;/p>
+&lt;hr>
+&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>One man&amp;rsquo;s constant is another man&amp;rsquo;s variable.&lt;/strong>&lt;/p>
+&lt;blockquote>
+&lt;p>汝之常量，彼之变量。&lt;/p>&lt;/blockquote>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Functions delay binding: data structures induce binding. Moral: Structure data late in the programming process.&lt;/strong>&lt;/p>
+&lt;blockquote>
+&lt;p>函数延迟绑定；数据结构促成绑定。箴言：编程后期再构建数据。&lt;/p>&lt;/blockquote>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Syntactic sugar causes cancer of the semi-colons.&lt;/strong>&lt;/p>
+&lt;blockquote>
+&lt;p>语法糖导致了分号癌。&lt;/p>&lt;/blockquote>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Every program is a part of some other program and rarely fits.&lt;/strong>&lt;/p>
+&lt;blockquote>
+&lt;p>每个程序都是其他程序的一部分，而且很少能完美适配。&lt;/p>&lt;/blockquote>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>If a program manipulates a large amount of data, it does so in a small number of ways.&lt;/strong>&lt;/p></description></item></channel></rss>
