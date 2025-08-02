@@ -1,0 +1,198 @@
+<!doctype html><html lang=zh><head><title>为什么 Go 会有 nil channels &ndash; Code talks</title><meta name=viewport content="width=device-width,initial-scale=1"><meta charset=UTF-8><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin=anonymous referrerpolicy=no-referrer><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/academicons/1.9.4/css/academicons.min.css integrity="sha512-IW0nhlW5MgNydsXJO40En2EoCkTTjZhI3yuODrZIc8cQ4h1XcF53PsqDHa09NqnkXuIe0Oiyyj171BqZFwISBw==" crossorigin=anonymous referrerpolicy=no-referrer><link rel=stylesheet href=/css/palettes/base16-dark.css><link rel=stylesheet href=/css/risotto.css><link rel=stylesheet href=/css/custom.css><link rel=icon href=/favicon.ico><meta property="og:title" content="为什么 Go 会有 nil channels &ndash; Code talks"><meta property="og:url" content="/post/why-are-there-nil-channels-in-go/"><meta property="og:locale" content="zh-CN"><script async src="https://www.googletagmanager.com/gtag/js?id=G-4TVXFV2XZM%20"></script><script>var dnt,doNotTrack=!1;if(!1&&(dnt=navigator.doNotTrack||window.doNotTrack||navigator.msDoNotTrack,doNotTrack=dnt=="1"||dnt=="yes"),!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-4TVXFV2XZM ")}</script></head><body><div class=page><header class=page__header><nav class="page__nav main-nav"><ul><li class=nomarker><h1 class=page__logo><a href=/ class=page__logo-inner>Code talks</a></h1></li><li class=main-nav__item><a class=nav-main-item href=/post title>Posts</a></li><li class=main-nav__item><a class=nav-main-item href=/tags title>Tags</a></li><li class=main-nav__item><a class=nav-main-item href=https://github.com/douglarek title>GitHub</a></li></ul></nav></header><section class=page__body><header class=content__header><h1>为什么 Go 会有 nil channels</h1><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6649330439620894" crossorigin=anonymous></script></header><div class=content__body><p>本文翻译自 <a href=https://medium.com/justforfunc/why-are-there-nil-channels-in-go-9877cc0b2308>Why are there nil channels in Go</a>，版权归原作者所有。</p><p>每个写过 Go 的人都知道 channels. 我们大多数人也知道 channels 的默认值是 nil. 但是我们很多人都不知道这个 nil 值是有用的. (译注: 老实说读到这篇文章之前我也认为 nil channels 没什么用, 不仅没用, 我还觉得对 nil channels 的写入操作应该 panic 才对, 就像对 nil map 的写入是 panic 一样, 甚至认为这是 Go 的设计不一致问题)</p><p>我从一个学习 Go 的开发者的 twitter 上得到了同样的问题, 他想知道是否 Go nil channels 的存在仅仅是为了完整性.</p><p>想知道是否有用是有意义的, 因为它们的行为表现的截然相反.</p><p>给定一个 nil channel c:</p><ul><li>&lt;-c 从 c 接收将永远阻塞</li><li>c &lt;- v 发送值到 c 会永远阻塞</li><li>close(c) 关闭 c 引发 panic</li></ul><p>但我仍然坚持他们是有用的. 让我先介绍一个问题, 其解决方案起初看起来很明显, 但实际上并不像人们想象的那么容易, 实际上却从 nil channels 中受益.</p><h2 id=合并-channels>合并 channels</h2><p>如果你选择接受它, 你的任务是编写一个函数, 给定两个 channels a 和 b 返回一个相同类型的 channel c. a 或 b 中收到的每个元素都将发送给 c, 并且一旦 a 和 b 都关闭, c 也将被关闭.</p><img src=/images/0_aKHj7JJ0UCDEYu23.png width=700px height=371px><h2 id=一个辅助函数>一个辅助函数</h2><p>在我们开始之前, 让我们编写一个函数来帮助我们测试我们的解决方案. 此函数返回一个 channel , 该 channel 最终将随机接收所有给定的值并通过关闭完成.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>asChan</span>(<span style=color:#a6e22e>vs</span> <span style=color:#f92672>...</span><span style=color:#66d9ef>int</span>) <span style=color:#f92672>&lt;-</span><span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>int</span> {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>c</span> <span style=color:#f92672>:=</span> make(<span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>int</span>)
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>go</span> <span style=color:#66d9ef>func</span>() {
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>for</span> <span style=color:#a6e22e>_</span>, <span style=color:#a6e22e>v</span> <span style=color:#f92672>:=</span> <span style=color:#66d9ef>range</span> <span style=color:#a6e22e>vs</span> {
+</span></span><span style=display:flex><span>			<span style=color:#a6e22e>c</span> <span style=color:#f92672>&lt;-</span> <span style=color:#a6e22e>v</span>
+</span></span><span style=display:flex><span>			<span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Sleep</span>(<span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Duration</span>(<span style=color:#a6e22e>rand</span>.<span style=color:#a6e22e>Intn</span>(<span style=color:#ae81ff>1000</span>)) <span style=color:#f92672>*</span> <span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Millisecond</span>)
+</span></span><span style=display:flex><span>		}
+</span></span><span style=display:flex><span>		close(<span style=color:#a6e22e>c</span>)
+</span></span><span style=display:flex><span>	}()
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>return</span> <span style=color:#a6e22e>c</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>此函数创建一个 channel c, 启动一个新的 goroutine, 将值发送到创建的 channel c, 最后返回 channel c.</p><p>在处理 channels 时这是很常见的模式, 因此在继续阅读之前, 请确保你了解它的工作原理.</p><h2 id=让我们开始吧>让我们开始吧</h2><p>由于我们没有对 a 或 b 的偏好, 所以我们将避免通过选择我们应该首先 range 哪个 channel 来创建偏好.</p><p>相反我们会保持这种对称性, 并且使用一个无限循环来 select 这两个 channels.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>merge</span>(<span style=color:#a6e22e>a</span>, <span style=color:#a6e22e>b</span> <span style=color:#f92672>&lt;-</span><span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>int</span>) <span style=color:#f92672>&lt;-</span><span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>int</span> {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>c</span> <span style=color:#f92672>:=</span> make(<span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>int</span>)
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>go</span> <span style=color:#66d9ef>func</span>() {
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>for</span> {
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>select</span> {
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>case</span> <span style=color:#a6e22e>v</span> <span style=color:#f92672>:=</span> <span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>a</span>:
+</span></span><span style=display:flex><span>				<span style=color:#a6e22e>c</span> <span style=color:#f92672>&lt;-</span> <span style=color:#a6e22e>v</span>
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>case</span> <span style=color:#a6e22e>v</span> <span style=color:#f92672>:=</span> <span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>b</span>:
+</span></span><span style=display:flex><span>				<span style=color:#a6e22e>c</span> <span style=color:#f92672>&lt;-</span> <span style=color:#a6e22e>v</span>
+</span></span><span style=display:flex><span>			}
+</span></span><span style=display:flex><span>		}
+</span></span><span style=display:flex><span>	}()
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>return</span> <span style=color:#a6e22e>c</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>这看起来不错, 让我们写一个快速测试并运行它.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>a</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>asChan</span>(<span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>5</span>, <span style=color:#ae81ff>7</span>)
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>b</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>asChan</span>(<span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>4</span>, <span style=color:#ae81ff>6</span>, <span style=color:#ae81ff>8</span>)
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>c</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>merge</span>(<span style=color:#a6e22e>a</span>, <span style=color:#a6e22e>b</span>)
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>for</span> <span style=color:#a6e22e>v</span> <span style=color:#f92672>:=</span> <span style=color:#66d9ef>range</span> <span style=color:#a6e22e>c</span> {
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#a6e22e>v</span>)
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>这应该以某种顺序打印 1 到 8 并成功结束. 让我们看看发生了什么.</p><pre tabindex=0><code>&gt; go run main.go
+1
+2
+3
+4
+5
+6
+7
+8
+0
+0
+0
+0
+0
+0
+0
+😱
+</code></pre><p>好吧, 很明显这不好, 因为该程序没有结束. 一旦它打印出从 1 到 8 的值, 它将开始永远打印 0.</p><h2 id=处理关闭的-channels>处理关闭的 channels</h2><p>如果我们从一个关闭的 channel 接收会发生什么 ? 我们会得到 channel 类型的默认值. 在我们的例子中, 类型是 int, 所以值是 0.</p><p>我们可以通过与 0 比较来检查是否 channel 已经关闭, 但是如果我们接收到的其中一个值是 0, 会怎么样 ? 相反, 我们可以使用 &ldquo;v, ok&rdquo; 语法:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#a6e22e>v</span>, <span style=color:#a6e22e>ok</span> <span style=color:#f92672>:=</span> <span style=color:#f92672>&lt;-</span> <span style=color:#a6e22e>c</span>
+</span></span></code></pre></div><p>当使用这个语法时, ok 是一个布尔值, 只要 channel 是开着的, 它就是 true. 知道这一点, 我们可以避免将多余的 0 发送给 c .</p><p>在某一点上我们也应该停止迭代, 所以让我们也跟踪两个 channels 何时关闭.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>merge</span>(<span style=color:#a6e22e>a</span>, <span style=color:#a6e22e>b</span> <span style=color:#f92672>&lt;-</span><span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>int</span>) <span style=color:#f92672>&lt;-</span><span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>int</span> {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>c</span> <span style=color:#f92672>:=</span> make(<span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>int</span>)
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>go</span> <span style=color:#66d9ef>func</span>() {
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>adone</span>, <span style=color:#a6e22e>bdone</span> <span style=color:#f92672>:=</span> <span style=color:#66d9ef>false</span>, <span style=color:#66d9ef>false</span>
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>for</span> !<span style=color:#a6e22e>adone</span> <span style=color:#f92672>||</span> !<span style=color:#a6e22e>bdone</span> {
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>select</span> {
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>case</span> <span style=color:#a6e22e>v</span>, <span style=color:#a6e22e>ok</span> <span style=color:#f92672>:=</span> <span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>a</span>:
+</span></span><span style=display:flex><span>				<span style=color:#66d9ef>if</span> !<span style=color:#a6e22e>ok</span> {
+</span></span><span style=display:flex><span>					<span style=color:#a6e22e>adone</span> = <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>					<span style=color:#66d9ef>continue</span>
+</span></span><span style=display:flex><span>				}
+</span></span><span style=display:flex><span>				<span style=color:#a6e22e>c</span> <span style=color:#f92672>&lt;-</span> <span style=color:#a6e22e>v</span>
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>case</span> <span style=color:#a6e22e>v</span>, <span style=color:#a6e22e>ok</span> <span style=color:#f92672>:=</span> <span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>b</span>:
+</span></span><span style=display:flex><span>				<span style=color:#66d9ef>if</span> !<span style=color:#a6e22e>ok</span> {
+</span></span><span style=display:flex><span>					<span style=color:#a6e22e>bdone</span> = <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>					<span style=color:#66d9ef>continue</span>
+</span></span><span style=display:flex><span>				}
+</span></span><span style=display:flex><span>				<span style=color:#a6e22e>c</span> <span style=color:#f92672>&lt;-</span> <span style=color:#a6e22e>v</span>
+</span></span><span style=display:flex><span>			}
+</span></span><span style=display:flex><span>		}
+</span></span><span style=display:flex><span>	}()
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>return</span> <span style=color:#a6e22e>c</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>这看起来可能有用 ! 让我们来运行它.</p><pre tabindex=0><code>&gt; go run main.go
+1
+2
+3
+4
+5
+6
+7
+8
+fatal error: all goroutines are asleep - deadlock!
+goroutine 1 [chan receive]:
+main.main()
+        /Users/francesc/src/github.com/campoy/campoy.cat/site/static/code/nilchans/main.go:13 +0x186
+exit status 2
+</code></pre><p>哎呀, 我们忘了一些事情. 是什么呢 ? 我们可以看到只有一个 goroutine 在运行, 并且它阻塞在第 13 行:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#66d9ef>for</span> <span style=color:#a6e22e>v</span> <span style=color:#f92672>:=</span> <span style=color:#66d9ef>range</span> <span style=color:#a6e22e>c</span> {
+</span></span></code></pre></div><p>你能看出问题是什么吗 ? range 语句迭代 channel 中的所有值直到 channel 关闭. 但是谁关闭了这个 channel ?</p><p>我们忘了 ! 让我们在我们的 goroutine 中添加 defer 语句, 以确保该 channel 最终关闭.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>merge</span>(<span style=color:#a6e22e>a</span>, <span style=color:#a6e22e>b</span> <span style=color:#f92672>&lt;-</span><span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>int</span>) <span style=color:#f92672>&lt;-</span><span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>int</span> {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>c</span> <span style=color:#f92672>:=</span> make(<span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>int</span>)
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>go</span> <span style=color:#66d9ef>func</span>() {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>defer</span> close(<span style=color:#a6e22e>c</span>)
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>adone</span>, <span style=color:#a6e22e>bdone</span> <span style=color:#f92672>:=</span> <span style=color:#66d9ef>false</span>, <span style=color:#66d9ef>false</span>
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>for</span> !<span style=color:#a6e22e>adone</span> <span style=color:#f92672>||</span> !<span style=color:#a6e22e>bdone</span> {
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>select</span> {
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>case</span> <span style=color:#a6e22e>v</span>, <span style=color:#a6e22e>ok</span> <span style=color:#f92672>:=</span> <span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>a</span>:
+</span></span><span style=display:flex><span>				<span style=color:#66d9ef>if</span> !<span style=color:#a6e22e>ok</span> {
+</span></span><span style=display:flex><span>					<span style=color:#a6e22e>adone</span> = <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>					<span style=color:#66d9ef>continue</span>
+</span></span><span style=display:flex><span>				}
+</span></span><span style=display:flex><span>				<span style=color:#a6e22e>c</span> <span style=color:#f92672>&lt;-</span> <span style=color:#a6e22e>v</span>
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>case</span> <span style=color:#a6e22e>v</span>, <span style=color:#a6e22e>ok</span> <span style=color:#f92672>:=</span> <span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>b</span>:
+</span></span><span style=display:flex><span>				<span style=color:#66d9ef>if</span> !<span style=color:#a6e22e>ok</span> {
+</span></span><span style=display:flex><span>					<span style=color:#a6e22e>bdone</span> = <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>					<span style=color:#66d9ef>continue</span>
+</span></span><span style=display:flex><span>				}
+</span></span><span style=display:flex><span>				<span style=color:#a6e22e>c</span> <span style=color:#f92672>&lt;-</span> <span style=color:#a6e22e>v</span>
+</span></span><span style=display:flex><span>			}
+</span></span><span style=display:flex><span>		}
+</span></span><span style=display:flex><span>	}()
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>return</span> <span style=color:#a6e22e>c</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>请注意, defer 语句位于新的 goroutine 中调用的匿名函数中, 而不是在 merge 中. 否则, 只要我们退出 merage, c 就会被关闭, 那么发送一个值给它将引发 panic.</p><p>让我们运行它, 看看会发生什么.</p><pre tabindex=0><code>&gt; go run main.go
+1
+2
+3
+4
+5
+6
+7
+8
+</code></pre><p>这看起来很棒 &mldr; 但是是这样吗 ?</p><h2 id=繁忙的循环>繁忙的循环</h2><p>我们迄今为止编写的代码非常好. 它在功能上是正确的, 但是如果你在生产中部署了它, 你最终可能会遇到性能问题.</p><p>为了向你显示问题所在, 让我们添加一些日志记录.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>merge</span>(<span style=color:#a6e22e>a</span>, <span style=color:#a6e22e>b</span> <span style=color:#f92672>&lt;-</span><span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>int</span>) <span style=color:#f92672>&lt;-</span><span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>int</span> {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>c</span> <span style=color:#f92672>:=</span> make(<span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>int</span>)
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>go</span> <span style=color:#66d9ef>func</span>() {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>defer</span> close(<span style=color:#a6e22e>c</span>)
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>adone</span>, <span style=color:#a6e22e>bdone</span> <span style=color:#f92672>:=</span> <span style=color:#66d9ef>false</span>, <span style=color:#66d9ef>false</span>
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>for</span> !<span style=color:#a6e22e>adone</span> <span style=color:#f92672>||</span> !<span style=color:#a6e22e>bdone</span> {
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>select</span> {
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>case</span> <span style=color:#a6e22e>v</span>, <span style=color:#a6e22e>ok</span> <span style=color:#f92672>:=</span> <span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>a</span>:
+</span></span><span style=display:flex><span>				<span style=color:#66d9ef>if</span> !<span style=color:#a6e22e>ok</span> {
+</span></span><span style=display:flex><span>                    <span style=color:#a6e22e>log</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#e6db74>&#34;a is done&#34;</span>)
+</span></span><span style=display:flex><span>					<span style=color:#a6e22e>adone</span> = <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>					<span style=color:#66d9ef>continue</span>
+</span></span><span style=display:flex><span>				}
+</span></span><span style=display:flex><span>				<span style=color:#a6e22e>c</span> <span style=color:#f92672>&lt;-</span> <span style=color:#a6e22e>v</span>
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>case</span> <span style=color:#a6e22e>v</span>, <span style=color:#a6e22e>ok</span> <span style=color:#f92672>:=</span> <span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>b</span>:
+</span></span><span style=display:flex><span>				<span style=color:#66d9ef>if</span> !<span style=color:#a6e22e>ok</span> {
+</span></span><span style=display:flex><span>                    <span style=color:#a6e22e>log</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#e6db74>&#34;b is done&#34;</span>)
+</span></span><span style=display:flex><span>					<span style=color:#a6e22e>bdone</span> = <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>					<span style=color:#66d9ef>continue</span>
+</span></span><span style=display:flex><span>				}
+</span></span><span style=display:flex><span>				<span style=color:#a6e22e>c</span> <span style=color:#f92672>&lt;-</span> <span style=color:#a6e22e>v</span>
+</span></span><span style=display:flex><span>			}
+</span></span><span style=display:flex><span>		}
+</span></span><span style=display:flex><span>	}()
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>return</span> <span style=color:#a6e22e>c</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>让我们运行它, 看看会发生什么.</p><pre tabindex=0><code>&gt; go run main.go
+2
+3
+4
+5
+6
+7
+8
+a is done
+2018/01/14 20:47:22 b is done
+... 😱
+2018/01/14 20:47:23 b is done
+2018/01/14 20:47:23 a is done
+</code></pre><p>呃哦 ! 似乎一旦一个 channel 完成, 我们就不停地迭代 !</p><p>毕竟它确实有意义. 正如我们在开始时看到的, 从一个关闭的 channel 读取从不阻塞.</p><p>因此, 只要两个 channels 都处于打开状态, select 语句将会阻塞, 直到新元素准备就绪, 但是一旦其中一个关闭, 我们将迭代并浪费 CPU. 这也被称为繁忙的循环, 并不好.</p><h2 id=在-select-语句中禁用一个-case>在 select 语句中禁用一个 case</h2><p>为了避免之前描述的繁忙循环, 我们希望禁用 select 语句的一部分. 具体来说, 当 a 关闭的时候我们想移除 (case v, ok := &lt;- a), b 也一样. 但是怎么做呢 ?</p><p>正如我们在开头提到的那样, 从 nil channels 接收数据会永远阻塞. 所以为了禁用一个从 channel 接收数据的 case, 我们可以简单将 channel 设置为 nil !</p><p>然后, 我们可以停止使用 adone 和 bdone, 而是检查 a 和 b 是否为 nil .</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>merge</span>(<span style=color:#a6e22e>a</span>, <span style=color:#a6e22e>b</span> <span style=color:#f92672>&lt;-</span><span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>int</span>) <span style=color:#f92672>&lt;-</span><span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>int</span> {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>c</span> <span style=color:#f92672>:=</span> make(<span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>int</span>)
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>go</span> <span style=color:#66d9ef>func</span>() {
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>defer</span> close(<span style=color:#a6e22e>c</span>)
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>for</span> <span style=color:#a6e22e>a</span> <span style=color:#f92672>!=</span> <span style=color:#66d9ef>nil</span> <span style=color:#f92672>||</span> <span style=color:#a6e22e>b</span> <span style=color:#f92672>!=</span> <span style=color:#66d9ef>nil</span> {
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>select</span> {
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>case</span> <span style=color:#a6e22e>v</span>, <span style=color:#a6e22e>ok</span> <span style=color:#f92672>:=</span> <span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>a</span>:
+</span></span><span style=display:flex><span>				<span style=color:#66d9ef>if</span> !<span style=color:#a6e22e>ok</span> {
+</span></span><span style=display:flex><span>					<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#e6db74>&#34;a is done&#34;</span>)
+</span></span><span style=display:flex><span>					<span style=color:#a6e22e>a</span> = <span style=color:#66d9ef>nil</span>
+</span></span><span style=display:flex><span>					<span style=color:#66d9ef>continue</span>
+</span></span><span style=display:flex><span>				}
+</span></span><span style=display:flex><span>				<span style=color:#a6e22e>c</span> <span style=color:#f92672>&lt;-</span> <span style=color:#a6e22e>v</span>
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>case</span> <span style=color:#a6e22e>v</span>, <span style=color:#a6e22e>ok</span> <span style=color:#f92672>:=</span> <span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>b</span>:
+</span></span><span style=display:flex><span>				<span style=color:#66d9ef>if</span> !<span style=color:#a6e22e>ok</span> {
+</span></span><span style=display:flex><span>					<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#e6db74>&#34;b is done&#34;</span>)
+</span></span><span style=display:flex><span>					<span style=color:#a6e22e>b</span> = <span style=color:#66d9ef>nil</span>
+</span></span><span style=display:flex><span>					<span style=color:#66d9ef>continue</span>
+</span></span><span style=display:flex><span>				}
+</span></span><span style=display:flex><span>				<span style=color:#a6e22e>c</span> <span style=color:#f92672>&lt;-</span> <span style=color:#a6e22e>v</span>
+</span></span><span style=display:flex><span>			}
+</span></span><span style=display:flex><span>		}
+</span></span><span style=display:flex><span>	}()
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>return</span> <span style=color:#a6e22e>c</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>好, 希望这可以避免不必要的循环. 我们来试试吧.</p><pre tabindex=0><code>&gt; go run main.go
+2
+1
+4
+3
+6
+5
+8
+7
+b is done
+a is done
+</code></pre><p>最终解决方案的代码在 <a href=https://github.com/campoy/justforfunc/blob/master/26-nil-chans/main.go>GitHub</a> 上.</p></div><div id=disqus_thread></div><script>window.disqus_config=function(){},function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById("disqus_thread").innerHTML="Disqus comments not available by default when the website is previewed locally.";return}var t=document,e=t.createElement("script");e.async=!0,e.src="//douglarek.disqus.com/embed.js",e.setAttribute("data-timestamp",+new Date),(t.head||t.body).appendChild(e)}()</script><noscript>Please enable JavaScript to view the <a href=https://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a><footer class=content__footer></footer></section><section class=page__aside><div class=aside__content><p>2018-04-21</p><hr>On this page:<nav id=TableOfContents><ul><li><a href=#合并-channels>合并 channels</a></li><li><a href=#一个辅助函数>一个辅助函数</a></li><li><a href=#让我们开始吧>让我们开始吧</a></li><li><a href=#处理关闭的-channels>处理关闭的 channels</a></li><li><a href=#繁忙的循环>繁忙的循环</a></li><li><a href=#在-select-语句中禁用一个-case>在 select 语句中禁用一个 case</a></li></ul></nav></div></section><footer class=page__footer><p></p><br><br><p class=copyright>Copyright © 2025 Leo Douglas</p></footer></div></body></html>
