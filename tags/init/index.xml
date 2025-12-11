@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Init on Code talks</title><link>/tags/init/</link><description>Recent content in Init on Code talks</description><generator>Hugo</generator><language>zh-CN</language><copyright> Copyright © 2025 Leo Douglas</copyright><lastBuildDate>Tue, 29 Jul 2025 00:00:00 +0000</lastBuildDate><atom:link href="/tags/init/index.xml" rel="self" type="application/rss+xml"/><item><title>重新思考 PID 1</title><link>/post/rethinking-pid-1/</link><pubDate>Tue, 29 Jul 2025 00:00:00 +0000</pubDate><guid>/post/rethinking-pid-1/</guid><description>&lt;p>本文翻译自 &lt;a href="https://0pointer.de/blog/projects/systemd.html">Rethinking PID 1&lt;/a>，版权归原作者所有。这是 systemd 作者发表于 2010 年的一篇文章，至今读来仍熠熠生辉。&lt;/p>
+&lt;hr>
+&lt;p>如果你消息灵通，或者善于读懂言外之意，你可能已经知道这篇博文要讲什么了。但即便如此，你可能还是会觉得这个故事很有趣。所以，端起一杯咖啡，坐下来，读读接下来的内容吧。&lt;/p>
+&lt;p>这篇博文很长，所以虽然我只能推荐你读完整个故事，但这里有一句话总结：我们正在试验一个新的 init 系统，而且很有趣。&lt;/p>
+&lt;p>&lt;a href="http://git.0pointer.de/?p=systemd.git">这是代码&lt;/a> 故事是这样的：&lt;/p>
+&lt;h2 id="进程标识符-1">进程标识符 1&lt;/h2>
+&lt;p>在每个 Unix 系统上，都有一个进程拥有特殊的进程标识符 1。它在所有其他进程之前由内核启动，并且是所有那些没有其他父进程的进程的父进程。因此，它可以做很多其他进程不能做的事情。它也负责一些其他进程不负责的事情，比如在启动期间启动和维护用户空间。&lt;/p>
+&lt;p>从历史上看，在 Linux 上充当 PID 1 的软件是古老的 sysvinit 软件包，尽管它已经相当老旧了。人们提出了许多替代品，但只有一个真正流行起来：&lt;a href="http://upstart.ubuntu.com/">Upstart&lt;/a>，它现在已经进入了所有主流发行版。&lt;/p>
+&lt;p>如前所述，init 系统的核心职责是启动用户空间。一个好的 init 系统会很快地完成这项工作。不幸的是，传统的 SysV init 系统并不是特别快。&lt;/p>
+&lt;p>为了实现快速高效的启动，有两件事至关重要：&lt;/p>
+&lt;ul>
+&lt;li>启动更少的服务。&lt;/li>
+&lt;li>并且并行启动更多的服务。&lt;/li>
+&lt;/ul>
+&lt;p>这是什么意思？启动更少意味着启动更少的服务，或者将服务的启动推迟到实际需要时。有些服务我们知道迟早会需要（syslog、D-Bus 系统总线等），但对于许多其他服务来说，情况并非如此。例如，除非实际插入了蓝牙适配器或者应用程序想要与其 D-Bus 接口通信，否则 bluetoothd 不需要运行。打印系统也是如此：除非机器物理连接到打印机，或者应用程序想要打印某些东西，否则没有必要运行像 CUPS 这样的打印守护进程。Avahi：如果机器没有连接到网络，就没有必要运行 &lt;a href="http://avahi.org">Avahi&lt;/a>，除非某个应用程序想要使用其 API。甚至 SSH 也是如此：只要没有人想连接你的机器，就没有必要运行它，只要它在第一次连接时启动即可。（承认吧，在大多数可能正在监听 sshd 的机器上，有人可能每隔一两个月才连接一次。）&lt;/p>
+&lt;p>并行启动更多意味着，如果必须运行某些东西，我们不应该序列化它的启动（就像 sysvinit 那样），而是应该同时运行所有东西，这样可以最大限度地利用可用的 CPU 和磁盘 IO 带宽，从而最大限度地减少整体启动时间。&lt;/p>
+&lt;h2 id="硬件和软件的动态变化">硬件和软件的动态变化&lt;/h2>
+&lt;p>现代系统（尤其是通用操作系统）的配置和使用都具有高度的动态性：它们是移动的，不同的应用程序会启动和停止，不同的硬件会添加和移除。负责维护服务的 init 系统需要监听硬件和软件的变化。它需要根据运行程序或启用某些硬件的需要动态地启动（有时是停止）服务。&lt;/p>
+&lt;p>大多数试图并行化启动的当前系统仍然会同步所涉及的各种守护进程的启动：由于 Avahi 需要 D-Bus，因此首先启动 D-Bus，只有当 D-Bus 发出就绪信号时，Avahi 才会启动。其他服务也类似：livirtd 和 X11 需要 HAL（好吧，我这里考虑的是 Fedora 13 的服务，忽略 HAL 已经过时了），因此 HAL 首先启动，然后才启动 livirtd 和 X11。而 libvirtd 也需要 Avahi，所以它也等待 Avahi。它们都需要 syslog，所以它们都等待 Syslog 完全启动和初始化。等等。&lt;/p></description></item></channel></rss>
