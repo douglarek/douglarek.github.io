@@ -1,0 +1,55 @@
+<!doctype html><html lang=zh><head><title>MySQL Order By 按特定的字段值排序 &ndash; Code talks</title><meta name=viewport content="width=device-width,initial-scale=1"><meta charset=UTF-8><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin=anonymous referrerpolicy=no-referrer><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/academicons/1.9.4/css/academicons.min.css integrity="sha512-IW0nhlW5MgNydsXJO40En2EoCkTTjZhI3yuODrZIc8cQ4h1XcF53PsqDHa09NqnkXuIe0Oiyyj171BqZFwISBw==" crossorigin=anonymous referrerpolicy=no-referrer><link rel=stylesheet href=/css/palettes/base16-dark.css><link rel=stylesheet href=/css/risotto.css><link rel=stylesheet href=/css/custom.css><link rel=icon href=/favicon.ico><meta property="og:title" content="MySQL Order By 按特定的字段值排序 &ndash; Code talks"><meta property="og:url" content="/post/ordering-by-specific-field-values-with-mysql/"><meta property="og:locale" content="zh-CN"><script async src="https://www.googletagmanager.com/gtag/js?id=G-4TVXFV2XZM%20"></script><script>var dnt,doNotTrack=!1;if(!1&&(dnt=navigator.doNotTrack||window.doNotTrack||navigator.msDoNotTrack,doNotTrack=dnt=="1"||dnt=="yes"),!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-4TVXFV2XZM ")}</script></head><body><div class=page><header class=page__header><nav class="page__nav main-nav"><ul><li class=nomarker><h1 class=page__logo><a href=/ class=page__logo-inner>Code talks</a></h1></li><li class=main-nav__item><a class=nav-main-item href=/post title>Posts</a></li><li class=main-nav__item><a class=nav-main-item href=/tags title>Tags</a></li><li class=main-nav__item><a class=nav-main-item href=https://github.com/douglarek title>GitHub</a></li></ul></nav></header><section class=page__body><header class=content__header><h1>MySQL Order By 按特定的字段值排序</h1><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6649330439620894" crossorigin=anonymous></script></header><div class=content__body><p>本文翻译自 <a href=https://www.electrictoolbox.com/mysql-order-specific-field-values/>Ordering by specific field values with MySQL</a>，版权归原作者所有。</p><p>在 SQL 查询中可能有时需要使用 ASC 或 DESC 或使用特殊排序字段才能完成的特定顺序. MySQL 有一个 ORDER BY FIELD 函数可以用来做这个.</p><h2 id=测试数据>测试数据</h2><p>本文中的示例数据使用我的示例 <a href=https://www.electrictoolbox.com/mysql-example-table/>fruit</a> 表. 这是一个有点简单的表, 但它可以用来很好地说明这篇文章中的观点.</p><h2 id=按特定字段值排序>按特定字段值排序</h2><p>fruit 表有一个 name 字段, 具有以下特定的值: 苹果(Apple), 香蕉(Banana), 橘子(Orange), 梨(Pear). 每个特定的值都有一系列的品种.</p><p>比方说, 为了论证的缘故, 我们要按香蕉, 苹果, 梨, 橘子等特定的顺序排列数据, 然后再按品种排序. 使用普通的 ORDER BY 子句不可能这样做, 因为这个字段的升序或降序排序不起作用. 我们要么需要某种形式的排序列或进行其他选择.</p><p>在 ORDER BY 子句中使用 FIELD 函数可以实现这一点. 它的工作方式是指定要排序的列, 然后按顺序排序它们的值. 例如:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> fruit
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> FIELD(name, <span style=color:#e6db74>&#39;Banana&#39;</span>, <span style=color:#e6db74>&#39;Apple&#39;</span>, <span style=color:#e6db74>&#39;Pear&#39;</span>, <span style=color:#e6db74>&#39;Orange&#39;</span>), variety;
+</span></span></code></pre></div><p>来自示例表的结果数据如下所示:</p><pre tabindex=0><code>+----------+--------+---------------------+
+| fruit_id | name   | variety             |
++----------+--------+---------------------+
+|       11 | Banana | Burro               |
+|       12 | Banana | Cavendish           |
+|       10 | Banana | Plantain            |
+|        6 | Apple  | Cox&#39;s Orange Pippin |
+|        7 | Apple  | Granny Smith        |
+|        1 | Apple  | Red Delicious       |
+|        8 | Pear   | Anjou               |
+|        4 | Pear   | Bartlett            |
+|        2 | Pear   | Comice              |
+|        5 | Orange | Blood               |
+|        3 | Orange | Navel               |
+|        9 | Orange | Valencia            |
++----------+--------+---------------------+
+</code></pre><h2 id=疑难杂症>疑难杂症</h2><p>使用此功能时有一个小小的疑难杂症. 列中不在 FIELD 函数中的任何值将在指定的值之前或多或少随机出现. 例如, 只指定苹果和香蕉:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> fruit
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> FIELD(name, <span style=color:#e6db74>&#39;Banana&#39;</span>, <span style=color:#e6db74>&#39;Apple&#39;</span>) <span style=color:#66d9ef>DESC</span>, variety;
+</span></span></code></pre></div><p>这导致:</p><pre tabindex=0><code>+----------+--------+---------------------+
+| fruit_id | name   | variety             |
++----------+--------+---------------------+
+|        6 | Apple  | Cox&#39;s Orange Pippin |
+|        7 | Apple  | Granny Smith        |
+|        1 | Apple  | Red Delicious       |
+|       11 | Banana | Burro               |
+|       12 | Banana | Cavendish           |
+|       10 | Banana | Plantain            |
+|        8 | Pear   | Anjou               |
+|        4 | Pear   | Bartlett            |
+|        5 | Orange | Blood               |
+|        2 | Pear   | Comice              |
+|        3 | Orange | Navel               |
+|        9 | Orange | Valencia            |
++----------+--------+---------------------+
+</code></pre><h2 id=解决问题的方法>解决问题的方法</h2><p>虽然通常只有在确切的列已知的情况下才使用此函数, 但解决方法是颠倒指定字段的顺序并按降序对其排序, 然后在同一个字段上进行第二次排序.</p><p>下面的例子, 不管它看起来如何，实际上按照香蕉, 苹果, 然后按照升序排列:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> fruit
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> FIELD(name, <span style=color:#e6db74>&#39;Apple&#39;</span>, <span style=color:#e6db74>&#39;Banana&#39;</span>) <span style=color:#66d9ef>DESC</span>, name, variety;
+</span></span></code></pre></div><p>这导致:</p><pre tabindex=0><code>+----------+--------+---------------------+
+| fruit_id | name   | variety             |
++----------+--------+---------------------+
+|       11 | Banana | Burro               |
+|       12 | Banana | Cavendish           |
+|       10 | Banana | Plantain            |
+|        6 | Apple  | Cox&#39;s Orange Pippin |
+|        7 | Apple  | Granny Smith        |
+|        1 | Apple  | Red Delicious       |
+|        5 | Orange | Blood               |
+|        3 | Orange | Navel               |
+|        9 | Orange | Valencia            |
+|        8 | Pear   | Anjou               |
+|        4 | Pear   | Bartlett            |
+|        2 | Pear   | Comice              |
++----------+--------+---------------------+
+</code></pre><p>如果一组特定的行需要显示在结果集中的其他行之前, 这可能是一个有用的解决方案, 但是当使用 ASC 或 DESC 排序顺序时, 通常不会出现在第一行.</p></div><div id=disqus_thread></div><script>window.disqus_config=function(){},function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById("disqus_thread").innerHTML="Disqus comments not available by default when the website is previewed locally.";return}var t=document,e=t.createElement("script");e.async=!0,e.src="//douglarek.disqus.com/embed.js",e.setAttribute("data-timestamp",+new Date),(t.head||t.body).appendChild(e)}()</script><noscript>Please enable JavaScript to view the <a href=https://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a><footer class=content__footer></footer></section><section class=page__aside><div class=aside__content><p>2018-01-25</p><hr>On this page:<nav id=TableOfContents><ul><li><a href=#测试数据>测试数据</a></li><li><a href=#按特定字段值排序>按特定字段值排序</a></li><li><a href=#疑难杂症>疑难杂症</a></li><li><a href=#解决问题的方法>解决问题的方法</a></li></ul></nav></div></section><footer class=page__footer><p></p><br><br><p class=copyright>Copyright © 2025 Leo Douglas</p></footer></div></body></html>
