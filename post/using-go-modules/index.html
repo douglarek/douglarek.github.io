@@ -1,0 +1,227 @@
+<!doctype html><html lang=zh><head><title>使用 Go Module &ndash; Code talks</title><meta name=viewport content="width=device-width,initial-scale=1"><meta charset=UTF-8><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin=anonymous referrerpolicy=no-referrer><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/academicons/1.9.4/css/academicons.min.css integrity="sha512-IW0nhlW5MgNydsXJO40En2EoCkTTjZhI3yuODrZIc8cQ4h1XcF53PsqDHa09NqnkXuIe0Oiyyj171BqZFwISBw==" crossorigin=anonymous referrerpolicy=no-referrer><link rel=stylesheet href=/css/palettes/base16-dark.css><link rel=stylesheet href=/css/risotto.css><link rel=stylesheet href=/css/custom.css><link rel=icon href=/favicon.ico><meta property="og:title" content="使用 Go Module &ndash; Code talks"><meta property="og:url" content="/post/using-go-modules/"><meta property="og:locale" content="zh-CN"><script async src="https://www.googletagmanager.com/gtag/js?id=G-4TVXFV2XZM%20"></script><script>var dnt,doNotTrack=!1;if(!1&&(dnt=navigator.doNotTrack||window.doNotTrack||navigator.msDoNotTrack,doNotTrack=dnt=="1"||dnt=="yes"),!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-4TVXFV2XZM ")}</script></head><body><div class=page><header class=page__header><nav class="page__nav main-nav"><ul><li class=nomarker><h1 class=page__logo><a href=/ class=page__logo-inner>Code talks</a></h1></li><li class=main-nav__item><a class=nav-main-item href=/post title>Posts</a></li><li class=main-nav__item><a class=nav-main-item href=/tags title>Tags</a></li><li class=main-nav__item><a class=nav-main-item href=https://github.com/douglarek title>GitHub</a></li></ul></nav></header><section class=page__body><header class=content__header><h1>使用 Go Module</h1><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6649330439620894" crossorigin=anonymous></script></header><div class=content__body><p>本文翻译自 <a href=https://blog.golang.org/using-go-modules>Using Go Modules</a>，版权归原作者所有。</p><h2 id=引言>引言</h2><p>Go 1.11 和 1.12 包含<a href=https://golang.org/doc/go1.11#modules>对 Module(后文称模块) 的初步支持</a>, Go 的<a href=https://blog.golang.org/versioning-proposal>新依赖管理系统</a>使依赖版本信息明确且易于管理. 本文介绍了开始使用模块所需的基本操作. 后续文章将涵盖发布供其他人使用的模块.</p><p>模块是存储在文件树中的 <a href=https://golang.org/ref/spec#Packages>Go 包</a>的集合, 其根目录中包含 go.mod 文件. go.mod 文件定义了模块的模块路径, 它也是用于根目录的导入路径, 以及它的依赖(它们是成功构建所需的其他模块). 每个依赖都被写作模块路径和特定<a href=http://semver.org/>语义版本</a>.</p><p>从 Go 1.11 开始, 如果目录在 $GOPATH/src 之外, 则 go 命令允许在当前目录或任何具有 go.mod 的父目录使用模块. (在 $GOPATH/src 中, 为了兼容性, go 命令仍然在旧的GOPATH 模式下运行, 即使找到了 go.mod 也是如此. 有关详细信息, 请参阅 <a href=https://golang.org/cmd/go/#hdr-Preliminary_module_support>go 命令文档</a>) 从 Go 1.13 开始, 模块模式将是所有开发的默认模式.</p><p>本文将介绍使用模块开发 Go 代码时出现的一系列常见操作:</p><ul><li>创建一个新的模块.</li><li>添加依赖.</li><li>升级依赖.</li><li>添加一个新的大版本依赖.</li><li>升级依赖到一个新的大版本.</li><li>移除不用的依赖.</li></ul><h2 id=创建一个新的模块>创建一个新的模块</h2><p>让我们创建一个新模块.</p><p>在 $GOPATH/src之 外的某处创建一个新的空目录, 切换到该目录, 然后创建一个新的源文件 hello.go:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>hello</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>Hello</span>() <span style=color:#66d9ef>string</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#e6db74>&#34;Hello, world.&#34;</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>我们也在 hello_test.go 中写一个测试:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>hello</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> <span style=color:#e6db74>&#34;testing&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>TestHello</span>(<span style=color:#a6e22e>t</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>testing</span>.<span style=color:#a6e22e>T</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>want</span> <span style=color:#f92672>:=</span> <span style=color:#e6db74>&#34;Hello, world.&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> <span style=color:#a6e22e>got</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>Hello</span>(); <span style=color:#a6e22e>got</span> <span style=color:#f92672>!=</span> <span style=color:#a6e22e>want</span> {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>t</span>.<span style=color:#a6e22e>Errorf</span>(<span style=color:#e6db74>&#34;Hello() = %q, want %q&#34;</span>, <span style=color:#a6e22e>got</span>, <span style=color:#a6e22e>want</span>)
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>此时, 该目录包含一个包, 但不包含模块, 因为没有 go.mod 文件. 如果我们切换到 /home/gopher/hello 并立即运行 go test, 我们会看到:</p><pre tabindex=0><code>$ go test
+PASS
+ok      _/home/gopher/hello    0.020s
+$
+</code></pre><p>最后一行总结了整个的包测试. 因为我们在 $GOPATH 之外以及任何模块之外工作, 所以 go 命令不知道当前目录的导入路径, 并根据目录名称构造了一个假路径: _/home/gopher/hello.</p><p>让我们使用 go mod init 将当前目录作为模块的根目录, 然后再次尝试 go test:</p><pre tabindex=0><code>$ go mod init example.com/hello
+go: creating new go.mod: module example.com/hello
+$ go test
+PASS
+ok      example.com/hello    0.020s
+$
+</code></pre><p>恭喜! 您已经编写并测试了第一个模块.</p><p>go mod init 命令写入了一个 go.mod 文件:</p><pre tabindex=0><code>$ cat go.mod
+module example.com/hello
+
+go 1.12
+$
+</code></pre><p>go.mod 文件仅出现在模块的根目录中. 子目录中的包所有的导入路径, 包含了模块路径和子目录的路径. 例如, 如果我们创建了一个子目录 world, 我们就不需要(也不想)在它那运行 go mod init. 该包将自动被识别为 example.com/hello 模块的一部分, 其导入路径为 example.com/hello/world.</p><h2 id=添加一个依赖>添加一个依赖</h2><p>Go 模块的主要动机是改善使用(即添加依赖)其他开发人员编写的代码的体验.</p><p>让我们更新我们的 hello.go 来导入 rsc.io/quote 并使用它来实现 Hello:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>hello</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> <span style=color:#e6db74>&#34;rsc.io/quote&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>Hello</span>() <span style=color:#66d9ef>string</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>quote</span>.<span style=color:#a6e22e>Hello</span>()
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>现在让我们再次运行测试:</p><pre tabindex=0><code>$ go test
+go: finding rsc.io/quote v1.5.2
+go: downloading rsc.io/quote v1.5.2
+go: extracting rsc.io/quote v1.5.2
+go: finding rsc.io/sampler v1.3.0
+go: finding golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c
+go: downloading rsc.io/sampler v1.3.0
+go: extracting rsc.io/sampler v1.3.0
+go: downloading golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c
+go: extracting golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c
+PASS
+ok      example.com/hello    0.023s
+$
+</code></pre><p>go 命令通过使用 go.mod 中列出的特定依赖模块版本来解析导入. 当遇到 go.mod 中任何模块未提供的软件包导入时, go 命令会自动查找包含该软件包的模块, 并将其最新版本添加到 go.mod 中.(&ldquo;最新&rdquo; 被定义为最新的标记稳定版(非<a href=https://semver.org/#spec-item-9>预发行版</a>), 或者最新的标记预发布版本, 或者最新的未标记版本) 在我们的示例中, go test 将新导入 rsc.io/quote 解析为模块 rsc.io/quote v1.5.2. 它还下载了 rsc.io/quote 使用的两个依赖项, 即 rsc.io/sampler 和 golang.org/x/text. go.mod 文件中只记录了直接依赖关系:</p><pre tabindex=0><code>$ cat go.mod
+module example.com/hello
+
+go 1.12
+
+require rsc.io/quote v1.5.2
+$
+</code></pre><p>第二个 go 测试命令不会重复这项工作, 因为 go.mod 现在是最新的, 下载的模块在本地缓存(在 $GOPATH/pkg/mod中):</p><pre tabindex=0><code>$ go test
+PASS
+ok      example.com/hello    0.020s
+$
+</code></pre><p>请注意, 虽然 go 命令可以快速轻松地添加新的依赖项, 但它并非没有成本. 现在, 你的模块依赖于临界区的新依赖关系, 例如正确性, 安全性和适当的许可, 仅举几例. 有关更多注意事项, 请参阅 Russ Cox 的博客文章"<a href=https://research.swtch.com/deps>我们的软件依赖性问题</a>".</p><p>如上所述, 添加一个直接依赖通常也会带来其他间接依赖. go list -m all 命令列出当前模块及其所有依赖项:</p><pre tabindex=0><code>$ go list -m all
+example.com/hello
+golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c
+rsc.io/quote v1.5.2
+rsc.io/sampler v1.3.0
+$
+</code></pre><p>在 go list 输出中, 当前模块(也称为主模块)始终是第一行, 后面是按模块路径排序的依赖项.</p><p>golang.org/x/text 版本 v0.0.0-20170915032832-14c0d48ead0c 是<a href=https://golang.org/cmd/go/#hdr-Pseudo_versions>伪版本</a>的示例, 它是特定无标记提交的 go 命令的版本语法.</p><p>除了 go.mod 之外, go 命令还维护一个名为 go.sum 的文件, 其中包含特定模块版本内容的预期<a href=https://golang.org/cmd/go/#hdr-Module_downloading_and_verification>加密哈希</a>:</p><pre tabindex=0><code>$ cat go.sum
+golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c h1:qgOY6WgZO...
+golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c/go.mod h1:Nq...
+rsc.io/quote v1.5.2 h1:w5fcysjrx7yqtD/aO+QwRjYZOKnaM9Uh2b40tElTs3...
+rsc.io/quote v1.5.2/go.mod h1:LzX7hefJvL54yjefDEDHNONDjII0t9xZLPX...
+rsc.io/sampler v1.3.0 h1:7uVkIFmeBqHfdjD+gZwtXXI+RODJ2Wc4O7MPEh/Q...
+rsc.io/sampler v1.3.0/go.mod h1:T1hPZKmBbMNahiBKFy5HrXp6adAjACjK9...
+$
+</code></pre><p>go 命令使用 go.sum 文件来确保这些模块的未来下载与第一次下载相同, 以保证你项目所依赖的模块不会出现意外更改, 无论是出于恶意, 偶然还是其他原因. go.mod 和 go.sum 都应检入版本控制.</p><h2 id=升级依赖>升级依赖</h2><p>使用 Go 模块, 版本使用语义版本标记引用. 语义版本包含三个部分: major, minor 和 patch. 例如, 对于 v0.1.2, 主要版本为 0, 次要版本为 1, 补丁版本为 2. 让我们来看看几个小版本的升级. 在下一节中, 我们将考虑进行主要版本升级.</p><p>从 go list -m all 的输出中, 我们可以看到我们正在使用 golang.org/x/text 的无标记版本. 让我们升级到最新的标记版本并测试是否一切仍然奏效:</p><pre tabindex=0><code>$ go get golang.org/x/text
+go: finding golang.org/x/text v0.3.0
+go: downloading golang.org/x/text v0.3.0
+go: extracting golang.org/x/text v0.3.0
+$ go test
+PASS
+ok      example.com/hello    0.013s
+$
+</code></pre><p>哇噢! 都通过了. 让我们再看一下 go list -m all 和 go.mod 文件:</p><pre tabindex=0><code>$ go list -m all
+example.com/hello
+golang.org/x/text v0.3.0
+rsc.io/quote v1.5.2
+rsc.io/sampler v1.3.0
+$ cat go.mod
+module example.com/hello
+
+go 1.12
+
+require (
+    golang.org/x/text v0.3.0 // indirect
+    rsc.io/quote v1.5.2
+)
+$
+</code></pre><p>golang.org/x/text 包已升级到最新的标记版本(v0.3.0). go.mod 文件也已更新到指定的 v0.3.0. indirect 注释表示此模块不直接使用依赖关系, 而是仅由其他模块依赖关系间接使用. 有关详细信息, 请参阅 go help modules.</p><p>现在让我们尝试升级 rsc.io/sampler 次要版本. 通过运行 go get 和 running tests 以相同的方式启动:</p><pre tabindex=0><code>$ go get rsc.io/sampler
+go: finding rsc.io/sampler v1.99.99
+go: downloading rsc.io/sampler v1.99.99
+go: extracting rsc.io/sampler v1.99.99
+$ go test
+--- FAIL: TestHello (0.00s)
+    hello_test.go:8: Hello() = &#34;99 bottles of beer on the wall, 99 bottles of beer, ...&#34;, want &#34;Hello, world.&#34;
+FAIL
+exit status 1
+FAIL    example.com/hello    0.014s
+$
+</code></pre><p>呃, 哦! 测试失败表明最新版本的 rsc.io/sampler 与我们的用法不兼容. 让我们列出该模块的可用标记版本:</p><pre tabindex=0><code>$ go list -m -versions rsc.io/sampler
+rsc.io/sampler v1.0.0 v1.2.0 v1.2.1 v1.3.0 v1.3.1 v1.99.99
+$
+</code></pre><p>我们一直在使用 v1.3.0; v1.99.99 显然不好. 也许我们可以尝试使用 v1.3.1 代替:</p><pre tabindex=0><code>$ go get rsc.io/sampler@v1.3.1
+go: finding rsc.io/sampler v1.3.1
+go: downloading rsc.io/sampler v1.3.1
+go: extracting rsc.io/sampler v1.3.1
+$ go test
+PASS
+ok      example.com/hello    0.022s
+$
+</code></pre><p>请注意 go get 参数中的显式 @v1.3.1. 通常, 传递给 go get 的每个参数都可以采用显式版本; 默认值为 @latest, 它解析为之前定义的最新版本.</p><h2 id=添加一个新的大版本依赖>添加一个新的大版本依赖</h2><p>让我们为我们的包添加一个新函数: func Proverb 通过调用 quote.Concurrency 返回一个 Go 并发谚语, 该函数由模块 rsc.io/quote/v3 提供. 首先我们更新 hello.go 以添加新功能:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>hello</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> (
+</span></span><span style=display:flex><span>    <span style=color:#e6db74>&#34;rsc.io/quote&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>quoteV3</span> <span style=color:#e6db74>&#34;rsc.io/quote/v3&#34;</span>
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>Hello</span>() <span style=color:#66d9ef>string</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>quote</span>.<span style=color:#a6e22e>Hello</span>()
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>Proverb</span>() <span style=color:#66d9ef>string</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>quoteV3</span>.<span style=color:#a6e22e>Concurrency</span>()
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>然后我们为 hello_test.go 添加一个测试:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>TestProverb</span>(<span style=color:#a6e22e>t</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>testing</span>.<span style=color:#a6e22e>T</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>want</span> <span style=color:#f92672>:=</span> <span style=color:#e6db74>&#34;Concurrency is not parallelism.&#34;</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> <span style=color:#a6e22e>got</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>Proverb</span>(); <span style=color:#a6e22e>got</span> <span style=color:#f92672>!=</span> <span style=color:#a6e22e>want</span> {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>t</span>.<span style=color:#a6e22e>Errorf</span>(<span style=color:#e6db74>&#34;Proverb() = %q, want %q&#34;</span>, <span style=color:#a6e22e>got</span>, <span style=color:#a6e22e>want</span>)
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>然后我们可以测试我们的代码:</p><pre tabindex=0><code>$ go test
+go: finding rsc.io/quote/v3 v3.1.0
+go: downloading rsc.io/quote/v3 v3.1.0
+go: extracting rsc.io/quote/v3 v3.1.0
+PASS
+ok      example.com/hello    0.024s
+$
+</code></pre><p>请注意, 我们的模块现在依赖 rsc.io/quote 和 rsc.io/quote/v3:</p><pre tabindex=0><code>$ go list -m rsc.io/q...
+rsc.io/quote v1.5.2
+rsc.io/quote/v3 v3.1.0
+$
+</code></pre><p>Go模块的每个不同主要版本(v1, v2等)使用不同的模块路径: 从 v2 开始, 路径必须以主要版本号结尾. 在该示例中, rsc.io/quote 的 v3 不再是 rsc.io/quote: 相反, 它由模块路径 rsc.io/quote/v3 标识. 此约定称为<a href=https://research.swtch.com/vgo-import>语义导入版本控制</a>, 它为不兼容的包(具有不同主要版本的包)提供不同的名称. 相比之下, rsc.io/quote 的 v1.6.0 应该与 v1.5.2 向后兼容, 因此它重用 rsc.io/quote 这个名称. (在上一节中, rsc.io/sampler v1.99.99 应该与 rsc.io/sampler v1.3.0 向后兼容, 但是有关模块行为的错误或不正确的客户端假设都可能发生.)</p><p>go 命令允许构建包含任何特定模块路径的最多一个版本, 最多意味着每个主要版本之一: 一个 rsc.io/quote, 一个 rsc.io/quote/v2, 一个 rsc.io/quote/v3, 依此类推. 这为模块作者提供了关于单个模块路径可能重复的明确规则: 同时使用 rsc.io/quote v1.5.2 和 rsc.io/quote v1.6.0 构建程序是不可能的. 同时, 允许模块的不同主要版本(因为它们具有不同的路径)使模块使用者能够以递增方式升级到新的主要版本. 在这个例子中, 我们想使用 rsc/quote/v3 v3.1.0 中的 quote.Concurrency, 但尚未准备好从 rsc.io/quote v1.5.2 迁移. 在大型程序或代码库中, 逐步迁移的能力尤为重要.</p><h2 id=将依赖升级到新的主要版本>将依赖升级到新的主要版本</h2><p>让我们完成从使用 rsc.io/quote 到仅使用 rsc.io/quote/v3 的转换. 由于主要版本更改, 我们应该期望某些 API 可能已经以不兼容的方式被删除, 重命名或以其他方式更改. 阅读文档, 我们可以看到 Hello 已成为 HelloV3:</p><pre tabindex=0><code>$ go doc rsc.io/quote/v3
+package quote // import &#34;rsc.io/quote/v3&#34;
+
+Package quote collects pithy sayings.
+
+func Concurrency() string
+func GlassV3() string
+func GoV3() string
+func HelloV3() string
+func OptV3() string
+$
+</code></pre><p>我们可以更新 hello.go 中 quote.Hello(), 以使用 quoteV3.HelloV3():</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>hello</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> <span style=color:#a6e22e>quoteV3</span> <span style=color:#e6db74>&#34;rsc.io/quote/v3&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>Hello</span>() <span style=color:#66d9ef>string</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>quoteV3</span>.<span style=color:#a6e22e>HelloV3</span>()
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>Proverb</span>() <span style=color:#66d9ef>string</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>quoteV3</span>.<span style=color:#a6e22e>Concurrency</span>()
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>然后我们不再需要重命名的导入, 所以可以撤消:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>hello</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> <span style=color:#e6db74>&#34;rsc.io/quote/v3&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>Hello</span>() <span style=color:#66d9ef>string</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>quote</span>.<span style=color:#a6e22e>HelloV3</span>()
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>Proverb</span>() <span style=color:#66d9ef>string</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>quote</span>.<span style=color:#a6e22e>Concurrency</span>()
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>让我们重新运行测试以确保一切正常:</p><pre tabindex=0><code>$ go test
+PASS
+ok      example.com/hello       0.014s
+</code></pre><h2 id=移除未使用的依赖>移除未使用的依赖</h2><p>我们已经删除了对 rsc.io/quote 的使用, 但它仍然在 go list -m all 和 go.mod 文件中:</p><pre tabindex=0><code>$ go list -m all
+example.com/hello
+golang.org/x/text v0.3.0
+rsc.io/quote v1.5.2
+rsc.io/quote/v3 v3.1.0
+rsc.io/sampler v1.3.1
+$ cat go.mod
+module example.com/hello
+
+go 1.12
+
+require (
+    golang.org/x/text v0.3.0 // indirect
+    rsc.io/quote v1.5.2
+    rsc.io/quote/v3 v3.0.0
+    rsc.io/sampler v1.3.1 // indirect
+)
+$
+</code></pre><p>为什么? 因为构建一个单独的包, 比如 go build 或 go test, 可以很容易地判断什么时候缺少并且需要添加, 但是不知道什么时候可以安全地删除. 只有在检查模块中的所有包以及这些包的所有可能的构建标记组合之后, 才能删除依赖. 普通的构建命令不会加载此信息, 因此无法安全地删除依赖.</p><p>go mod tidy 命令清除这些未使用的依赖:</p><pre tabindex=0><code>$ go mod tidy
+$ go list -m all
+example.com/hello
+golang.org/x/text v0.3.0
+rsc.io/quote/v3 v3.1.0
+rsc.io/sampler v1.3.1
+$ cat go.mod
+module example.com/hello
+
+go 1.12
+
+require (
+    golang.org/x/text v0.3.0 // indirect
+    rsc.io/quote/v3 v3.1.0
+    rsc.io/sampler v1.3.1 // indirect
+)
+
+$ go test
+PASS
+ok      example.com/hello    0.020s
+$
+</code></pre><h2 id=结论>结论</h2><p>Go 模块是 Go 中依赖管理的未来. 现在, 所有支持的 Go 版本(即 Go 1.11 和 Go 1.12)都提供了模块功能.</p><p>这篇文章介绍了使用 Go 模块的工作流程:</p><ul><li>go mod init 创建一个新模块, 初始化描述它的 go.mod 文件.</li><li>go build, go test 和其他包构建​​命令根据需要为 go.mod 添加新的依赖.</li><li>go list -m all 打印当前模块的依赖.</li><li>go get 更改所需的依赖版本(或添加新的依赖).</li><li>go mod tidy 移除未使用的依赖.</li></ul><p>我们鼓励你开始在本地开发中使用模块, 并将 go.mod 和 go.sum 文件添加到项目中. 为了提供反馈并帮助塑造 Go 中依赖管理的未来, 请向我们发送<a href=https://golang.org/issue/new>错误报告</a>或<a href=https://golang.org/wiki/ExperienceReports>体验报告</a>.</p><p>感谢您的所有反馈和帮助改进模块.</p><p><em>作者: Tyler Bui-Palsulich, Eno Compton</em></p></div><div id=disqus_thread></div><script>window.disqus_config=function(){},function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById("disqus_thread").innerHTML="Disqus comments not available by default when the website is previewed locally.";return}var t=document,e=t.createElement("script");e.async=!0,e.src="//douglarek.disqus.com/embed.js",e.setAttribute("data-timestamp",+new Date),(t.head||t.body).appendChild(e)}()</script><noscript>Please enable JavaScript to view the <a href=https://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a><footer class=content__footer></footer></section><section class=page__aside><div class=aside__content><p>2019-03-27</p><hr>On this page:<nav id=TableOfContents><ul><li><a href=#引言>引言</a></li><li><a href=#创建一个新的模块>创建一个新的模块</a></li><li><a href=#添加一个依赖>添加一个依赖</a></li><li><a href=#升级依赖>升级依赖</a></li><li><a href=#添加一个新的大版本依赖>添加一个新的大版本依赖</a></li><li><a href=#将依赖升级到新的主要版本>将依赖升级到新的主要版本</a></li><li><a href=#移除未使用的依赖>移除未使用的依赖</a></li><li><a href=#结论>结论</a></li></ul></nav></div></section><footer class=page__footer><p></p><br><br><p class=copyright>Copyright © 2025 Leo Douglas</p></footer></div></body></html>

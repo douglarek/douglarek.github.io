@@ -1,0 +1,180 @@
+<!doctype html><html lang=zh><head><title>Go 命名返回值的好处 &ndash; Code talks</title><meta name=viewport content="width=device-width,initial-scale=1"><meta charset=UTF-8><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin=anonymous referrerpolicy=no-referrer><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/academicons/1.9.4/css/academicons.min.css integrity="sha512-IW0nhlW5MgNydsXJO40En2EoCkTTjZhI3yuODrZIc8cQ4h1XcF53PsqDHa09NqnkXuIe0Oiyyj171BqZFwISBw==" crossorigin=anonymous referrerpolicy=no-referrer><link rel=stylesheet href=/css/palettes/base16-dark.css><link rel=stylesheet href=/css/risotto.css><link rel=stylesheet href=/css/custom.css><link rel=icon href=/favicon.ico><meta property="og:title" content="Go 命名返回值的好处 &ndash; Code talks"><meta property="og:url" content="/post/golang-internals-part-2-nice-benefits-of-named-return-values/"><meta property="og:locale" content="zh-CN"><script async src="https://www.googletagmanager.com/gtag/js?id=G-4TVXFV2XZM%20"></script><script>var dnt,doNotTrack=!1;if(!1&&(dnt=navigator.doNotTrack||window.doNotTrack||navigator.msDoNotTrack,doNotTrack=dnt=="1"||dnt=="yes"),!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-4TVXFV2XZM ")}</script></head><body><div class=page><header class=page__header><nav class="page__nav main-nav"><ul><li class=nomarker><h1 class=page__logo><a href=/ class=page__logo-inner>Code talks</a></h1></li><li class=main-nav__item><a class=nav-main-item href=/post title>Posts</a></li><li class=main-nav__item><a class=nav-main-item href=/tags title>Tags</a></li><li class=main-nav__item><a class=nav-main-item href=https://github.com/douglarek title>GitHub</a></li></ul></nav></header><section class=page__body><header class=content__header><h1>Go 命名返回值的好处</h1><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6649330439620894" crossorigin=anonymous></script></header><div class=content__body><p>本文翻译自 <a href=https://blog.minio.io/golang-internals-part-2-nice-benefits-of-named-return-values-1e95305c8687>Golang internals part 2: nice benefits of named return values</a>，版权归原作者所有。</p><p>你可能知道 Golang 提供了命名返回值的能力. 到目前为止在 <a href=https://github.com/minio/minio>minio</a> 中我们还没有使用这个功能, 但是这将会改变, 因为我们将在这个博客文章中解释一些隐藏的好处.</p><p>如果你像我们一样, 你可能会有相当数量的代码, 如下所示, 对于每一个 return 语句你都实例化一个新的对象, 以便返回一个&rsquo;默认&rsquo;值:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#66d9ef>type</span> <span style=color:#a6e22e>objectInfo</span> <span style=color:#66d9ef>struct</span> {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>arg1</span> <span style=color:#66d9ef>int64</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>arg2</span> <span style=color:#66d9ef>uint64</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>arg3</span> <span style=color:#66d9ef>string</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>arg4</span> []<span style=color:#66d9ef>int</span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>NoNamedReturnParams</span>(<span style=color:#a6e22e>i</span> <span style=color:#66d9ef>int</span>) (<span style=color:#a6e22e>objectInfo</span>) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>if</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>==</span> <span style=color:#ae81ff>1</span> {
+</span></span><span style=display:flex><span>		<span style=color:#75715e>// Do one thing</span>
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>return</span> <span style=color:#a6e22e>objectInfo</span>{}
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>if</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>==</span> <span style=color:#ae81ff>2</span> {
+</span></span><span style=display:flex><span>		<span style=color:#75715e>// Do another thing</span>
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>return</span> <span style=color:#a6e22e>objectInfo</span>{}
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>if</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>==</span> <span style=color:#ae81ff>3</span> {
+</span></span><span style=display:flex><span>		<span style=color:#75715e>// Do one more thing still</span>
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>return</span> <span style=color:#a6e22e>objectInfo</span>{}
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#75715e>// Normal return</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>return</span> <span style=color:#a6e22e>objectInfo</span>{}
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>如果你看一下 Golang 编译器生成的实际代码, 你将会得到如下的结果:</p><pre tabindex=0><code>&#34;&#34;.NoNamedReturnParams t=1 size=243 args=0x40 locals=0x0
+0x0000 	TEXT	&#34;&#34;.NoNamedReturnParams(SB), $0-64
+0x0000 	MOVQ	$0, &#34;&#34;.~r1+16(FP)
+0x0009 	LEAQ	&#34;&#34;.~r1+24(FP), DI
+0x000e 	XORPS	X0, X0
+0x0011 	ADDQ	$-16, DI
+0x0015 	DUFFZERO	$288
+0x0028 	MOVQ	&#34;&#34;.i+8(FP), AX
+0x002d 	CMPQ	AX, $1
+0x0031 	JEQ	$0, 199
+0x0037 	CMPQ	AX, $2
+0x003b 	JEQ	$0, 155
+0x003d 	CMPQ	AX, $3
+0x0041 	JNE	111
+0x0043 	MOVQ	&#34;&#34;.statictmp_2(SB), AX
+0x004a 	MOVQ	AX, &#34;&#34;.~r1+16(FP)
+0x004f 	LEAQ	&#34;&#34;.~r1+24(FP), DI
+0x0054 	LEAQ	&#34;&#34;.statictmp_2+8(SB), SI
+0x005b 	DUFFCOPY	$854
+0x006e 	RET
+0x006f 	MOVQ	&#34;&#34;.statictmp_3(SB), AX
+0x0076 	MOVQ	AX, &#34;&#34;.~r1+16(FP)
+0x007b 	LEAQ	&#34;&#34;.~r1+24(FP), DI
+0x0080 	LEAQ	&#34;&#34;.statictmp_3+8(SB), SI
+0x0087 	DUFFCOPY	$854
+0x009a 	RET
+0x009b 	MOVQ	&#34;&#34;.statictmp_1(SB), AX
+0x00a2 	MOVQ	AX, &#34;&#34;.~r1+16(FP)
+0x00a7 	LEAQ	&#34;&#34;.~r1+24(FP), DI
+0x00ac 	LEAQ	&#34;&#34;.statictmp_1+8(SB), SI
+0x00b3 	DUFFCOPY	$854
+0x00c6 	RET
+0x00c7 	MOVQ	&#34;&#34;.statictmp_0(SB), AX
+0x00ce 	MOVQ	AX, &#34;&#34;.~r1+16(FP)
+0x00d3 	LEAQ	&#34;&#34;.~r1+24(FP), DI
+0x00d8 	LEAQ	&#34;&#34;.statictmp_0+8(SB), SI
+0x00df 	DUFFCOPY	$854
+0x00f2 	RET
+</code></pre><p>一切都很好, 但这看起来是否有点重复? 你是对的. 实质上, 对于每个 return 语句, 要返回的对象或多或少被分配/初始化(或者通过 DUFFCOPY 宏更精确地复制).</p><p>毕竟这是我们通过在每种情况下都返回 objectInfo {} 的结果.</p><h2 id=命名返回值>命名返回值</h2><p>现在看看如果我们做一个非常简单的改变会发生什么, 本质上只是给返回值一个名字 (oi) 和使用 Golang 的&rsquo;裸体&rsquo;返回特性(为返回语句放弃参数, 虽然这不是严格要求, 稍后更多):</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>NamedReturnParams</span>(<span style=color:#a6e22e>i</span> <span style=color:#66d9ef>int</span>) (<span style=color:#a6e22e>oi</span> <span style=color:#a6e22e>objectInfo</span>) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>if</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>==</span> <span style=color:#ae81ff>1</span> {
+</span></span><span style=display:flex><span>		<span style=color:#75715e>// Do one thing</span>
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>return</span>
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>if</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>==</span> <span style=color:#ae81ff>2</span> {
+</span></span><span style=display:flex><span>		<span style=color:#75715e>// Do another thing</span>
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>return</span>
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>if</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>==</span> <span style=color:#ae81ff>3</span> {
+</span></span><span style=display:flex><span>		<span style=color:#75715e>// Do one more thing still</span>
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>return</span>
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#75715e>// Normal return</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>return</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>再看看编译器生成的代码, 我们得到以下结果:</p><pre tabindex=0><code>&#34;&#34;.NamedReturnParams t=1 size=67 args=0x40 locals=0x0
+	0x0000 	TEXT	&#34;&#34;.NamedReturnParams(SB), $0-64
+	0x0000 	MOVQ	$0, &#34;&#34;.oi+16(FP)
+	0x0009 	LEAQ	&#34;&#34;.oi+24(FP), DI
+	0x000e 	XORPS	X0, X0
+	0x0011 	ADDQ	$-16, DI
+	0x0015 	DUFFZERO	$288
+	0x0028 	MOVQ	&#34;&#34;.i+8(FP), AX
+	0x002d 	CMPQ	AX, $1
+	0x0031 	JEQ	$0, 66
+	0x0033 	CMPQ	AX, $2
+	0x0037 	JEQ	$0, 65
+	0x0039 	CMPQ	AX, $3
+	0x003d 	JNE	64
+	0x003f 	RET
+	0x0040 	RET
+	0x0041 	RET
+	0x0042 	RET
+</code></pre><p>这是一个非常大的差异, 所有四个对象初始化和 DUFFCOPY 这些东西消失(甚至对于这个微不足道的情况)了. 它将函数的大小从 243 减小到 67 字节. 另外作为一个额外的好处, 你将省去一些 CPU 周期退出, 因为不需要做任何事情来设置返回值.</p><p>请注意, 如果您不喜欢或偏好 Golang 提供的裸返回, 则可以使用 return oi, 同时还可以获得相同的好处, 如下所示:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#66d9ef>if</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>==</span> <span style=color:#ae81ff>1</span> {
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>return</span> <span style=color:#a6e22e>oi</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h2 id=minio-服务器中真实世界的例子>minio 服务器中真实世界的例子</h2><p>我们拿 minio server 的例子更进一步:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#75715e>// parse credentialHeader string into its structured form.</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>parseCredentialHeader</span>(<span style=color:#a6e22e>credElement</span> <span style=color:#66d9ef>string</span>) <span style=color:#a6e22e>credentialHeader</span> {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>creds</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>strings</span>.<span style=color:#a6e22e>Split</span>(<span style=color:#a6e22e>strings</span>.<span style=color:#a6e22e>TrimSpace</span>(<span style=color:#a6e22e>credElement</span>), <span style=color:#e6db74>&#34;=&#34;</span>)
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>if</span> len(<span style=color:#a6e22e>creds</span>) <span style=color:#f92672>!=</span> <span style=color:#ae81ff>2</span> {
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>return</span> <span style=color:#a6e22e>credentialHeader</span>{}
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>if</span> <span style=color:#a6e22e>creds</span>[<span style=color:#ae81ff>0</span>] <span style=color:#f92672>!=</span> <span style=color:#e6db74>&#34;Credential&#34;</span> {
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>return</span> <span style=color:#a6e22e>credentialHeader</span>{}
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>credElements</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>strings</span>.<span style=color:#a6e22e>Split</span>(<span style=color:#a6e22e>strings</span>.<span style=color:#a6e22e>TrimSpace</span>(<span style=color:#a6e22e>creds</span>[<span style=color:#ae81ff>1</span>]), <span style=color:#e6db74>&#34;/&#34;</span>)
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>if</span> len(<span style=color:#a6e22e>credElements</span>) <span style=color:#f92672>!=</span> <span style=color:#ae81ff>5</span> {
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>return</span> <span style=color:#a6e22e>credentialHeader</span>{}
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>if</span> <span style=color:#66d9ef>false</span> <span style=color:#75715e>/*!isAccessKeyValid(credElements[0])*/</span> {
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>return</span> <span style=color:#a6e22e>credentialHeader</span>{}
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>	<span style=color:#75715e>// Save access key id.</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>cred</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>credentialHeader</span>{
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>accessKey</span>: <span style=color:#a6e22e>credElements</span>[<span style=color:#ae81ff>0</span>],
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>e</span> <span style=color:#66d9ef>error</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>cred</span>.<span style=color:#a6e22e>scope</span>.<span style=color:#a6e22e>date</span>, <span style=color:#a6e22e>e</span> = <span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Parse</span>(<span style=color:#a6e22e>yyyymmdd</span>, <span style=color:#a6e22e>credElements</span>[<span style=color:#ae81ff>1</span>])
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>if</span> <span style=color:#a6e22e>e</span> <span style=color:#f92672>!=</span> <span style=color:#66d9ef>nil</span> {
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>return</span> <span style=color:#a6e22e>credentialHeader</span>{}
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>cred</span>.<span style=color:#a6e22e>scope</span>.<span style=color:#a6e22e>region</span> = <span style=color:#a6e22e>credElements</span>[<span style=color:#ae81ff>2</span>]
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>if</span> <span style=color:#a6e22e>credElements</span>[<span style=color:#ae81ff>3</span>] <span style=color:#f92672>!=</span> <span style=color:#e6db74>&#34;s3&#34;</span> {
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>return</span> <span style=color:#a6e22e>credentialHeader</span>{}
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>cred</span>.<span style=color:#a6e22e>scope</span>.<span style=color:#a6e22e>service</span> = <span style=color:#a6e22e>credElements</span>[<span style=color:#ae81ff>3</span>]
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>if</span> <span style=color:#a6e22e>credElements</span>[<span style=color:#ae81ff>4</span>] <span style=color:#f92672>!=</span> <span style=color:#e6db74>&#34;aws4_request&#34;</span> {
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>return</span> <span style=color:#a6e22e>credentialHeader</span>{}
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>cred</span>.<span style=color:#a6e22e>scope</span>.<span style=color:#a6e22e>request</span> = <span style=color:#a6e22e>credElements</span>[<span style=color:#ae81ff>4</span>]
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>return</span> <span style=color:#a6e22e>cred</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>深入汇编我们得到以下的函数头:</p><pre tabindex=0><code>&#34;&#34;.parseCredentialHeader t=1 size=1157 args=0x68 locals=0xb8
+</code></pre><p>如果我们修改代码来使用一个命名返回参数(下面的第二个源代码块), 请检查函数的大小:</p><pre tabindex=0><code>&#34;&#34;.parseCredentialHeader t=1 size=863 args=0x68 locals=0xb8 
+</code></pre><p>它从总共 1150 个字节中删除了 300 个字节, 这对于源代码这样一个最小的改变还不错. 取决于你从哪里来，你也可能更喜欢源代码的更干净的外观:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#75715e>// parse credentialHeader string into its structured form.</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>parseCredentialHeader</span>(<span style=color:#a6e22e>credElement</span> <span style=color:#66d9ef>string</span>) (<span style=color:#a6e22e>ch</span> <span style=color:#a6e22e>credentialHeader</span>) {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>creds</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>strings</span>.<span style=color:#a6e22e>Split</span>(<span style=color:#a6e22e>strings</span>.<span style=color:#a6e22e>TrimSpace</span>(<span style=color:#a6e22e>credElement</span>), <span style=color:#e6db74>&#34;=&#34;</span>)
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>if</span> len(<span style=color:#a6e22e>creds</span>) <span style=color:#f92672>!=</span> <span style=color:#ae81ff>2</span> {
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>return</span>
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>if</span> <span style=color:#a6e22e>creds</span>[<span style=color:#ae81ff>0</span>] <span style=color:#f92672>!=</span> <span style=color:#e6db74>&#34;Credential&#34;</span> {
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>return</span>
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>credElements</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>strings</span>.<span style=color:#a6e22e>Split</span>(<span style=color:#a6e22e>strings</span>.<span style=color:#a6e22e>TrimSpace</span>(<span style=color:#a6e22e>creds</span>[<span style=color:#ae81ff>1</span>]), <span style=color:#e6db74>&#34;/&#34;</span>)
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>if</span> len(<span style=color:#a6e22e>credElements</span>) <span style=color:#f92672>!=</span> <span style=color:#ae81ff>5</span> {
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>return</span>
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>if</span> <span style=color:#66d9ef>false</span> <span style=color:#75715e>/*!isAccessKeyValid(credElements[0])*/</span> {
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>return</span>
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>	<span style=color:#75715e>// Save access key id.</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>cred</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>credentialHeader</span>{
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>accessKey</span>: <span style=color:#a6e22e>credElements</span>[<span style=color:#ae81ff>0</span>],
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>e</span> <span style=color:#66d9ef>error</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>cred</span>.<span style=color:#a6e22e>scope</span>.<span style=color:#a6e22e>date</span>, <span style=color:#a6e22e>e</span> = <span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Parse</span>(<span style=color:#a6e22e>yyyymmdd</span>, <span style=color:#a6e22e>credElements</span>[<span style=color:#ae81ff>1</span>])
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>if</span> <span style=color:#a6e22e>e</span> <span style=color:#f92672>!=</span> <span style=color:#66d9ef>nil</span> {
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>return</span>
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>cred</span>.<span style=color:#a6e22e>scope</span>.<span style=color:#a6e22e>region</span> = <span style=color:#a6e22e>credElements</span>[<span style=color:#ae81ff>2</span>]
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>if</span> <span style=color:#a6e22e>credElements</span>[<span style=color:#ae81ff>3</span>] <span style=color:#f92672>!=</span> <span style=color:#e6db74>&#34;s3&#34;</span> {
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>return</span>
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>cred</span>.<span style=color:#a6e22e>scope</span>.<span style=color:#a6e22e>service</span> = <span style=color:#a6e22e>credElements</span>[<span style=color:#ae81ff>3</span>]
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>if</span> <span style=color:#a6e22e>credElements</span>[<span style=color:#ae81ff>4</span>] <span style=color:#f92672>!=</span> <span style=color:#e6db74>&#34;aws4_request&#34;</span> {
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>return</span>
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>cred</span>.<span style=color:#a6e22e>scope</span>.<span style=color:#a6e22e>request</span> = <span style=color:#a6e22e>credElements</span>[<span style=color:#ae81ff>4</span>]
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>return</span> <span style=color:#a6e22e>cred</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>请注意, 实际上 ch 变量是一个正常的局部变量, 就像在函数中定义的任何其他局部变量一样. 因此, 您可以将其值从默认的&rsquo;零&rsquo;状态更改(当然, 修改后的版本将在退出时返回).</p><h2 id=命名返回值的其他用法>命名返回值的其他用法</h2><p>正如几位人士指出的那样, 指定返回值的另一个好处是可以在闭包中使用(即 defer 语句). 因此, 可以在作为 defer 语句的结果调用的函数中访问指定的返回值, 并相应地进行操作.</p><h2 id=关于这个系列>关于这个系列</h2><p>如果你错过了本系列的第一部分, 这里是一个链接:</p><ul><li>关于 <a href=https://blog.minio.io/golang-internals-part-1-autogenerated-functions-and-how-to-get-rid-of-them-6ca4749cc236>autogenerated</a> 函数</li></ul><h2 id=结论>结论</h2><p>所以我们将逐渐采用命名的返回值, 无论是新代码还是现有代码.</p><p>事实上, 我们也在研究是否可以开发一些小工具来帮助或自动化这个过程. 按照 gofmt 的思路思考, 然后自动修改源代码以进行上面所述的更改. 特别是在返回值还没有被命名的情况下(因此实用程序必须给它一个名字), 这个返回变量在现有的源代码中以任何方式改变都是不可能的, ch (在上面列表的情况下)不会导致程序的任何功能变化.</p><p>所以请继续关注.</p><p>我们希望这篇文章能对你有所帮助, 并提供一些關於 Go 如何在內部運行以及如何改進 Golang 代碼的新見解.</p><h2 id=更新>更新</h2><p>已经有一个 Golang <a href=https://github.com/golang/go/issues/20859>issue</a> 来优化编译器为上述情况生成相同的代码, 这将是一件好事.</p></div><div id=disqus_thread></div><script>window.disqus_config=function(){},function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById("disqus_thread").innerHTML="Disqus comments not available by default when the website is previewed locally.";return}var t=document,e=t.createElement("script");e.async=!0,e.src="//douglarek.disqus.com/embed.js",e.setAttribute("data-timestamp",+new Date),(t.head||t.body).appendChild(e)}()</script><noscript>Please enable JavaScript to view the <a href=https://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a><footer class=content__footer></footer></section><section class=page__aside><div class=aside__content><p>2018-01-22</p><hr>On this page:<nav id=TableOfContents><ul><li><a href=#命名返回值>命名返回值</a></li><li><a href=#minio-服务器中真实世界的例子>minio 服务器中真实世界的例子</a></li><li><a href=#命名返回值的其他用法>命名返回值的其他用法</a></li><li><a href=#关于这个系列>关于这个系列</a></li><li><a href=#结论>结论</a></li><li><a href=#更新>更新</a></li></ul></nav></div></section><footer class=page__footer><p></p><br><br><p class=copyright>Copyright © 2025 Leo Douglas</p></footer></div></body></html>

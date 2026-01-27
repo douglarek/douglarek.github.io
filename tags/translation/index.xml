@@ -1,0 +1,677 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Translation on Code talks</title><link>/tags/translation/</link><description>Recent content in Translation on Code talks</description><generator>Hugo</generator><language>zh-CN</language><copyright> Copyright © 2025 Leo Douglas</copyright><lastBuildDate>Tue, 27 Jan 2026 00:00:00 +0000</lastBuildDate><atom:link href="/tags/translation/index.xml" rel="self" type="application/rss+xml"/><item><title>Java 的面向数据编程：超越 Records</title><link>/post/beyond-records-translation/</link><pubDate>Tue, 27 Jan 2026 00:00:00 +0000</pubDate><guid>/post/beyond-records-translation/</guid><description>&lt;p>本文翻译自 &lt;a href="https://openjdk.org/projects/amber/design-notes/beyond-records">Data-Oriented Programming for Java: Beyond Records&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;h2 id="引言">引言&lt;/h2>
+&lt;p>每个人都喜欢 records；它们允许我们创建浅层不可变的数据持有类——我们可以将其视为&amp;quot;具名元组&amp;quot;——这些类派生自简洁的状态描述，并且可以通过模式匹配解构 records。但是 records 有严格的约束，并非所有数据持有类都符合 records 的限制。也许它们有一些可变状态，或者有不属于状态描述的派生或缓存状态，或者它们的表示和 API 不完全匹配，或者它们需要在层次结构中分解状态。在这些类中，即使它们也可能是&amp;quot;数据持有者&amp;quot;，用户体验就像从悬崖上掉下来一样。即使与 record 理想有一点点偏差，也意味着必须回到白板重新开始，编写显式的构造函数声明、访问器方法声明和 Object 方法实现——并且放弃通过模式匹配进行解构。&lt;/p>
+&lt;p>从 records 设计过程开始，我们就牢记一个目标：让更广泛的类能够获得&amp;quot;record 的好处&amp;quot;：减少声明负担、参与解构，以及即将推出的&lt;a href="https://openjdk.org/jeps/468">重构（reconstruction）&lt;/a>。在设计 records 期间，我们还探索了许多较弱的语义模型，这些模型可以提供更大的灵活性。虽然当时它们都未能达到 &lt;em>records 的目标&lt;/em>，但我们可以施加一组较弱的语义约束，允许更大的灵活性，同时仍然支持我们想要的特性，以及与偏离 record 理想的程度相称的某种程度的语法简洁性，而不会出现&amp;quot;掉下悬崖&amp;quot;的行为。&lt;/p>
+&lt;p>Records、sealed 类以及使用 record 模式进行解构构成了 Java&amp;quot;面向数据编程&amp;quot;的第一个特性弧。在考虑了众多设计思想之后，我们现在准备推进下一个&amp;quot;面向数据编程&amp;quot;特性弧：&lt;em>carrier 类&lt;/em>（以及接口）。&lt;/p>
+&lt;h2 id="超越-record-模式">超越 Record 模式&lt;/h2>
+&lt;p>Record 模式允许将 record 实例解构为其组件。Record 模式可以在 &lt;code>instanceof&lt;/code> 和 &lt;code>switch&lt;/code> 中使用，并且当 record 模式也是穷尽的时，将可以在即将推出的 &lt;a href="https://mail.openjdk.org/pipermail/amber-spec-experts/2026-January/004306.html">&lt;em>模式赋值语句&lt;/em>&lt;/a> 特性中使用。&lt;/p>
+&lt;p>在探索&amp;quot;类如何能够参与与 records 相同类型的解构&amp;quot;这个问题时，我们最初关注的是类中的一种新声明形式——&amp;ldquo;解构器（deconstructor）&amp;quot;——它作为构造函数的反向操作。正如构造函数接受组件值并产生聚合实例一样，解构器将接受聚合实例并恢复其组件值。&lt;/p>
+&lt;p>但随着这一探索的展开，更有趣的问题变成了：哪些类首先适合解构？这个问题的答案将我们引向了表达解构的不同方法。适合解构的类是那些像 records 一样，只不过是特定数据元组的载体。这不仅仅是类 &lt;em>拥有&lt;/em> 的东西，比如构造函数或方法，而是类 &lt;em>是什么&lt;/em>。因此，将解构描述为类的顶层属性更有意义。这反过来又带来了许多简化。&lt;/p>
+&lt;h2 id="状态描述的力量">状态描述的力量&lt;/h2>
+&lt;p>Records 是一个语义特性；它们只是偶然地简洁。但它们 &lt;em>确实&lt;/em> 简洁；当我们声明一个 record 时：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">record&lt;/span> &lt;span style="color:#a6e22e">Point&lt;/span>(&lt;span style="color:#66d9ef">int&lt;/span> x, &lt;span style="color:#66d9ef">int&lt;/span> y) {... }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>我们自动获得合理的 API（规范构造函数、解构模式、每个组件的访问器方法）和实现（字段、构造函数、访问器方法、Object 方法）。如果我们愿意，可以显式指定其中的大部分（字段除外），但大多数情况下我们不必这样做，因为默认值正是我们想要的。&lt;/p></description></item><item><title>JSpecify 空值用户指南</title><link>/post/jspecify-nullness-user-guide/</link><pubDate>Wed, 31 Dec 2025 00:00:00 +0000</pubDate><guid>/post/jspecify-nullness-user-guide/</guid><description>&lt;p>本文翻译自 &lt;a href="https://jspecify.dev/docs/user-guide/">Nullness User Guide&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>在 Java 代码中，表达式是否可能求值为 &lt;code>null&lt;/code> 通常只在自然语言中记录，甚至根本没有记录。JSpecify 的空值注解让程序员能够以一致且定义良好的方式表达 Java 代码的空值性。&lt;/p>
+&lt;p>JSpecify 定义了描述 Java 类型是否包含 &lt;code>null&lt;/code> 值的注解。这些注解对以下方面很有用（例如）:&lt;/p>
+&lt;ul>
+&lt;li>阅读代码的程序员,&lt;/li>
+&lt;li>帮助开发人员避免 &lt;code>NullPointerException&lt;/code> 的工具,&lt;/li>
+&lt;li>执行运行时检查和测试生成的工具,以及&lt;/li>
+&lt;li>文档系统。&lt;/li>
+&lt;/ul>
+&lt;h2 id="java-变量是引用">Java 变量是引用&lt;/h2>
+&lt;p>在 Java 中，所有非基本类型变量要么是 &lt;code>null&lt;/code>，要么是对对象的引用。我们经常认为像 &lt;code>String x&lt;/code> 这样的声明意味着 &lt;code>x&lt;/code> 是一个 &lt;code>String&lt;/code>，但它实际上意味着 &lt;code>x&lt;/code> &lt;em>要么&lt;/em>是 &lt;code>null&lt;/code> &lt;em>要么&lt;/em>是对实际 &lt;code>String&lt;/code> 对象的引用。JSpecify 为您提供了一种明确表达您真正含义的方法，即您是真的这样认为，还是您真的认为 &lt;code>x&lt;/code> 绝对是对 &lt;code>String&lt;/code> 对象的引用而不是 &lt;code>null&lt;/code>。&lt;/p>
+&lt;h2 id="类型和空值性">类型和空值性&lt;/h2>
+&lt;p>JSpecify 为您提供了规则，用于确定每种类型用法具有四种空值性中的哪一种:&lt;/p>
+&lt;ul>
+&lt;li>它可以包含 &lt;code>null&lt;/code>（它是&amp;quot;可空的&amp;quot;）。&lt;/li>
+&lt;li>它不会包含 &lt;code>null&lt;/code>（它是&amp;quot;非空的&amp;quot;）。&lt;/li>
+&lt;li>仅对类型变量：如果替换它的类型参数包含 &lt;code>null&lt;/code>，则它包含 &lt;code>null&lt;/code>（它具有&amp;quot;参数化空值性&amp;quot;）。&lt;/li>
+&lt;li>我们不知道它是否可以包含 &lt;code>null&lt;/code>（它具有&amp;quot;未指定的空值性&amp;quot;）。这相当于没有 JSpecify 注解的世界状态。&lt;/li>
+&lt;/ul>
+&lt;p>对于给定的变量 &lt;code>x&lt;/code>，如果 &lt;code>x&lt;/code> 可以是 &lt;code>null&lt;/code>，那么 &lt;code>x.getClass()&lt;/code> 是不安全的，因为它可能产生 &lt;code>NullPointerException&lt;/code>。如果 &lt;code>x&lt;/code> 不能是 &lt;code>null&lt;/code>，&lt;code>x.getClass()&lt;/code> 永远不会产生 &lt;code>NullPointerException&lt;/code>。如果我们不知道 &lt;code>x&lt;/code> 是否可以是 &lt;code>null&lt;/code>，我们就不知道 &lt;code>x.getClass()&lt;/code> 是否安全（至少就 JSpecify 而言）。&lt;/p></description></item><item><title>2025 年大语言模型回顾</title><link>/post/2025-llm-year-review/</link><pubDate>Fri, 19 Dec 2025 00:00:00 +0000</pubDate><guid>/post/2025-llm-year-review/</guid><description>&lt;p>本文翻译自 &lt;a href="https://karpathy.bearblog.dev/year-in-review-2025/">2025 LLM Year in Review&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>&lt;img src="/images/2025-llm-year-review-header.webp" alt="2025 LLM 年度回顾">&lt;/p>
+&lt;p>2025 年对于大语言模型（LLMs）来说，是进步强劲且充满变革的一年。以下是我个人认为值得关注且略显意外的&amp;quot;范式转变&amp;quot;清单——这些改变了整个领域格局，在概念上令我印象深刻。&lt;/p>
+&lt;h3 id="1-基于可验证奖励的强化学习rlvr">1. 基于可验证奖励的强化学习（RLVR）&lt;/h3>
+&lt;p>在 2025 年初，所有实验室的 LLM 生产栈看起来都是这样的：&lt;/p>
+&lt;ul>
+&lt;li>预训练（GPT-2/3，约 2020 年）&lt;/li>
+&lt;li>监督微调（InstructGPT，约 2022 年）以及&lt;/li>
+&lt;li>基于人类反馈的强化学习（RLHF，约 2022 年）&lt;/li>
+&lt;/ul>
+&lt;p>这是训练生产级 LLM 的稳定且经过验证的配方，持续了相当长的时间。2025 年，基于可验证奖励的强化学习（RLVR）作为新的主要阶段加入了这个组合。通过在多种环境（例如数学/代码谜题）中针对自动可验证的奖励训练 LLMs，模型自发地发展出对人类来说像&amp;quot;推理&amp;quot;的策略——它们学会将问题分解为中间计算步骤，并学习多种问题解决策略来回反复思考（参见 DeepSeek R1 论文的示例）。这些策略在之前的范式中很难实现，因为对 LLM 来说，最优的推理轨迹和恢复策略并不清晰——它必须通过针对奖励的优化来找到对自己有效的方法。&lt;/p>
+&lt;p>与 SFT 和 RLHF 阶段不同（两者都是相对较短/轻量的阶段，计算量较小的微调），RLVR 涉及针对客观（不可博弈）奖励函数的训练，允许更长时间的优化。运行 RLVR 被证明具有高性价比，这吞噬了原本用于预训练的计算资源。因此，2025 年的大部分能力进步是由 LLM 实验室消化这个新阶段的积压所定义的，总体而言，我们看到的是大小相近的 LLMs，但 RL 运行时间更长。这个新阶段的另一个独特之处是，我们获得了一个全新的调节旋钮（以及相关的缩放定律），通过生成更长的推理轨迹和增加&amp;quot;思考时间&amp;quot;来控制测试时计算的能力函数。OpenAI o1（2024 年末）是 RLVR 模型的首次演示，但 o3 的发布（2025 年初）是明显的转折点，你可以直观地感受到差异。&lt;/p>
+&lt;h3 id="2-幽灵与动物--参差不齐的智能">2. 幽灵与动物 / 参差不齐的智能&lt;/h3>
+&lt;p>2025 年是我（我认为整个行业也是如此）首次开始以更直观的方式内化 LLM 智能的&amp;quot;形态&amp;quot;。我们不是在&amp;quot;进化/培养动物&amp;quot;，而是在&amp;quot;召唤幽灵&amp;quot;。LLM 栈的一切都是不同的（神经架构、训练数据、训练算法，尤其是优化压力），所以我们在智能空间中得到非常不同的实体也就不足为奇了，用动物的视角来思考它们是不合适的。从监督比特的角度来看，人类神经网络被优化用于在丛林中部落的生存，但 LLM 神经网络被优化用于模仿人类的文本、在数学谜题中获得奖励，以及在 LM Arena 上获得人类的赞同。随着可验证领域允许 RLVR，LLMs 在这些领域附近的能力会&amp;quot;飙升&amp;quot;，并且总体上表现出有趣的参差不齐的性能特征——它们同时是一个天才博学者和一个困惑且认知能力受限的小学生，随时可能被越狱攻击欺骗以窃取你的数据。&lt;/p></description></item><item><title>Java 并行流</title><link>/post/parallel-streams/</link><pubDate>Thu, 11 Dec 2025 14:00:00 +0000</pubDate><guid>/post/parallel-streams/</guid><description>&lt;p>本文翻译自 &lt;a href="https://dev.java/learn/api/streams/parallel-streams/">Parallelizing Streams&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;h2 id="优化流计算">优化流计算&lt;/h2>
+&lt;p>Stream API 的一个非常令人兴奋的特性是流能够并行处理数据。使用 Stream API 并行处理数据非常简单，只需在任何现有流上调用 &lt;code>parallel()&lt;/code> 方法即可。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">int&lt;/span> parallelSum &lt;span style="color:#f92672">=&lt;/span> IntStream.&lt;span style="color:#a6e22e">range&lt;/span>(0, 10)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .&lt;span style="color:#a6e22e">parallel&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .&lt;span style="color:#a6e22e">sum&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>IO.&lt;span style="color:#a6e22e">println&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;Sum = &amp;#34;&lt;/span> &lt;span style="color:#f92672">+&lt;/span> parallelSum);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>运行此代码会得到以下结果。&lt;/p>
+&lt;pre tabindex="0">&lt;code>Sum = 45
+&lt;/code>&lt;/pre>&lt;p>这个求和实际上是并行计算的。不过在这么小的示例中，你可能不会注意到任何性能提升。&lt;/p>
+&lt;p>为什么要并行计算数据？可能是为了更快地得到计算结果。并行流会比顺序流更快地给出结果吗？这个问题的答案并不像听起来那么简单。在某些情况下是的，但在其他一些情况下，不幸的是，不会。尽管听起来令人失望，但并行流并不总是比顺序流快。&lt;/p>
+&lt;p>考虑到这一点，你应该谨慎：选择使用并行流不是一个可以轻易做出的决定。在考虑并行化之前，你需要问自己几个问题。&lt;/p>
+&lt;p>首先，问问自己，你需要它吗？你的应用程序中是否有未满足的性能要求？你确定性能问题来自你正在考虑并行计算的流处理吗？你计划如何衡量性能提升，以确保对这个特定计算并行化确实改善了应用程序的性能？&lt;/p>
+&lt;p>并行化会消耗更多的计算能力。你是否有空闲的 CPU 或 CPU 核心可以分配给这个计算？你能否在不减慢应用程序其余部分的情况下为计算分配更多 CPU 周期？&lt;/p>
+&lt;p>并行化会消耗线程。你是否有空闲线程可以分配给计算？如果你在 Web 服务器中运行的应用程序上工作，那么你的线程用于处理 HTTP 请求。你愿意将它们用于其他事情吗？&lt;/p>
+&lt;p>一旦你选择了并行化，那么你需要确保流计算的性能确实得到了改善。你应该在尽可能接近生产环境的上下文中测量这种性能提升。&lt;/p>
+&lt;p>在本教程中，我们涵盖了几个关键要素，这些要素将帮助你评估并行化可能带来的收益，以及一些应该让你对并行化保持警惕的其他要素。但归根结底，唯一能告诉你并行化是否值得的是测试和测量执行时间。&lt;/p>
+&lt;h2 id="并行化实现">并行化实现&lt;/h2>
+&lt;p>Stream API 中的并行化是通过递归分解流正在处理的数据来实现的。它构建在 JDK 7 中添加的 Fork/Join 框架之上。&lt;/p>
+&lt;p>分解包括将流正在处理的数据分成两部分。然后每个部分由自己的 CPU 核心处理，该核心可能决定再次递归分割它。&lt;/p>
+&lt;p>在某个时刻，框架将决定给定部分中的数据量足够小，可以正常处理。然后将处理这个数据子集，并计算部分结果。然后将这个部分结果与其他 CPU 核心上从其他部分计算的其他部分结果合并。&lt;/p>
+&lt;p>并行化确实会带来开销。与在多个 CPU 核心上分配计算的收益相比，这种开销必须很小。否则，并行化将恶化计算性能而不是改善它们。&lt;/p>
+&lt;p>让我们逐一检查所有这些步骤，看看什么可能阻止你获得更好的性能提升。&lt;/p>
+&lt;h2 id="理解数据局部性">理解数据局部性&lt;/h2>
+&lt;p>数据局部性会影响数据处理的速度，无论是顺序处理还是并行处理。局部性越好，计算就越快。&lt;/p>
+&lt;p>为了让 CPU 可用，你的数据必须从计算机的主内存传输到 CPU 的缓存。从物理上讲，主内存是计算机的一个特定组件，与 CPU 分离。另一方面，缓存与 CPU 的核心计算元素共享同一硅片。它们通过主板和不同的通信总线连接在一起。与 CPU 核心从其缓存访问数据的速度相比，将数据从主内存传输到 CPU 缓存非常慢。&lt;/p></description></item><item><title>Java 虚拟线程</title><link>/post/java-virtual-threads/</link><pubDate>Thu, 11 Dec 2025 00:00:00 +0000</pubDate><guid>/post/java-virtual-threads/</guid><description>&lt;p>本文翻译自 &lt;a href="https://dev.java/learn/new-features/virtual-threads/">Virtual Threads&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;h2 id="为什么需要虚拟线程">为什么需要虚拟线程？&lt;/h2>
+&lt;p>Java 1.0 于 1995 年发布时，其 API 中包含约一百个类，其中就有 &lt;code>java.lang.Thread&lt;/code>。Java 是第一个直接支持并发编程的主流编程语言。&lt;/p>
+&lt;p>从 Java 1.2 开始，每个 Java 线程都运行在底层操作系统提供的&lt;strong>平台线程&lt;/strong>上。（在 Java 1.1 及之前的版本中，在某些平台上，所有 Java 线程由单个平台线程执行。）&lt;/p>
+&lt;p>平台线程的成本不低。启动一个平台线程需要数千条 CPU 指令，并且会消耗几兆字节的内存。服务器应用程序可能需要处理大量并发请求，为每个请求分配一个独立的平台线程变得不可行。在典型的服务器应用中，这些请求大部分时间都处于&lt;strong>阻塞&lt;/strong>状态，等待数据库或其他服务返回结果。&lt;/p>
+&lt;p>提高吞吐量的传统方法是使用非阻塞 API。程序员不是等待结果，而是指定当结果可用时应调用哪个方法，以及在失败时调用另一个方法。这种方式很快就会变得令人不快，因为回调会不断嵌套。&lt;/p>
+&lt;p>JEP 425 在 Java 19 中引入了&lt;strong>虚拟线程&lt;/strong>。多个虚拟线程运行在一个平台线程上。每当虚拟线程阻塞时，它就会被&lt;strong>卸载&lt;/strong>，平台线程随即运行另一个虚拟线程。（&amp;ldquo;虚拟线程&amp;quot;这个名称类似于虚拟内存映射到实际 RAM。）虚拟线程在 Java 20 中成为预览特性（JEP 436），并在 Java 21 中正式发布。&lt;/p>
+&lt;p>有了虚拟线程，阻塞的成本变得很低。当结果不能立即获得时，你只需在虚拟线程中阻塞即可。你可以使用熟悉的编程结构——分支、循环、try 块——而不是一系列回调。&lt;/p>
+&lt;p>虚拟线程在并发任务数量庞大且任务主要阻塞在网络 I/O 上时非常有用。对于 CPU 密集型任务，它们没有任何优势。对于此类任务，可以考虑使用&lt;a href="https://dev.java/learn/api/streams/parallel-streams/">并行流&lt;/a>或&lt;a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/RecursiveTask.html">递归 fork-join 任务&lt;/a>。&lt;/p>
+&lt;h2 id="创建虚拟线程">创建虚拟线程&lt;/h2>
+&lt;p>工厂方法 &lt;code>Executors.newVirtualThreadPerTaskExecutor()&lt;/code> 返回一个 &lt;code>ExecutorService&lt;/code>，它会在单独的虚拟线程中运行每个任务。例如：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">import&lt;/span> java.util.concurrent.*;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">public&lt;/span> &lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">VirtualThreadDemo&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">public&lt;/span> &lt;span style="color:#66d9ef">static&lt;/span> &lt;span style="color:#66d9ef">void&lt;/span> &lt;span style="color:#a6e22e">main&lt;/span>(String&lt;span style="color:#f92672">[]&lt;/span> args) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">final&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span> NTASKS &lt;span style="color:#f92672">=&lt;/span> 100;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ExecutorService service &lt;span style="color:#f92672">=&lt;/span> Executors.&lt;span style="color:#a6e22e">newVirtualThreadPerTaskExecutor&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">for&lt;/span> (&lt;span style="color:#66d9ef">int&lt;/span> i &lt;span style="color:#f92672">=&lt;/span> 0; i &lt;span style="color:#f92672">&amp;lt;&lt;/span> NTASKS; i&lt;span style="color:#f92672">++&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> service.&lt;span style="color:#a6e22e">submit&lt;/span>(() &lt;span style="color:#f92672">-&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">long&lt;/span> id &lt;span style="color:#f92672">=&lt;/span> Thread.&lt;span style="color:#a6e22e">currentThread&lt;/span>().&lt;span style="color:#a6e22e">threadId&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> LockSupport.&lt;span style="color:#a6e22e">parkNanos&lt;/span>(1_000_000_000);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> IO.&lt;span style="color:#a6e22e">println&lt;/span>(id);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> service.&lt;span style="color:#a6e22e">close&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>顺便说一下，这段代码使用 &lt;code>LockSupport.parkNanos&lt;/code> 而不是 &lt;code>Thread.sleep&lt;/code>，这样我们就不必捕获麻烦的 &lt;code>InterruptedException&lt;/code>。&lt;/p></description></item><item><title>深入解析 JVM 启动过程</title><link>/post/jvm-start-up/</link><pubDate>Tue, 09 Dec 2025 00:00:00 +0000</pubDate><guid>/post/jvm-start-up/</guid><description>&lt;p>本文翻译自 &lt;a href="https://inside.java/2025/01/28/jvm-start-up/">A Deep Dive into JVM Start-up&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>当你启动一个 Java 应用程序时，你可能会认为唯一执行的代码就是传递给 JVM 的 Java 字节码，即由 &lt;code>javac&lt;/code> 编译生成的 &lt;code>.class&lt;/code> 文件。但实际上，在启动过程中，JVM 会经历一系列复杂的步骤，为运行 Java 应用程序创建一个完整的运行环境。在本文中，我们将详细介绍 JVM 从执行 &lt;code>$ java&lt;/code> 到打印 &lt;code>Hello World&lt;/code> 所经历的步骤。如果你更喜欢视频形式，也可以在 Java YouTube 频道观看这个视频：&lt;/p>
+&lt;div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+ &lt;iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" loading="eager" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube-nocookie.com/embed/ED1oc7gn5uY?autoplay=0&amp;amp;controls=1&amp;amp;end=0&amp;amp;loop=0&amp;amp;mute=0&amp;amp;start=0" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" title="YouTube video">&lt;/iframe>
+ &lt;/div>
+
+&lt;h2 id="前言">前言&lt;/h2>
+&lt;p>为了让这次对 JVM 启动过程的讲解不至于过于庞大，我将使用以下几个约束条件来描述这个过程：&lt;/p>
+&lt;ul>
+&lt;li>我将描述 JVM 启动过程在 JDK 23 中的行为。你可以在&lt;a href="https://docs.oracle.com/javase/specs/jvms/se23/html/index.html">这里&lt;/a>查看 Java SE 23 的 JVM 规范。&lt;/li>
+&lt;li>我将使用 &lt;a href="https://en.wikipedia.org/wiki/HotSpot_(virtual_machine)">HotSpot JVM&lt;/a> 实现作为示例。这是目前使用最广泛的 JVM 实现，许多流行的 JDK 发行版都使用 HotSpot JVM 或其衍生版本。其他 JVM 实现可能在内部行为上略有不同。&lt;/li>
+&lt;li>最后，我将使用的主要代码示例是 &lt;code>HelloWorld&lt;/code>，尽管这是一个非常简单的应用程序，但它仍然会触发 JVM 启动过程的所有关键环节。&lt;/li>
+&lt;/ul>
+&lt;p>尽管有这些约束条件，但在阅读完本文后，你应该能够对 JVM 在启动过程中所经历的流程以及它们为何必要有一个相当全面的理解。这些知识在调试应用程序启动时遇到的问题时会很有帮助，在某些特定情况下还能帮助改善启动性能。不过，我们会在文章末尾更详细地讨论这一点。&lt;/p></description></item><item><title>优秀工程师如何在大公司写出糟糕的代码</title><link>/post/how-good-engineers-write-bad-code-at-big-companies/</link><pubDate>Tue, 09 Dec 2025 00:00:00 +0000</pubDate><guid>/post/how-good-engineers-write-bad-code-at-big-companies/</guid><description>&lt;p>本文翻译自 &lt;a href="https://www.seangoedecke.com/bad-code-at-big-companies/">How good engineers write bad code at big companies&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>每隔几年就会有&lt;a href="https://ziglang.org/news/migrating-from-github-to-codeberg/">人&lt;/a>&lt;a href="https://github.com/microsoft/terminal/issues/10362">注意到&lt;/a>大型科技公司有时会产出令人惊讶的粗制滥造代码。如果你没有在大公司工作过，可能很难理解这种情况是如何发生的。大型科技公司薪酬优厚，足以吸引许多有能力的工程师。他们行动缓慢，看起来似乎有足够的时间做好扎实的工作。那么糟糕的代码是如何产生的呢？&lt;/p>
+&lt;h3 id="大多数代码变更都是由相对初学者完成的">大多数代码变更都是由相对初学者完成的&lt;/h3>
+&lt;p>我认为主要原因是&lt;strong>大公司充满了在其专业领域之外工作的工程师&lt;/strong>。大型科技公司员工的平均任期只有&lt;a href="https://stackoverflow.blog/2022/04/19/whats-the-average-tenure-of-an-engineer-at-a-big-tech-company-ep-434/">一到两年&lt;/a>&lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup>。事实上，大型科技公司的薪酬方案通常会对工程师的任期设置四年上限：四年后，初始股票授予完全兑现，这可能导致工程师的薪酬削减高达 50%。公司确实会延长临时性的年度补充授予，但这显然会激励工程师去寻找另一份工作，在那里他们不必每年担心自己是否能拿到另一半薪酬。&lt;/p>
+&lt;p>如果算上内部流动，情况会更糟。我在单个团队或代码库上停留的最长时间是三年，那还是在我职业生涯的早期。我预计至少每年都会被&lt;a href="https://www.youtube.com/watch?v=yDcaRklX7q4">重组&lt;/a>一次，而且通常频率更高。&lt;/p>
+&lt;p>然而，大型科技公司代码库的平均存续时间要长得多。我工作的许多服务已有十年或更长时间，多年来有过许多不同的负责人。这意味着许多大型科技公司的工程师一直在&amp;quot;摸索前进&amp;quot;。&lt;strong>相当高比例的代码变更是由&amp;quot;初学者&amp;quot;完成的&lt;/strong>：即在过去六个月内刚加入公司、代码库，甚至刚接触某种编程语言的人。&lt;/p>
+&lt;h3 id="老手">老手&lt;/h3>
+&lt;p>在某种程度上，这个问题可以通过&amp;quot;老手&amp;quot;来缓解：那些恰好在特定系统的周围待了足够长时间并培养出真正专业知识的工程师。这些工程师可以进行深入的代码审查，可靠地发现明显的问题。但依赖&amp;quot;老手&amp;quot;有两个问题。&lt;/p>
+&lt;p>首先，&lt;strong>这个过程完全是非正式的&lt;/strong>。大型科技公司在培养单个系统的长期专业知识方面投入的努力出奇地少，而一旦他们获得了这种专业知识，似乎根本不在乎保留它。相关工程师经常被调到不同的服务，他们要么基本上以志愿者的身份继续履行&amp;quot;老手&amp;quot;的职责，要么放弃它们，在一个全新的系统上成为相对的初学者。&lt;/p>
+&lt;p>其次，&lt;strong>经验丰富的工程师总是超负荷工作&lt;/strong>。作为少数几个对特定服务有深入专业知识的工程师之一，这是一份&lt;em>繁忙&lt;/em>的工作。你没有足够的时间亲自审查每一个软件变更，或积极参与每一个决策过程。记住&lt;em>你也有自己的工作要做&lt;/em>：如果你把所有时间都花在审查变更和参与讨论上，你可能会因为没有足够的个人产出而受到公司的惩罚。&lt;/p>
+&lt;h3 id="中等水平的高效工程师">中等水平的高效工程师&lt;/h3>
+&lt;p>综合以上所有因素，大型科技公司中等水平的高效&lt;sup id="fnref:2">&lt;a href="#fn:2" class="footnote-ref" role="doc-noteref">2&lt;/a>&lt;/sup>工程师是什么样子的？他们通常是：&lt;/p>
+&lt;ul>
+&lt;li>有足够的能力通过招聘门槛并能够完成工作，但要么&lt;/li>
+&lt;li>在一个对他们来说基本上是全新的代码库或语言上工作，要么&lt;/li>
+&lt;li>在努力应付大量代码变更的同时还要兼顾自己的工作。&lt;/li>
+&lt;/ul>
+&lt;p>他们几乎肯定是在按截止日期工作，或者为不同项目的一系列重叠截止日期工作。换句话说，&lt;strong>他们正在一个不适合产出高质量代码的环境中尽力而为。&lt;/strong>&lt;/p>
+&lt;p>这就是&amp;quot;明显&amp;quot;糟糕的代码如何产生的。例如，一个初级工程师接到一个关于烦人 bug 的工单，而他们对这个代码库几乎不熟悉。他们花了几天时间弄清楚，想出了一个粗糙的解决方案。一个更资深的&amp;quot;老手&amp;quot;（如果他们幸运的话）在空闲的半小时内扫了一眼，否决了它，并建议了一个稍微好一点、至少能工作的方案。初级工程师尽其所能实现了它，测试它能工作，简单审查后就发布了，所有相关人员立即转向更高优先级的工作。五年后有人注意到这个&lt;sup id="fnref:3">&lt;a href="#fn:3" class="footnote-ref" role="doc-noteref">3&lt;/a>&lt;/sup>，心想&amp;quot;哇，这太粗糙了——这么大的软件公司怎么会写出这么糟糕的代码&amp;quot;？&lt;/p>
+&lt;h3 id="大型科技公司对此无所谓">大型科技公司对此无所谓&lt;/h3>
+&lt;p>我写过很多关于导致这种情况的内部科技公司动态的文章。最直接的是，在&lt;a href="https://www.seangoedecke.com/seeing-like-a-software-company">《像软件公司一样看问题》&lt;/a>一文中，我认为大型科技公司始终将内部&lt;em>可读性&lt;/em>——即一眼就能看出谁在做什么并能随意改变的能力——置于生产力之上。大公司知道，将工程师视为可互换的并四处调动他们，会破坏他们在单个代码库中培养长期专业知识的能力。&lt;strong>这是一种深思熟虑的权衡&lt;/strong>。他们放弃了一定程度的专业知识和软件质量，以换取能够快速将熟练工程师部署到当月任何问题上的能力。&lt;/p>
+&lt;p>我不知道这是个好主意还是坏主意。这对大型科技公司来说似乎确实有效，尤其是在&amp;quot;你能多快转向与 AI 相关的东西&amp;quot;如此重要的现在。但如果你这样做，那么&lt;em>当然&lt;/em>会产出一些真正糟糕的代码。当你要求工程师在他们不熟悉的系统上匆忙完成工作时，就会发生这种情况。&lt;/p>
+&lt;p>&lt;strong>个人工程师完全无力改变这种动态&lt;/strong>。在 2025 年尤其如此，当时&lt;a href="https://www.seangoedecke.com/good-times-are-over">权力平衡已经倾斜&lt;/a>，从工程师转向科技公司领导层。作为个人工程师，你能做的最多就是努力成为&amp;quot;老手&amp;quot;：在至少一个领域培养专业知识，并用它来阻止最糟糕的变更，引导人们做出至少是最低限度明智的技术决策。但即使这样，往往也是在逆组织的潮流而动，如果做得不专业，可能会导致你被&lt;a href="https://www.reddit.com/r/csMajors/comments/1et7miz/what_you_need_to_know_about_performance/">列入绩效改进计划（PIP）&lt;/a>或更糟。&lt;/p>
+&lt;h3 id="纯粹工程与不纯粹工程">纯粹工程与不纯粹工程&lt;/h3>
+&lt;p>我认为很多问题归结为&lt;a href="https://www.seangoedecke.com/pure-and-impure-engineering">纯粹软件工程和不纯粹软件工程&lt;/a>之间的区别。对于纯粹工程师——从事独立技术项目的工程师，比如&lt;a href="https://ziglang.org/">编程语言&lt;/a>——糟糕代码的唯一解释就是无能。但不纯粹的工程师更像水管工或电工。他们在相对陌生的项目上按截止日期工作，即使他们的技术基础无可挑剔，这种情况的特定设置总是有&lt;em>某些&lt;/em>尴尬或令人惊讶的东西。对于不纯粹的工程师来说，糟糕的代码是不可避免的。只要整个系统运行得足够好，项目就是成功的。&lt;/p>
+&lt;p>在大型科技公司，工程师无法决定他们是在做纯粹还是不纯粹的工程工作。&lt;a href="https://www.seangoedecke.com/not-your-codebase">这不是他们的代码库&lt;/a>！如果公司想让你从数据库基础设施工作转到构建新的支付系统，他们完全有权这样做。你可能在不熟悉的系统中犯错误，或者你在数据库基础设施团队的老同事可能因为失去你的专业知识而受苦——这是&lt;strong>公司而非工程师&lt;/strong>做出的深思熟虑的权衡。&lt;/p>
+&lt;p>指出大公司糟糕代码的例子是可以的。如果别无其他，这可能是让这些特定例子得到修复的有效方法，因为高管们通常会抓住机会将坏的公关变成好的公关。但我认为将主要责任归咎于这些公司的工程师是一个错误&lt;sup id="fnref:4">&lt;a href="#fn:4" class="footnote-ref" role="doc-noteref">4&lt;/a>&lt;/sup>。如果你能挥动魔法棒让每个工程师强大两倍，&lt;em>你仍然会有糟糕的代码&lt;/em>，因为几乎没有人能够进入一个全新的代码库并快速做出零错误的变更。根本原因是&lt;strong>大多数大公司工程师被迫在不熟悉的代码库中完成大部分工作&lt;/strong>。&lt;/p>
+&lt;div class="footnotes" role="doc-endnotes">
+&lt;hr>
+&lt;ol>
+&lt;li id="fn:1">
+&lt;p>我很难找到一个好的原始数据来源。有一份 2013 年的 PayScale &lt;a href="https://www.payscale.com/data-packages/employee-loyalty/least-loyal-employees">报告&lt;/a>引用了 Google 1.1 年的中位数流动率，这个数字似乎偏低。&amp;#160;&lt;a href="#fnref:1" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:2">
+&lt;p>大型科技公司的许多工程师并不高效，但这本身就是一个独立的话题。我不想在这里深入讨论，原因有二：首先，我认为有能力的工程师产出的糟糕代码已经足够多，所以可以宽容一点，只把讨论范围限定在他们身上。其次，即使是无能的工程师写的代码，几乎总会有有能力的工程师本可以审查它，而为什么没有发生这种情况的问题仍然很有趣。&amp;#160;&lt;a href="#fnref:2" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:3">
+&lt;p>我这里想到的例子不是最近的 &lt;a href="https://ziglang.org/news/migrating-from-github-to-codeberg/">GitHub Actions 那个&lt;/a>，我对那个没有第一手经验。我可以想到至少十个发生在我身上的单独实例。&amp;#160;&lt;a href="#fnref:3" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:4">
+&lt;p>在我看来，这主要是想象力的失败：认为你自己的工作环境一定与其他人的非常相似。&amp;#160;&lt;a href="#fnref:4" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;/div></description></item><item><title>关于 systemd 的最大误解</title><link>/post/the-biggest-myths/</link><pubDate>Sat, 02 Aug 2025 00:00:00 +0000</pubDate><guid>/post/the-biggest-myths/</guid><description>&lt;p>本文翻译自 &lt;a href="https://0pointer.de/blog/projects/the-biggest-myths.html">The Biggest Myths&lt;/a>，版权归原作者所有。这是 systemd 作者 2013 年 1 月的文章。&lt;/p>
+&lt;p>自我们首次提议将 systemd 纳入发行版以来，它在许多论坛、邮件列表和会议中被频繁讨论。在这些讨论中，人们经常听到一些关于 systemd 的误解，这些误解被一遍又一遍地重复，但不断的重复并不能增加其真实性。让我们花点时间来揭穿其中的一些：&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>&lt;strong>误解：systemd 是单体的。&lt;/strong>&lt;/p>
+&lt;p>如果您在启用所有配置选项的情况下构建 systemd，您将构建 69 个独立的二进制文件。这些二进制文件都用于不同的任务，并且由于多种原因被清晰地分离开来。例如，我们设计 systemd 时考虑到了安全性，因此大多数守护进程以最低权限运行（例如，使用内核功能），并且只负责非常具体的任务，以最小化其安全表面和影响。此外，systemd 比任何先前的解决方案都更能并行化引导。这种并行化是通过并行运行更多进程来实现的。因此，将 systemd 很好地分解为许多二进制文件和进程至关重要。事实上，其中许多二进制文件&lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup> 被分离得如此之好，以至于它们在 systemd 之外也非常有用。&lt;/p>
+&lt;p>一个包含 69 个独立二进制文件的软件包很难被称为&lt;em>单体的&lt;/em>。然而，与以前的解决方案不同的是，我们将更多的组件放在一个 tarball 中发布，并在一个具有统一发布周期的单一存储库中进行上游维护。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>误解：systemd 只关乎速度。&lt;/strong>&lt;/p>
+&lt;p>是的，systemd 很快（&lt;a href="https://plus.google.com/108087225644395745666/posts/LyPQgKdntgA">有人要在约 900 毫秒内完成一个相当完整的用户空间启动吗？&lt;/a>），但这主要只是做对事情的副作用。事实上，我们从未真正坐下来从 systemd 中榨取最后一点性能。相反，我们实际上经常故意选择稍慢的代码路径，以保持代码更具可读性。这并不意味着速度对我们来说无关紧要，但将 systemd 归结为速度肯定是一个相当大的误解，因为这肯定不在我们目标列表的前列。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>误解：systemd 的快速启动与服务器无关。&lt;/strong>&lt;/p>
+&lt;p>这完全是错误的。许多管理员实际上热衷于在维护窗口期间减少停机时间。在高可用性设置中，如果发生故障的机器能够非常快地恢复，那就太好了。在具有大量虚拟机或容器的云设置中，慢速启动的代价会随着实例数量的增加而倍增。在数百个虚拟机或容器的非常慢的启动上花费数分钟的 CPU 和 IO 会大大降低系统的密度，哎呀，它甚至会花费您更多的能源。缓慢的启动在经济上可能相当昂贵。然后，容器的快速启动允许您实现诸如&lt;a href="http://0pointer.de/blog/projects/socket-activated-containers.html">套接字激活容器&lt;/a>之类的逻辑，从而使您能够大幅提高云系统的密度。&lt;/p>
+&lt;p>当然，在许多服务器设置中，启动确实无关紧要，但 systemd 应该涵盖整个范围。是的，我知道通常是服务器固件在启动时花费的时间最多，而操作系统无论如何都比它快，但是，systemd 仍然应该涵盖整个范围（见上文……），而且，并非所有服务器都有这么糟糕的固件，当然也不是虚拟机和容器，它们也是一种服务器。&lt;sup id="fnref:2">&lt;a href="#fn:2" class="footnote-ref" role="doc-noteref">2&lt;/a>&lt;/sup>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>误解：systemd 与 shell 脚本不兼容。&lt;/strong>&lt;/p>
+&lt;p>这完全是胡说八道。我们只是不将它们用于引导过程，因为我们相信它们不是该特定用途的最佳工具，但这并不意味着 systemd 与它们不兼容。您可以轻松地将 shell 脚本作为 systemd 服务运行，哎呀，您可以将用&lt;em>任何&lt;/em>语言编写的脚本作为 systemd 服务运行，systemd 丝毫不在乎您的可执行文件里面是什么。此外，我们为自己的目的大量使用 shell 脚本，用于安装、构建、测试 systemd。您可以将脚本放在早期引导过程中，将它们用于普通服务，可以在最终关闭时运行它们，几乎没有限制。&lt;/p></description></item><item><title>重新思考 PID 1</title><link>/post/rethinking-pid-1/</link><pubDate>Tue, 29 Jul 2025 00:00:00 +0000</pubDate><guid>/post/rethinking-pid-1/</guid><description>&lt;p>本文翻译自 &lt;a href="https://0pointer.de/blog/projects/systemd.html">Rethinking PID 1&lt;/a>，版权归原作者所有。这是 systemd 作者发表于 2010 年的一篇文章，至今读来仍熠熠生辉。&lt;/p>
+&lt;hr>
+&lt;p>如果你消息灵通，或者善于读懂言外之意，你可能已经知道这篇博文要讲什么了。但即便如此，你可能还是会觉得这个故事很有趣。所以，端起一杯咖啡，坐下来，读读接下来的内容吧。&lt;/p>
+&lt;p>这篇博文很长，所以虽然我只能推荐你读完整个故事，但这里有一句话总结：我们正在试验一个新的 init 系统，而且很有趣。&lt;/p>
+&lt;p>&lt;a href="http://git.0pointer.de/?p=systemd.git">这是代码&lt;/a> 故事是这样的：&lt;/p>
+&lt;h2 id="进程标识符-1">进程标识符 1&lt;/h2>
+&lt;p>在每个 Unix 系统上，都有一个进程拥有特殊的进程标识符 1。它在所有其他进程之前由内核启动，并且是所有那些没有其他父进程的进程的父进程。因此，它可以做很多其他进程不能做的事情。它也负责一些其他进程不负责的事情，比如在启动期间启动和维护用户空间。&lt;/p>
+&lt;p>从历史上看，在 Linux 上充当 PID 1 的软件是古老的 sysvinit 软件包，尽管它已经相当老旧了。人们提出了许多替代品，但只有一个真正流行起来：&lt;a href="http://upstart.ubuntu.com/">Upstart&lt;/a>，它现在已经进入了所有主流发行版。&lt;/p>
+&lt;p>如前所述，init 系统的核心职责是启动用户空间。一个好的 init 系统会很快地完成这项工作。不幸的是，传统的 SysV init 系统并不是特别快。&lt;/p>
+&lt;p>为了实现快速高效的启动，有两件事至关重要：&lt;/p>
+&lt;ul>
+&lt;li>启动更少的服务。&lt;/li>
+&lt;li>并且并行启动更多的服务。&lt;/li>
+&lt;/ul>
+&lt;p>这是什么意思？启动更少意味着启动更少的服务，或者将服务的启动推迟到实际需要时。有些服务我们知道迟早会需要（syslog、D-Bus 系统总线等），但对于许多其他服务来说，情况并非如此。例如，除非实际插入了蓝牙适配器或者应用程序想要与其 D-Bus 接口通信，否则 bluetoothd 不需要运行。打印系统也是如此：除非机器物理连接到打印机，或者应用程序想要打印某些东西，否则没有必要运行像 CUPS 这样的打印守护进程。Avahi：如果机器没有连接到网络，就没有必要运行 &lt;a href="http://avahi.org">Avahi&lt;/a>，除非某个应用程序想要使用其 API。甚至 SSH 也是如此：只要没有人想连接你的机器，就没有必要运行它，只要它在第一次连接时启动即可。（承认吧，在大多数可能正在监听 sshd 的机器上，有人可能每隔一两个月才连接一次。）&lt;/p>
+&lt;p>并行启动更多意味着，如果必须运行某些东西，我们不应该序列化它的启动（就像 sysvinit 那样），而是应该同时运行所有东西，这样可以最大限度地利用可用的 CPU 和磁盘 IO 带宽，从而最大限度地减少整体启动时间。&lt;/p>
+&lt;h2 id="硬件和软件的动态变化">硬件和软件的动态变化&lt;/h2>
+&lt;p>现代系统（尤其是通用操作系统）的配置和使用都具有高度的动态性：它们是移动的，不同的应用程序会启动和停止，不同的硬件会添加和移除。负责维护服务的 init 系统需要监听硬件和软件的变化。它需要根据运行程序或启用某些硬件的需要动态地启动（有时是停止）服务。&lt;/p>
+&lt;p>大多数试图并行化启动的当前系统仍然会同步所涉及的各种守护进程的启动：由于 Avahi 需要 D-Bus，因此首先启动 D-Bus，只有当 D-Bus 发出就绪信号时，Avahi 才会启动。其他服务也类似：livirtd 和 X11 需要 HAL（好吧，我这里考虑的是 Fedora 13 的服务，忽略 HAL 已经过时了），因此 HAL 首先启动，然后才启动 livirtd 和 X11。而 libvirtd 也需要 Avahi，所以它也等待 Avahi。它们都需要 syslog，所以它们都等待 Syslog 完全启动和初始化。等等。&lt;/p></description></item><item><title>AGI 的叉勺困境</title><link>/post/sporks-of-agi/</link><pubDate>Tue, 22 Jul 2025 00:00:00 +0000</pubDate><guid>/post/sporks-of-agi/</guid><description>&lt;p>本文翻译自 &lt;a href="https://sergeylevine.substack.com/p/sporks-of-agi">Sporks of AGI&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>训练大型模型真的很困难，随着模型变得越来越大并扩展到新的领域，这只会变得更加困难。大语言模型（LLMs）使用大量的文本数据，而视觉-语言模型（VLMs）需要包含文本和图像的数据，机器人技术中的&lt;a href="https://www.pi.website/blog/pi05">视觉-语言-动作&lt;/a>（VLA）模型需要大量机器人在现实世界中执行真实任务的数据。这对智能体的冲击尤其严重：无论你是想控制现实世界的机器人，还是想在网络上采取行动来满足用户请求，带有动作标签的真实世界交互数据都无法像从网络上获取文本和图像那样廉价地获得。难怪研究人员一直在试图找到一种方法来用&lt;strong>次优选择&lt;/strong>来替代真实数据中的观察和动作，试图获得两全其美的效果：在巨大数据集上训练巨大模型所带来的力量和泛化能力，而成本却比在领域内数据上训练基础模型的标准方法要低得多。&lt;/p>
+&lt;h2 id="次优选择">次优选择&lt;/h2>
+&lt;p>虽然真实的现实世界数据一直是视觉感知和自然语言处理的首选，但当涉及到智能体——特别是机器人智能体（例如 VLA）时，有一种无法抗拒的冲动，想要弄清楚如何使用&lt;strong>其他东西&lt;/strong>，某种&lt;strong>代理数据&lt;/strong>，这种数据可以廉价获得，但仍然提供我们期望从基础模型中获得的广泛泛化能力。我在这篇文章中将重点关注机器人技术，但其他领域也遵循类似的脚本，只是参与者不同。仿真是一个经典选择。如果我们能够弄清楚如何在&amp;quot;矩阵&amp;quot;中或在一个非常好的视频游戏中训练机器人，也许我们就可以避免对真实数据的需求。其他选择包括使用人类的视频，可能从网络上抓取，或者使用手持的类似夹具的设备，人们可以用这些设备录制自己以更机器人化的方式执行任务的视频。虽然这一领域已经有了大量令人兴奋和惊人创新的研究，但我们可以冒着画漫画的风险，将其描述如下：手动定义廉价的&lt;strong>代理&lt;/strong>域和真实世界机器人系统之间的映射或对应关系，然后利用这种对应关系来使用这些廉价数据，而不是昂贵但具有代表性的域内数据（即来自目标域中真实机器人的数据）。每种广泛研究的避免真实世界机器人数据需求的方法都基于某种此类想法：&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>&lt;strong>仿真：&lt;/strong> 仿真到真实的方法需要人类设计师指定机器人接受训练的环境并产生必要的资产。在仿真中学到的行为是这些选择的产物。通常，产生最佳结果的仿真并不是呈现准确的现实模型（这很困难），而是编码机器人应该对其具有鲁棒性的变化类型，例如在随机踏脚石或高度场上训练，这进一步强调了人类洞察力不仅指导任务&lt;strong>是什么&lt;/strong>，而且间接指导&lt;strong>如何&lt;/strong>解决任务。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>人类视频：&lt;/strong> 纯粹从人类视频中学习机器人技能的方法通常需要定义人类和机器人之间的某种对应关系，例如手的位置或抓取的手指放置。任何这样的选择都假设了解决任务的特定方式（例如，通过用手使用力量抓取来拾取和移动物品），并且还需要弥合物理上可行的人类运动和机器人运动之间的巨大差距，无论是在动力学还是外观方面。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>手持夹具设备：&lt;/strong> 我们可以在物理上施加人机映射，而不是在学习过程中定义映射，方法是要求人们使用模拟机器人夹具的手持设备收集数据。这真的很有吸引力，因为这样人们就必须以机器人化的方式执行任务。但仍然需要同样的&amp;quot;如何&amp;quot;决策——例如，设备假设机器人将在具有完整 6 自由度灵巧性的运动学工作空间中执行任务，仅使用手指，并且以不会暴露人类和机器人运动学或外观差异的方式。&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;p>所有这些方法都构成了有趣且相关的研究，并且都带来了一些优秀且令人兴奋的实际结果。然而，我认为在极限情况下，它们每一种都代表了一种妥协，最终会削弱大型学习模型的真正力量。&lt;/p>
+&lt;h2 id="交集">交集&lt;/h2>
+&lt;p>当然，在收集数据时，人类判断是不可避免的：即使是最真实和纯粹的白板学习方法也需要我们定义我们希望模型做什么。但是，当我们试图回避对真实数据的需求时，我们所做的设计决策可能特别麻烦，因为它们固有地限制了问题的解决方式。对于每个域差距（仿真、视频等），我们被限制在实际上与我们的系统一起工作的行为、可以用我们选择的方法完成的行为（例如，在仿真中，或用手持夹具）以及关键的是，不会加剧域间差异的行为（例如，暴露没有机器人握着夹具，或暴露特别严重的仿真/真实世界差异）的交集内的解决方案。此外，随着我们使用更大更强大的模型，我们应该期望从这些问题中感受到更强的阻力：随着更强大的模型更紧密地拟合数据中的模式，它们会越来越多地拟合&lt;strong>差异&lt;/strong>，就像它们拟合我们想要学习的真正可转移的模式一样。&lt;/p>
+&lt;p>&lt;img src="/images/sporks-agi-intersection.png" alt="交集图">&lt;/p>
+&lt;p>这些问题在研究项目和演示中可能看起来无关紧要，因为我们可以以使这种差异变得不那么重要的方式设置真实机器人，选择最佳和最鲁棒的策略恰好位于这个交集内的任务、环境和物体。但在真实的开放世界环境中，这不仅是限制性的，而且实际上削弱了训练大型和强大基础模型的主要优势。&lt;/p>
+&lt;p>首先，随着模型变得越来越强大，因此能够更好地区分代理数据域和目标真实世界域（即黄色圆圈收缩），这个交集变得更小。我们可以尝试通过从模型中隐藏信息、减少观察空间、使用域不变性损失、限制机器人可以使用的相机视图等来抵消这个问题。实际上，每种解决这些域差异的方法都归结为某种信息隐藏。但这又一次削弱了基础模型的主要优势，即它们综合复杂信息源并提取人类难以手动识别的微妙模式的能力。基本上，随着我们使用更强的模型，黄色圆圈变得更小，任何抵消这种情况的尝试最终都必须使模型变得更弱。我们只能通过对它们进行&amp;quot;脑叶切除术&amp;quot;来&amp;quot;愚弄&amp;quot;我们的模型，防止它们意识到自己在矩阵中。&lt;/p>
+&lt;p>这个交集的大小还严重依赖于我们在设计代理数据时所做的设计决策——这些设计决策越差，绿色和红色圆圈之间的交集就越小。在实践中，我们设计代理数据的设置（我们的仿真器，或手持数据收集设备），以便在我们考虑的几个应用域中，差异最小化，使得良好的动作（即导致成功的动作，或至少避免灾难性失败的动作）在这些应用域内的代理和真实机器人之间匹配。但无法保证它们在外部也会匹配。本质上，当我们在例如人类数据上训练我们的机器人基础模型，然后向它提出一个新问题时，它会尝试预测人类如何处理这个问题，而不是预测机器人的有效策略。这再次与基础模型的主要优势相反——即它们适用于许多问题的&lt;strong>通用性&lt;/strong>和它们在将训练模式外推到新测试域时的&lt;strong>泛化&lt;/strong>能力。现在，每个新域都需要更多的手动工程来改进我们的对应关系，而且当我们尝试泛化到更新颖的情况时，模型的泛化能力实际上&lt;strong>与我们作对&lt;/strong>，加剧了代理数据和真实机器人之间的差距。&lt;/p>
+&lt;p>&lt;img src="/images/sporks-agi-spork.png" alt="叉勺图">&lt;/p>
+&lt;p>当我们实际上想要优化最佳可能行为时（例如，通过强化学习），所有这些问题都变得更加严重，因为我们无法利用真实机器人系统的全部能力，而不会超出机器人能做的事情、在代理数据中有效的事情以及模型无法区分差异的事情的狭窄交集。&lt;/p>
+&lt;h2 id="真实的东西">真实的东西&lt;/h2>
+&lt;p>在试图回避使用真实世界数据的需求时，我们试图找到一个两全其美的解决方案：既像仿真或网络视频一样便宜，又像在大型数据集上训练的真实基础模型一样有效。我们得到的是一个叉勺：在符合我们假设的少数情况下，它既可以做叉子的工作，也可以做勺子的工作，但通常它最终只是一个有洞的糟糕勺子或一个无效的钝叉子。&lt;/p>
+&lt;p>在机器学习中，一贯最有效的做法是确保训练数据与测试条件匹配。这就是&lt;strong>真实的东西&lt;/strong>——教导模型世界如何真正运作的数据，以便它能够完成工作并提取潜在的模式，其中许多模式过于微妙和复杂，甚至人类都无法理解，然后从这些模式中推断出解决复杂新问题的方法。当我们用代理数据替代真实数据时，我们正在做&lt;strong>次优选择&lt;/strong>：一个在几个特定条件下与真实交易匹配的代理。就像你不会通过对着挡板击球或观看罗杰·费德勒在电视上比赛来成为网球专家一样，尽管两者都复制了真正网球专业体验的某些方面，但机器人不会掌握真实世界，除非它能看到&lt;strong>自己&lt;/strong>在真实世界中做事情。&lt;/p>
+&lt;p>我们应该从中得出什么结论？主要的结论是，如果我们要真正构建能够像大语言模型和视觉-语言模型在虚拟世界中那样在真实物理世界中广泛泛化的机器人基础模型，那么真实数据是不可或缺的。但我们也不应该把婴儿和洗澡水一起倒掉：保持务实很重要，就像大语言模型和视觉-语言模型使用大量与其最终目的相关性较低但包含有用世界知识的数据一样，我们的机器人基础模型也可以使用许多不同的数据源。毕竟，如果你想成为一个好的网球选手，观看罗杰·费德勒&lt;strong>是&lt;/strong>有用的。如果我们在训练集中包含不同的数据，包括来自人类的数据甚至仿真数据，&lt;strong>除了&lt;/strong>广泛和具有代表性的真实世界机器人经验，这很可能会有所帮助。事实上，这可能比试图完全回避真实世界数据的需求要容易得多：如果我们不再需要担心仅在机器人能力和我们的代理数据覆盖范围的交集中学习，那么可以放弃旨在减少域差距的拐杖，拥抱代理数据的本质：一个辅助的知识源，可以帮助你成为一个好的网球选手，它旨在&lt;strong>补充&lt;/strong>而不是&lt;strong>替代&lt;/strong>大量的真实世界实践经验。有了这种观点，我们可能也会对我们的代理数据提出非常不同的要求：我们不会试图紧密匹配真实世界的机器人实体（例如，通过使用手持夹具，或要求人们在视频中像机器人一样移动），而是像我们为大语言模型使用预训练数据一样使用代理数据——关于真实世界中&lt;strong>可能&lt;/strong>发生什么的知识源，而不是智能体实际应该做什么的直接指令。&lt;/p>
+&lt;h2 id="叉勺们">叉勺们&lt;/h2>
+&lt;p>在这篇文章中，我讨论了代理数据，一个试图在没有大规模域内数据收集成本的情况下获得大规模训练好处的叉勺。这不是 AI 研究人员喜欢的唯一叉勺。其他叉勺包括结合手工工程和学习组件的混合系统，使用手工设计的约束来限制学习自主系统的不良行为的方法，以及将我们对问题&lt;strong>应该&lt;/strong>如何解决的直觉嵌入到神经网络架构本身中的模型。它们都试图获得两全其美的效果：大规模机器学习的好处，而没有高数据需求或广泛目标设计（&amp;ldquo;对齐&amp;quot;或&amp;quot;后训练&amp;rdquo;）的伴随缺点。在某种深层次上，它们有很多共同点——用某种形式的手工设计的&lt;strong>归纳偏差&lt;/strong>来解决不完整训练的挑战。因此，它们有同样的根本缺点：它们要求我们构建&lt;strong>我们认为我们是如何思考的&lt;/strong>。大规模机器学习的成功归结于机器学习相对于人类设计的力量，理查德·萨顿称之为&lt;a href="https://www.cs.utexas.edu/~eunsol/courses/data/bitter_lesson.pdf">苦涩的教训&lt;/a>。苦涩教训的一个推论是，对于任何启用学习的系统，任何&lt;strong>不是&lt;/strong>学习的而是手工设计的组件最终都会成为其性能的瓶颈。叉勺很有吸引力，因为它们让我们认为我们可以通过强迫模型以特定方式解决问题来克服 AI 中的重大挑战，但最终这使我们的学习系统变得不那么可扩展，即使我们的意图是做恰恰相反的事情。&lt;/p>
+&lt;p>&lt;em>感谢 Karol Hausman、Brian Ichter、Lachy Groom 和 Chelsea Finn 对本文早期版本的反馈。&lt;/em>&lt;/p></description></item><item><title>深入探讨 Go 语言的深度递归问题</title><link>/post/deep-dive-into-deeply-recursive-go/</link><pubDate>Fri, 18 Jul 2025 00:00:00 +0000</pubDate><guid>/post/deep-dive-into-deeply-recursive-go/</guid><description>&lt;p>本文翻译自 &lt;a href="https://mattermost.com/blog/a-deep-dive-into-deeply-recursive-go/">A deep dive into deeply recursive Go&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>在我们 &lt;a href="https://mattermost.com/blog/year-of-security-fixes-in-go/">之前关于 Go 安全性的博客文章&lt;/a> 中，我们写到了 2024 年修复的安全问题。其中一个要点与 9 月份发布的 Go 1.22.7 和 1.23.1 安全版本有关，该版本包含了对三个拒绝服务漏洞的修复。栈耗尽是这三个问题的根本原因，在没有明确以防御性方式编写的代码中极其常见。特别是在 Go 中，由于运行时处理栈耗尽的方式，栈耗尽比大多数内存安全语言更加危险。当栈耗尽发生时，崩溃是不可避免的。&lt;/p>
+&lt;p>需要进一步调查深度递归在 Go 中为何如此糟糕的机制、通常如何最终编写出深度递归的 Go 代码，以及可以采取什么措施来缓解栈耗尽问题。&lt;/p>
+&lt;h2 id="定义深度递归">定义深度递归&lt;/h2>
+&lt;p>有些问题本质上是递归的。这并不是说这些问题不能用迭代方式解决，而是递归解决方案更直观，通常也更易读。一个简单的例子是斐波那契数列，其定义本身就是递归的：数列中的每个元素都是前两个元素的和。编写一个打印数列的迭代 Go 程序很容易，但递归实现更直观，因为它直接映射到定义：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">// Fibonacci 打印斐波那契数列 1, 1, 2, 3, 5, ...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">func&lt;/span> &lt;span style="color:#a6e22e">Fibonacci&lt;/span>(&lt;span style="color:#a6e22e">f&lt;/span> &lt;span style="color:#f92672">...&lt;/span>&lt;span style="color:#66d9ef">uint64&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">var&lt;/span> &lt;span style="color:#a6e22e">next&lt;/span> &lt;span style="color:#66d9ef">uint64&lt;/span> = &lt;span style="color:#ae81ff">1&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> len(&lt;span style="color:#a6e22e">f&lt;/span>) &amp;gt; &lt;span style="color:#ae81ff">1&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">next&lt;/span> = &lt;span style="color:#a6e22e">f&lt;/span>[len(&lt;span style="color:#a6e22e">f&lt;/span>)&lt;span style="color:#f92672">-&lt;/span>&lt;span style="color:#ae81ff">2&lt;/span>] &lt;span style="color:#f92672">+&lt;/span> &lt;span style="color:#a6e22e">f&lt;/span>[len(&lt;span style="color:#a6e22e">f&lt;/span>)&lt;span style="color:#f92672">-&lt;/span>&lt;span style="color:#ae81ff">1&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">fmt&lt;/span>.&lt;span style="color:#a6e22e">Printf&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;%d, &amp;#34;&lt;/span>, &lt;span style="color:#a6e22e">next&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">Fibonacci&lt;/span>(append(&lt;span style="color:#a6e22e">f&lt;/span>, &lt;span style="color:#a6e22e">next&lt;/span>)&lt;span style="color:#f92672">...&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这个函数是 &lt;strong>无限&lt;/strong> 递归的一个例子：它会一直打印斐波那契数列中的数字直到永远——或者直到某个外部力量阻止它。这也是一个 &lt;strong>尾递归&lt;/strong> 函数的例子，其中递归步骤是函数体中的最后一条语句。这样的函数很容易转换为迭代形式，甚至可以通过编译器在称为尾调用优化（TCO）的过程中自动转换。不幸的是，&lt;a href="https://github.com/golang/go/issues/22624">Go 不支持 TCO&lt;/a>，这意味着递归不会被优化掉，导致栈在数列的每一步都会增长。&lt;/p>
+&lt;h3 id="栈和堆的说明">栈和堆的说明&lt;/h3>
+&lt;p>Go 程序可以访问两种类型的内存：栈和堆，就像一般的计算机程序一样。一个只使用局部变量和基本类型的简单程序可能只访问栈，这是所有局部变量在可能的情况下存储的地方。但对于任何更复杂的程序，堆是大多数分配实际发生的地方：所有用 &lt;code>make&lt;/code> 或 &lt;code>new&lt;/code> 分配的内容、所有切片的内容，以及所有不能安全存储在栈上的内容。为了确定什么可以存储在栈上，什么需要放在堆上，Go 编译器使用一个称为 &lt;a href="https://tip.golang.org/doc/gc-guide#Where_Go_Values_Live">逃逸分析&lt;/a> 的过程。细节相当复杂，仅通过查看代码很难确定变量的存储位置。&lt;/p></description></item><item><title>Go JSON 的演变：从 v1 到 v2</title><link>/post/go-json-v2/</link><pubDate>Thu, 17 Jul 2025 00:00:00 +0000</pubDate><guid>/post/go-json-v2/</guid><description>&lt;p>本文翻译自 &lt;a href="https://antonz.org/go-json-v2/">Go JSON v2&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>Go 1.25 中即将推出的 &lt;code>json&lt;/code> 包的第二个版本是一次重大更新，包含许多破坏性变更。v2 包添加了新特性，修复了 API 问题和行为缺陷，并提升了性能。让我们来看看都有哪些变化！&lt;/p>
+&lt;p>使用 &lt;code>Marshal&lt;/code> 和 &lt;code>Unmarshal&lt;/code> 的基本用例保持不变。以下代码在 v1 和 v2 中都能正常工作：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">type&lt;/span> &lt;span style="color:#a6e22e">Person&lt;/span> &lt;span style="color:#66d9ef">struct&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">Name&lt;/span> &lt;span style="color:#66d9ef">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">Age&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">alice&lt;/span> &lt;span style="color:#f92672">:=&lt;/span> &lt;span style="color:#a6e22e">Person&lt;/span>{&lt;span style="color:#a6e22e">Name&lt;/span>: &lt;span style="color:#e6db74">&amp;#34;Alice&amp;#34;&lt;/span>, &lt;span style="color:#a6e22e">Age&lt;/span>: &lt;span style="color:#ae81ff">25&lt;/span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">// 序列化 Alice&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">b&lt;/span>, &lt;span style="color:#a6e22e">err&lt;/span> &lt;span style="color:#f92672">:=&lt;/span> &lt;span style="color:#a6e22e">json&lt;/span>.&lt;span style="color:#a6e22e">Marshal&lt;/span>(&lt;span style="color:#a6e22e">alice&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">fmt&lt;/span>.&lt;span style="color:#a6e22e">Println&lt;/span>(string(&lt;span style="color:#a6e22e">b&lt;/span>), &lt;span style="color:#a6e22e">err&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">// 反序列化 Alice&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">err&lt;/span> = &lt;span style="color:#a6e22e">json&lt;/span>.&lt;span style="color:#a6e22e">Unmarshal&lt;/span>(&lt;span style="color:#a6e22e">b&lt;/span>, &lt;span style="color:#f92672">&amp;amp;&lt;/span>&lt;span style="color:#a6e22e">alice&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">fmt&lt;/span>.&lt;span style="color:#a6e22e">Println&lt;/span>(&lt;span style="color:#a6e22e">alice&lt;/span>, &lt;span style="color:#a6e22e">err&lt;/span>)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>但其余部分有很大不同。让我们来看看 v1 的主要变化。&lt;/p>
+&lt;h2 id="marshalwrite-和-unmarshalread">MarshalWrite 和 UnmarshalRead&lt;/h2>
+&lt;p>在 v1 中，你使用 &lt;code>Encoder&lt;/code> 序列化到 &lt;code>io.Writer&lt;/code>，使用 &lt;code>Decoder&lt;/code> 从 &lt;code>io.Reader&lt;/code> 反序列化：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">// 序列化 Alice&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">alice&lt;/span> &lt;span style="color:#f92672">:=&lt;/span> &lt;span style="color:#a6e22e">Person&lt;/span>{&lt;span style="color:#a6e22e">Name&lt;/span>: &lt;span style="color:#e6db74">&amp;#34;Alice&amp;#34;&lt;/span>, &lt;span style="color:#a6e22e">Age&lt;/span>: &lt;span style="color:#ae81ff">25&lt;/span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">out&lt;/span> &lt;span style="color:#f92672">:=&lt;/span> new(&lt;span style="color:#a6e22e">strings&lt;/span>.&lt;span style="color:#a6e22e">Builder&lt;/span>) &lt;span style="color:#75715e">// io.Writer&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">enc&lt;/span> &lt;span style="color:#f92672">:=&lt;/span> &lt;span style="color:#a6e22e">json&lt;/span>.&lt;span style="color:#a6e22e">NewEncoder&lt;/span>(&lt;span style="color:#a6e22e">out&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">enc&lt;/span>.&lt;span style="color:#a6e22e">Encode&lt;/span>(&lt;span style="color:#a6e22e">alice&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">fmt&lt;/span>.&lt;span style="color:#a6e22e">Println&lt;/span>(&lt;span style="color:#a6e22e">out&lt;/span>.&lt;span style="color:#a6e22e">String&lt;/span>())
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">// 反序列化 Bob&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">in&lt;/span> &lt;span style="color:#f92672">:=&lt;/span> &lt;span style="color:#a6e22e">strings&lt;/span>.&lt;span style="color:#a6e22e">NewReader&lt;/span>(&lt;span style="color:#e6db74">`{&amp;#34;Name&amp;#34;:&amp;#34;Bob&amp;#34;,&amp;#34;Age&amp;#34;:30}`&lt;/span>) &lt;span style="color:#75715e">// io.Reader&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">dec&lt;/span> &lt;span style="color:#f92672">:=&lt;/span> &lt;span style="color:#a6e22e">json&lt;/span>.&lt;span style="color:#a6e22e">NewDecoder&lt;/span>(&lt;span style="color:#a6e22e">in&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">var&lt;/span> &lt;span style="color:#a6e22e">bob&lt;/span> &lt;span style="color:#a6e22e">Person&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">dec&lt;/span>.&lt;span style="color:#a6e22e">Decode&lt;/span>(&lt;span style="color:#f92672">&amp;amp;&lt;/span>&lt;span style="color:#a6e22e">bob&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">fmt&lt;/span>.&lt;span style="color:#a6e22e">Println&lt;/span>(&lt;span style="color:#a6e22e">bob&lt;/span>)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;blockquote>
+&lt;p>从现在开始，我将省略错误处理以保持简洁。&lt;/p></description></item><item><title>Go 语言中的 //go:nosplit 指令解析</title><link>/post/go-nosplit-directive/</link><pubDate>Thu, 10 Jul 2025 00:00:00 +0800</pubDate><guid>/post/go-nosplit-directive/</guid><description>&lt;p>本文翻译自 &lt;a href="https://mcyoung.xyz/2025/07/07/nosplit/">//go:nosplit&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>&lt;code>//go:nosplit&lt;/code> 是什么？&lt;/p>
+&lt;p>大多数人不知道 Go 有特殊的指令语法。不幸的是，它不是真正的语法，它只是一个注释。例如，&lt;code>//go:noinline&lt;/code> 会导致下一个函数声明永远不会被内联，这对于改变调用它的函数的内联成本很有用。指令有三种类型：&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://pkg.go.dev/cmd/compile#hdr-Function_Directives">&lt;code>gc&lt;/code> 的文档注释&lt;/a>中记录的指令。这包括 &lt;code>//go:noinline&lt;/code> 和 &lt;code>//line&lt;/code>。&lt;/li>
+&lt;li>在其他地方记录的指令，例如 &lt;code>//go:build&lt;/code> 和 &lt;code>//go:generate&lt;/code>。&lt;/li>
+&lt;li>在 &lt;a href="https://cs.opensource.google/go/go/+/refs/tags/go1.24.4:src/runtime/HACKING.md">&lt;code>runtime/HACKING.md&lt;/code>&lt;/a> 中记录的指令，只有在将 &lt;code>-+&lt;/code> 标志传递给 &lt;code>gc&lt;/code> 时才能使用。这包括 &lt;code>//go:nowritebarrier&lt;/code>。&lt;/li>
+&lt;li>完全没有文档的指令，可以通过搜索编译器的测试来发现它们的存在。这包括 &lt;code>//go:nocheckptr&lt;/code>、&lt;code>//go:nointerface&lt;/code> 和 &lt;code>//go:debug&lt;/code>。&lt;/li>
+&lt;/ul>
+&lt;p>我们最感兴趣的是第一种类型的指令：&lt;code>//go:nosplit&lt;/code>。根据文档：&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;code>//go:nosplit&lt;/code> 指令必须紧跟函数声明。它指定函数必须省略其常规的栈溢出检查。这最常用于低级运行时代码，在调用协程被抢占不安全时调用。&lt;/p>&lt;/blockquote>
+&lt;p>这到底是什么意思？普通程序代码可以使用此注解，但其行为定义不明确。让我们深入探讨。&lt;/p>
+&lt;h2 id="go-栈增长">Go 栈增长&lt;/h2>
+&lt;p>Go 为新的 goroutine 分配非常小的栈，这些栈会动态增长。这使得程序可以生成大量短生命周期的 goroutine，而无需在它们的栈上花费大量内存。这意味着栈溢出非常容易发生。每个函数都知道其栈的大小，&lt;code>runtime.g&lt;/code>（goroutine 结构体）包含栈的结束位置；如果栈指针小于它（栈向上增长），控制权就会传递给 &lt;code>runtime.morestack&lt;/code>，它会有效地抢占 goroutine，同时调整其栈的大小。实际上，每个 Go 函数周围都有以下代码：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">TEXT&lt;/span> .&lt;span style="color:#a6e22e">f&lt;/span>(&lt;span style="color:#a6e22e">SB&lt;/span>), &lt;span style="color:#a6e22e">ABIInternal&lt;/span>, &lt;span style="color:#960050;background-color:#1e0010">$&lt;/span>&lt;span style="color:#ae81ff">24&lt;/span>&lt;span style="color:#f92672">-&lt;/span>&lt;span style="color:#ae81ff">16&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">CMPQ&lt;/span> &lt;span style="color:#a6e22e">SP&lt;/span>, &lt;span style="color:#ae81ff">16&lt;/span>(&lt;span style="color:#a6e22e">R14&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">JLS&lt;/span> &lt;span style="color:#a6e22e">grow&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">PUSHQ&lt;/span> &lt;span style="color:#a6e22e">BP&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">MOVQ&lt;/span> &lt;span style="color:#a6e22e">SP&lt;/span>, &lt;span style="color:#a6e22e">BP&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">SUBQ&lt;/span> &lt;span style="color:#960050;background-color:#1e0010">$&lt;/span>&lt;span style="color:#ae81ff">16&lt;/span>, &lt;span style="color:#a6e22e">SP&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">// Function body...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">ADDQ&lt;/span> &lt;span style="color:#960050;background-color:#1e0010">$&lt;/span>&lt;span style="color:#ae81ff">16&lt;/span>, &lt;span style="color:#a6e22e">SP&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">POPQ&lt;/span> &lt;span style="color:#a6e22e">BP&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">RET&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">grow&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">MOVQ&lt;/span> &lt;span style="color:#a6e22e">AX&lt;/span>, &lt;span style="color:#ae81ff">8&lt;/span>(&lt;span style="color:#a6e22e">SP&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">MOVQ&lt;/span> &lt;span style="color:#a6e22e">BX&lt;/span>, &lt;span style="color:#ae81ff">16&lt;/span>(&lt;span style="color:#a6e22e">SP&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">CALL&lt;/span> &lt;span style="color:#a6e22e">runtime&lt;/span>.&lt;span style="color:#a6e22e">morestack_noctxt&lt;/span>(&lt;span style="color:#a6e22e">SB&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">MOVQ&lt;/span> &lt;span style="color:#ae81ff">8&lt;/span>(&lt;span style="color:#a6e22e">SP&lt;/span>), &lt;span style="color:#a6e22e">AX&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">MOVQ&lt;/span> &lt;span style="color:#ae81ff">16&lt;/span>(&lt;span style="color:#a6e22e">SP&lt;/span>), &lt;span style="color:#a6e22e">BX&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">JMP&lt;/span> .&lt;span style="color:#a6e22e">f&lt;/span>(&lt;span style="color:#a6e22e">SB&lt;/span>)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>请注意，&lt;code>r14&lt;/code> 持有指向当前 &lt;code>runtime.g&lt;/code> 的指针，栈限制是该结构体中的第三个字大小的字段（&lt;code>runtime.g.stackguard0&lt;/code>），因此偏移量为 16。如果栈即将耗尽，它会跳转到函数末尾的一个特殊块，该块会溢出所有参数寄存器，陷入运行时，一旦完成，就会取消溢出参数并重新启动函数。请注意，参数在调整 &lt;code>rsp&lt;/code> 之前溢出，这意味着参数被写入调用者的栈帧。这是 Go ABI 的一部分；调用者必须在其栈帧顶部为它调用的任何函数分配空间，以便在必要时溢出所有寄存器以进行抢占。抢占是不可重入的，也就是说，在已经被抢占的 G 上下文中，或者根本没有 G 的情况下运行的函数，都不能被这个检查再次抢占。&lt;/p></description></item><item><title>编程警句 by Alan J. Perlis</title><link>/post/alan-perlis-quotes/</link><pubDate>Mon, 07 Jul 2025 10:00:00 +0800</pubDate><guid>/post/alan-perlis-quotes/</guid><description>&lt;p>本文翻译自 &lt;a href="https://web.archive.org/web/20230127130734/http://pu.inf.uni-tuebingen.de/users/klaeren/epigrams.html">Epigrams in Programming&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;hr>
+&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>One man&amp;rsquo;s constant is another man&amp;rsquo;s variable.&lt;/strong>&lt;/p>
+&lt;blockquote>
+&lt;p>汝之常量，彼之变量。&lt;/p>&lt;/blockquote>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Functions delay binding: data structures induce binding. Moral: Structure data late in the programming process.&lt;/strong>&lt;/p>
+&lt;blockquote>
+&lt;p>函数延迟绑定；数据结构促成绑定。箴言：编程后期再构建数据。&lt;/p>&lt;/blockquote>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Syntactic sugar causes cancer of the semi-colons.&lt;/strong>&lt;/p>
+&lt;blockquote>
+&lt;p>语法糖导致了分号癌。&lt;/p>&lt;/blockquote>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Every program is a part of some other program and rarely fits.&lt;/strong>&lt;/p>
+&lt;blockquote>
+&lt;p>每个程序都是其他程序的一部分，而且很少能完美适配。&lt;/p>&lt;/blockquote>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>If a program manipulates a large amount of data, it does so in a small number of ways.&lt;/strong>&lt;/p></description></item><item><title>使用 Go Module</title><link>/post/using-go-modules/</link><pubDate>Wed, 27 Mar 2019 17:07:21 +0000</pubDate><guid>/post/using-go-modules/</guid><description>&lt;p>本文翻译自 &lt;a href="https://blog.golang.org/using-go-modules">Using Go Modules&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;h2 id="引言">引言&lt;/h2>
+&lt;p>Go 1.11 和 1.12 包含&lt;a href="https://golang.org/doc/go1.11#modules">对 Module(后文称模块) 的初步支持&lt;/a>, Go 的&lt;a href="https://blog.golang.org/versioning-proposal">新依赖管理系统&lt;/a>使依赖版本信息明确且易于管理. 本文介绍了开始使用模块所需的基本操作. 后续文章将涵盖发布供其他人使用的模块.&lt;/p>
+&lt;p>模块是存储在文件树中的 &lt;a href="https://golang.org/ref/spec#Packages">Go 包&lt;/a>的集合, 其根目录中包含 go.mod 文件. go.mod 文件定义了模块的模块路径, 它也是用于根目录的导入路径, 以及它的依赖(它们是成功构建所需的其他模块). 每个依赖都被写作模块路径和特定&lt;a href="http://semver.org/">语义版本&lt;/a>.&lt;/p>
+&lt;p>从 Go 1.11 开始, 如果目录在 $GOPATH/src 之外, 则 go 命令允许在当前目录或任何具有 go.mod 的父目录使用模块. (在 $GOPATH/src 中, 为了兼容性, go 命令仍然在旧的GOPATH 模式下运行, 即使找到了 go.mod 也是如此. 有关详细信息, 请参阅 &lt;a href="https://golang.org/cmd/go/#hdr-Preliminary_module_support">go 命令文档&lt;/a>) 从 Go 1.13 开始, 模块模式将是所有开发的默认模式.&lt;/p>
+&lt;p>本文将介绍使用模块开发 Go 代码时出现的一系列常见操作:&lt;/p>
+&lt;ul>
+&lt;li>创建一个新的模块.&lt;/li>
+&lt;li>添加依赖.&lt;/li>
+&lt;li>升级依赖.&lt;/li>
+&lt;li>添加一个新的大版本依赖.&lt;/li>
+&lt;li>升级依赖到一个新的大版本.&lt;/li>
+&lt;li>移除不用的依赖.&lt;/li>
+&lt;/ul>
+&lt;h2 id="创建一个新的模块">创建一个新的模块&lt;/h2>
+&lt;p>让我们创建一个新模块.&lt;/p>
+&lt;p>在 $GOPATH/src之 外的某处创建一个新的空目录, 切换到该目录, 然后创建一个新的源文件 hello.go:&lt;/p></description></item><item><title>通过消除错误消除错误处理</title><link>/post/eliminate-error-handling-by-eliminating-errors/</link><pubDate>Wed, 06 Feb 2019 14:46:28 +0000</pubDate><guid>/post/eliminate-error-handling-by-eliminating-errors/</guid><description>&lt;p>本文翻译自 &lt;a href="https://dave.cheney.net/2019/01/27/eliminate-error-handling-by-eliminating-errors">Eliminate error handling by eliminating errors&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>Go 2 旨在改善&lt;a href="https://go.googlesource.com/proposal/+/master/design/go2draft-error-handling-overview.md">错误处理&lt;/a>的开销, 但是你知道有什么比处理错误的改进语法更好吗? 根本不需要处理错误. 现在, 我不是说 &amp;ldquo;删除你的错误处理代码&amp;rdquo;, 相反我建议改变你的代码, 这样你就没有多少错误需要处理.&lt;/p>
+&lt;p>本文从 John Ousterhout &lt;a href="https://www.amazon.com/Philosophy-Software-Design-John-Ousterhout/dp/1732102201">软件设计的哲学&lt;/a>的一章中汲取灵感, &amp;ldquo;定义不存在的错误&amp;rdquo;. 我尝试将他的建议应用于 Go.&lt;/p>
+&lt;p>这是一个计算文件行数的函数:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">func&lt;/span> &lt;span style="color:#a6e22e">CountLines&lt;/span>(&lt;span style="color:#a6e22e">r&lt;/span> &lt;span style="color:#a6e22e">io&lt;/span>.&lt;span style="color:#a6e22e">Reader&lt;/span>) (&lt;span style="color:#66d9ef">int&lt;/span>, &lt;span style="color:#66d9ef">error&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">var&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">br&lt;/span> = &lt;span style="color:#a6e22e">bufio&lt;/span>.&lt;span style="color:#a6e22e">NewReader&lt;/span>(&lt;span style="color:#a6e22e">r&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">lines&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">err&lt;/span> &lt;span style="color:#66d9ef">error&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> )
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">for&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">_&lt;/span>, &lt;span style="color:#a6e22e">err&lt;/span> = &lt;span style="color:#a6e22e">br&lt;/span>.&lt;span style="color:#a6e22e">ReadString&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;\n&amp;#39;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">lines&lt;/span>&lt;span style="color:#f92672">++&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> &lt;span style="color:#a6e22e">err&lt;/span> &lt;span style="color:#f92672">!=&lt;/span> &lt;span style="color:#66d9ef">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">break&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">if&lt;/span> &lt;span style="color:#a6e22e">err&lt;/span> &lt;span style="color:#f92672">!=&lt;/span> &lt;span style="color:#a6e22e">io&lt;/span>.&lt;span style="color:#a6e22e">EOF&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>, &lt;span style="color:#a6e22e">err&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#a6e22e">lines&lt;/span>, &lt;span style="color:#66d9ef">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>我们构造一个 bufio.Reader, 然后在一个循环中调用 ReadString 方法, 递增计数器直到我们到达文件的末尾, 然后我们返回读取的行数. 这是我们&lt;em>想&lt;/em>编写的代码, 而 CountLines 因错误处理而变得更加复杂.&lt;/p>
+&lt;p>例如, 有这种奇怪的结构:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">_&lt;/span>, &lt;span style="color:#a6e22e">err&lt;/span> = &lt;span style="color:#a6e22e">br&lt;/span>.&lt;span style="color:#a6e22e">ReadString&lt;/span>(&lt;span style="color:#e6db74">&amp;#39;\n&amp;#39;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">lines&lt;/span>&lt;span style="color:#f92672">++&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">if&lt;/span> &lt;span style="color:#a6e22e">err&lt;/span> &lt;span style="color:#f92672">!=&lt;/span> &lt;span style="color:#66d9ef">nil&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">break&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>我们在检查错误之前增加行数, 这看起来很奇怪. 我们必须以这种方式编写它的原因是, 如果在遇到换行符之前遇到文件结尾-io.EOF, 则 ReadString 将返回错误. 如果没有尾换行符, 则会发生这种情况.&lt;/p></description></item><item><title>一些常见的并发编程错误</title><link>/post/concurrent-common-mistakes/</link><pubDate>Fri, 14 Sep 2018 10:11:27 +0000</pubDate><guid>/post/concurrent-common-mistakes/</guid><description>&lt;p>本文翻译自 &lt;a href="https://go101.org/article/concurrent-common-mistakes.html">Some Common Concurrent Programming Mistakes&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>Go 是内置了并发编程支持的语言. 通过使用关键字 &lt;code>go&lt;/code> 来创建 goroutines (轻量级线程), 并且&lt;a href="https://go101.org/article/channel-use-cases.html">使用&lt;/a> &lt;a href="https://go101.org/article/channel.html">channels&lt;/a> 和 Go 提供的&lt;a href="https://go101.org/article/concurrent-atomic-operation.html">其他并发&lt;/a>&lt;a href="https://go101.org/article/concurrent-synchronization-more.html%3CPaste%3E">同步的技术&lt;/a>, 并发编程变得简单, 灵活, 并且富有乐趣.&lt;/p>
+&lt;p>另一方面, Go 不会阻止 Go 程序员由于粗心或者缺乏经验导致的一些并发编程的错误. 本文接下来的部分将展示一些常见的 Go 并发编程错误, 来帮助 Go 程序员避免类似的错误.&lt;/p>
+&lt;h2 id="需要同步的时候没有同步">需要同步的时候没有同步&lt;/h2>
+&lt;p>代码行可能&lt;a href="https://go101.org/article/memory-model.html">不会按书写代码的顺序执行&lt;/a>.&lt;/p>
+&lt;p>如下的程序有两个错误:&lt;/p>
+&lt;ul>
+&lt;li>首先, 主 goroutine 中 &lt;code>b&lt;/code> 的读取和新 goroutine 中 &lt;code>b&lt;/code> 的写入可能存在数据竞争.&lt;/li>
+&lt;li>其次, 条件 &lt;code>b == true&lt;/code> 无法确保主 goroutine 满足 &lt;code>a != nil&lt;/code>. 编译器和 CPU 在新 goroutine 中通过重排序进行优化, 所以运行时 &lt;code>b&lt;/code> 的赋值可能发生在 &lt;code>a&lt;/code> 的赋值之前, 导致当主 goroutine 中 &lt;code>a&lt;/code> 的元素被修改的时候, &lt;code>a&lt;/code> 仍旧是 &lt;code>nil&lt;/code>.&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">package&lt;/span> &lt;span style="color:#a6e22e">main&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#e6db74">&amp;#34;time&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#e6db74">&amp;#34;runtime&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">func&lt;/span> &lt;span style="color:#a6e22e">main&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#66d9ef">var&lt;/span> &lt;span style="color:#a6e22e">a&lt;/span> []&lt;span style="color:#66d9ef">int&lt;/span> &lt;span style="color:#75715e">// nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#66d9ef">var&lt;/span> &lt;span style="color:#a6e22e">b&lt;/span> &lt;span style="color:#66d9ef">bool&lt;/span> &lt;span style="color:#75715e">// false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#75715e">// a new goroutine&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#66d9ef">go&lt;/span> &lt;span style="color:#66d9ef">func&lt;/span> () {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		&lt;span style="color:#a6e22e">a&lt;/span> = make([]&lt;span style="color:#66d9ef">int&lt;/span>, &lt;span style="color:#ae81ff">3&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		&lt;span style="color:#a6e22e">b&lt;/span> = &lt;span style="color:#66d9ef">true&lt;/span> &lt;span style="color:#75715e">// write b&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	}()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#66d9ef">for&lt;/span> !&lt;span style="color:#a6e22e">b&lt;/span> { &lt;span style="color:#75715e">// read b&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		&lt;span style="color:#a6e22e">time&lt;/span>.&lt;span style="color:#a6e22e">Sleep&lt;/span>(&lt;span style="color:#a6e22e">time&lt;/span>.&lt;span style="color:#a6e22e">Second&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		&lt;span style="color:#a6e22e">runtime&lt;/span>.&lt;span style="color:#a6e22e">Gosched&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#a6e22e">a&lt;/span>[&lt;span style="color:#ae81ff">0&lt;/span>], &lt;span style="color:#a6e22e">a&lt;/span>[&lt;span style="color:#ae81ff">1&lt;/span>], &lt;span style="color:#a6e22e">a&lt;/span>[&lt;span style="color:#ae81ff">2&lt;/span>] = &lt;span style="color:#ae81ff">0&lt;/span>, &lt;span style="color:#ae81ff">1&lt;/span>, &lt;span style="color:#ae81ff">2&lt;/span> &lt;span style="color:#75715e">// might panic&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>上面的程序可能在一台电脑上运行良好, 在另一台电脑上 panic. 或者它可能 N 次运行良好, N+1 次 panic.&lt;/p></description></item><item><title>Go 问答 101</title><link>/post/go-faq-101/</link><pubDate>Fri, 20 Jul 2018 13:41:26 +0000</pubDate><guid>/post/go-faq-101/</guid><description>&lt;p>本文翻译自 &lt;a href="https://go101.org/article/unofficial-faq.html">Go FAQ 101&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;h2 id="编译器和运行时">编译器和运行时&lt;/h2>
+&lt;h2 id="编译错误-non-name--on-left-side-of--什么意思">编译错误 non-name *** on left side of := 什么意思&lt;/h2>
+&lt;p>到现在为止(Go 1.10), 对于短变量声明有一个&lt;a href="https://golang.org/ref/spec#Short_variable_declarations">强制性规则&lt;/a>:&lt;/p>
+&lt;blockquote>
+&lt;p>:= 左侧的所有条目必须是纯标识符, 并且至少有一个是新变量名.&lt;/p>&lt;/blockquote>
+&lt;p>这意味着容器元素(&lt;code>x[i]&lt;/code>), 结构体字段(&lt;code>x.f&lt;/code>), 指针解引用(&lt;code>*&lt;/code>)以及限制性标识符不能出现在 &lt;code>:=&lt;/code> 的左侧. 目前, 针对这个问题有一个&lt;a href="https://github.com/golang/go/issues/377">公开 issue&lt;/a>. 看起来 Go 作者们想把这个问题留到 Go 2.0.&lt;/p>
+&lt;h2 id="编译错误-unexpected-newline-expecting---什么意思">编译错误 unexpected newline, expecting { &amp;hellip; 什么意思&lt;/h2>
+&lt;p>在 Go 中, 我们不能在随意的位置折断一行代码. 具体细节可以阅读 &lt;a href="https://go101.org/article/line-break-rules.html">Go 换行规则&lt;/a>. 通过该规则, 一般来说, 在大括号之前不允许换行.&lt;/p>
+&lt;p>比如下面的代码:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">if&lt;/span> &lt;span style="color:#66d9ef">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">for&lt;/span> &lt;span style="color:#a6e22e">i&lt;/span> &lt;span style="color:#f92672">:=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>; &lt;span style="color:#a6e22e">i&lt;/span> &amp;lt; &lt;span style="color:#ae81ff">10&lt;/span>; &lt;span style="color:#a6e22e">i&lt;/span>&lt;span style="color:#f92672">++&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">var&lt;/span> &lt;span style="color:#a6e22e">_&lt;/span> = []&lt;span style="color:#66d9ef">int&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#ae81ff">1&lt;/span>, &lt;span style="color:#ae81ff">2&lt;/span>, &lt;span style="color:#ae81ff">3&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>将解释成:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">if&lt;/span> &lt;span style="color:#66d9ef">true&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">for&lt;/span> &lt;span style="color:#a6e22e">i&lt;/span> &lt;span style="color:#f92672">:=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>; &lt;span style="color:#a6e22e">i&lt;/span> &amp;lt; &lt;span style="color:#ae81ff">10&lt;/span>; &lt;span style="color:#a6e22e">i&lt;/span>&lt;span style="color:#f92672">++&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">var&lt;/span> &lt;span style="color:#a6e22e">_&lt;/span> = []&lt;span style="color:#66d9ef">int&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#ae81ff">1&lt;/span>, &lt;span style="color:#ae81ff">2&lt;/span>, &lt;span style="color:#ae81ff">3&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Go 编译器会对每一个开放的大括号给出一个错误. 为了避免这些错误, 我们应该重写代码如下:&lt;/p></description></item><item><title>Go 细节</title><link>/post/go-details/</link><pubDate>Tue, 08 May 2018 16:45:15 +0000</pubDate><guid>/post/go-details/</guid><description>&lt;p>本文翻译自 &lt;a href="https://go101.org/article/details.html">Go Details 101&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;h2 id="代码包">代码包&lt;/h2>
+&lt;p>##这些md还有一个问题，就是 markdown 的标记，如 ## ，### 一个包可以在源文件中多次导入&lt;/p>
+&lt;p>Go 源文件可以多次导入相同的包, 但导入名称必须不同. 这些相同的包导入引用相同的包实例.&lt;/p>
+&lt;p>例如:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">package&lt;/span> &lt;span style="color:#a6e22e">main&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">import&lt;/span> &lt;span style="color:#e6db74">&amp;#34;fmt&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">import&lt;/span> &lt;span style="color:#e6db74">&amp;#34;io&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">import&lt;/span> &lt;span style="color:#a6e22e">inout&lt;/span> &lt;span style="color:#e6db74">&amp;#34;io&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">func&lt;/span> &lt;span style="color:#a6e22e">main&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#a6e22e">fmt&lt;/span>.&lt;span style="color:#a6e22e">Println&lt;/span>(&lt;span style="color:#f92672">&amp;amp;&lt;/span>&lt;span style="color:#a6e22e">inout&lt;/span>.&lt;span style="color:#a6e22e">EOF&lt;/span> &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#f92672">&amp;amp;&lt;/span>&lt;span style="color:#a6e22e">io&lt;/span>.&lt;span style="color:#a6e22e">EOF&lt;/span>) &lt;span style="color:#75715e">// true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="package-mypkg-后的注释--import-xyzmypkg-对于-go-编译器是有意义的">package mypkg 后的注释 // import &amp;ldquo;x.y.z.mypkg&amp;rdquo; 对于 Go 编译器是有意义的&lt;/h3>
+&lt;p>例如, 当导入此包的源文件由标准 Go 编译器编译时, 以下包的导入路径必须为 &amp;ldquo;x.y.z.mypkg&amp;rdquo;.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">package&lt;/span> &lt;span style="color:#a6e22e">mypkg&lt;/span> &lt;span style="color:#75715e">// import &amp;#34;x.y.z.mypkg&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">...&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="流程控制">流程控制&lt;/h2>
+&lt;h3 id="swith-和-select-中的-default-分支可以放在所有-case-分支之前-之后-或者之间">swith 和 select 中的 default 分支可以放在所有 case 分支之前, 之后, 或者之间.&lt;/h3>
+&lt;p>与许多其他语言相比, 一个明显的区别在于 switch-case 控制流程块中默认分支的顺序可以是任意的. 例如, 以下三个 switch-case 控制流程块彼此等效.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">switch&lt;/span> &lt;span style="color:#a6e22e">n&lt;/span> &lt;span style="color:#f92672">:=&lt;/span> &lt;span style="color:#a6e22e">rand&lt;/span>.&lt;span style="color:#a6e22e">Intn&lt;/span>(&lt;span style="color:#ae81ff">3&lt;/span>); &lt;span style="color:#a6e22e">n&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">case&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>: &lt;span style="color:#a6e22e">fmt&lt;/span>.&lt;span style="color:#a6e22e">Println&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;n == 0&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">case&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>: &lt;span style="color:#a6e22e">fmt&lt;/span>.&lt;span style="color:#a6e22e">Println&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;n == 1&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">default&lt;/span>: &lt;span style="color:#a6e22e">fmt&lt;/span>.&lt;span style="color:#a6e22e">Println&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;n == 2&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">switch&lt;/span> &lt;span style="color:#a6e22e">n&lt;/span> &lt;span style="color:#f92672">:=&lt;/span> &lt;span style="color:#a6e22e">rand&lt;/span>.&lt;span style="color:#a6e22e">Intn&lt;/span>(&lt;span style="color:#ae81ff">3&lt;/span>); &lt;span style="color:#a6e22e">n&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">default&lt;/span>: &lt;span style="color:#a6e22e">fmt&lt;/span>.&lt;span style="color:#a6e22e">Println&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;n == 2&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">case&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>: &lt;span style="color:#a6e22e">fmt&lt;/span>.&lt;span style="color:#a6e22e">Println&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;n == 0&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">case&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>: &lt;span style="color:#a6e22e">fmt&lt;/span>.&lt;span style="color:#a6e22e">Println&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;n == 1&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">switch&lt;/span> &lt;span style="color:#a6e22e">n&lt;/span> &lt;span style="color:#f92672">:=&lt;/span> &lt;span style="color:#a6e22e">rand&lt;/span>.&lt;span style="color:#a6e22e">Intn&lt;/span>(&lt;span style="color:#ae81ff">3&lt;/span>); &lt;span style="color:#a6e22e">n&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">case&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>: &lt;span style="color:#a6e22e">fmt&lt;/span>.&lt;span style="color:#a6e22e">Println&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;n == 0&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">default&lt;/span>: &lt;span style="color:#a6e22e">fmt&lt;/span>.&lt;span style="color:#a6e22e">Println&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;n == 2&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">case&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>: &lt;span style="color:#a6e22e">fmt&lt;/span>.&lt;span style="color:#a6e22e">Println&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;n == 1&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="defer-匿名函数可以修改嵌套函数的命名返回结果">defer 匿名函数可以修改嵌套函数的命名返回结果&lt;/h3>
+&lt;p>例如:&lt;/p></description></item><item><title>Go 类型系统概述</title><link>/post/type-system-overview/</link><pubDate>Mon, 07 May 2018 14:48:57 +0000</pubDate><guid>/post/type-system-overview/</guid><description>&lt;p>本文翻译自 &lt;a href="https://go101.org/article/type-system-overview.html">Overview Of Go Type System&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>本文将介绍 Go 中的各种类型. Go 类型系统中的各种概念也将被引入. 如果不了解这些概念, 就很难对 Go 有透彻的理解.&lt;/p>
+&lt;h2 id="概念-基本类型">概念: 基本类型&lt;/h2>
+&lt;p>Go 中内置的基本类型已经在&lt;a href="https://go101.org/article/basic-types-and-value-literals.html">内置的基本类型和基本值字面量&lt;/a>中引入. 为了使本文完整, 这些内建的基本类型在这里重新列出.&lt;/p>
+&lt;ul>
+&lt;li>内建字符串类型: string.&lt;/li>
+&lt;li>内建布尔类型: bool.&lt;/li>
+&lt;li>内建数字类型:
+&lt;ul>
+&lt;li>int8, uint8 (byte), int16, uint16, int32 (rune), uint32, int64, uint64, int, uint, uinptr.&lt;/li>
+&lt;li>float32, float64.&lt;/li>
+&lt;li>complex64, complex128.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>除了&lt;a href="https://go101.org/article/string.html">字符串类型&lt;/a>, Go 101 系列文章不会在其他基本类型上作过多解释.&lt;/p>
+&lt;h2 id="概念-复合类型">概念: 复合类型&lt;/h2>
+&lt;p>Go 支持以下复合类型:&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://go101.org/article/pointer.html">指针类型&lt;/a> - 和 C 指针一样.&lt;/li>
+&lt;li>&lt;a href="https://go101.org/article/struct.html">结构体类型&lt;/a> - 和 C 结构体一样.&lt;/li>
+&lt;li>&lt;a href="https://go101.org/article/function.html">函数类型&lt;/a> - 函数是 Go 的一等类型.&lt;/li>
+&lt;li>&lt;a href="https://go101.org/article/container.html">容器类型&lt;/a>:
+&lt;ul>
+&lt;li>数组类型 - 固定长度的容器类型.&lt;/li>
+&lt;li>切片类型 - 动态长度和动态容量的容器类型.&lt;/li>
+&lt;li>映射类型 - 映射是关联数组(或字典). 标准 Go 编译器将映射实现为哈希表.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>&lt;a href="https://go101.org/article/channel.html">管道类型&lt;/a> - 管道(channels) 用于在 goroutine (Go 中的绿色线程) 之间同步数据.&lt;/li>
+&lt;li>&lt;a href="https://go101.org/article/interface.html">接口类型&lt;/a> - 接口在反射和多态中起着关键作用.&lt;/li>
+&lt;/ul>
+&lt;p>与基本类型不同, 复合类型可以表示为它们各自的类型字面量. 以下是各种复合类型的一些字面量表示示例.&lt;/p></description></item><item><title>Go 的值拷贝代价</title><link>/post/go-value-copy-cost/</link><pubDate>Fri, 27 Apr 2018 19:13:51 +0000</pubDate><guid>/post/go-value-copy-cost/</guid><description>&lt;p>本文翻译自 &lt;a href="https://go101.org/article/value-copy-cost.html">Go Value Copy Costs&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>值拷贝在 Go 语言编程中普遍发生. 赋值, 参数传递, channel 值发送以及接收操作都会涉及值拷贝. 本文将讨论 Go 中的值拷贝代价.&lt;/p>
+&lt;h2 id="值大小">值大小&lt;/h2>
+&lt;p>值的大小意味着该值(&lt;a href="https://go101.org/article/value-part.html">直接部分&lt;/a>)将在内存中占用多少字节. 值的间接底层部分不影响值的大小.&lt;/p>
+&lt;p>在 Go 中, 如果两个值的类型属于同一类型, 并且类型不是基本类型, 字符串类型, 接口类型, 数组类型和结构体类型, 那么这两个值的大小总是相等.&lt;/p>
+&lt;p>事实上, 对于标准的 Go 编译器/运行时, 两个字符串值的大小也总是相等, 对于两个接口值的大小也是一样的.&lt;/p>
+&lt;p>对于标准的 Go 编译器/运行时, 相同类型的值具有相同的值大小. 因此, 我们通常将值的大小称为值类型的大小.&lt;/p>
+&lt;p>数组类型的大小取决于元素类型的大小和数组类型的长度. 数组类型大小是数组元素类型大小与数组长度的乘积.&lt;/p>
+&lt;p>结构类型的大小取决于它的所有字段. 因为在两个相邻字段之间可能存在一些填充字节, 所以结构类型大小不小于(并且通常大于)结构字段的相应类型大小之和.&lt;/p>
+&lt;p>下表列出了各种类型的值大小. 在表中, 一个字表示一个本地字, 它在 32 位操作系统上是 4 字节, 在 64 位操作系统上是 8 字节.&lt;/p>
+&lt;table>
+ &lt;thead>
+ &lt;tr>
+ &lt;th style="text-align: left">类型&lt;/th>
+ &lt;th style="text-align: left">Go 1.10 的值大小&lt;/th>
+ &lt;th style="text-align: left">Go 规范要求&lt;/th>
+ &lt;/tr>
+ &lt;/thead>
+ &lt;tbody>
+ &lt;tr>
+ &lt;td style="text-align: left">bool&lt;/td>
+ &lt;td style="text-align: left">1 字节&lt;/td>
+ &lt;td style="text-align: left">未明确&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">int8, uint8(byte)&lt;/td>
+ &lt;td style="text-align: left">1 字节&lt;/td>
+ &lt;td style="text-align: left">1 字节&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">int16, uint16&lt;/td>
+ &lt;td style="text-align: left">2 字节&lt;/td>
+ &lt;td style="text-align: left">2 字节&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">int32 (rune), uint32, float32&lt;/td>
+ &lt;td style="text-align: left">4 字节&lt;/td>
+ &lt;td style="text-align: left">4 字节&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">int64, uint64, float64, complex64&lt;/td>
+ &lt;td style="text-align: left">8 字节&lt;/td>
+ &lt;td style="text-align: left">8 字节&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">complex128&lt;/td>
+ &lt;td style="text-align: left">16 字节&lt;/td>
+ &lt;td style="text-align: left">16 字节&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">int, uint&lt;/td>
+ &lt;td style="text-align: left">1 字&lt;/td>
+ &lt;td style="text-align: left">体系结构相关, 4 或 8 个字节&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">uintptr&lt;/td>
+ &lt;td style="text-align: left">1 字&lt;/td>
+ &lt;td style="text-align: left">足够大以存储指针值的未解释位&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">string&lt;/td>
+ &lt;td style="text-align: left">2 字&lt;/td>
+ &lt;td style="text-align: left">未明确&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">pointer&lt;/td>
+ &lt;td style="text-align: left">1 字&lt;/td>
+ &lt;td style="text-align: left">未明确&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">slice&lt;/td>
+ &lt;td style="text-align: left">3 字&lt;/td>
+ &lt;td style="text-align: left">未明确&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">map&lt;/td>
+ &lt;td style="text-align: left">1 字&lt;/td>
+ &lt;td style="text-align: left">未明确&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">channel&lt;/td>
+ &lt;td style="text-align: left">1 字&lt;/td>
+ &lt;td style="text-align: left">未明确&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">function&lt;/td>
+ &lt;td style="text-align: left">1 字&lt;/td>
+ &lt;td style="text-align: left">未明确&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">interface&lt;/td>
+ &lt;td style="text-align: left">2 字&lt;/td>
+ &lt;td style="text-align: left">未明确&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">struct&lt;/td>
+ &lt;td style="text-align: left">所有字段的大小总和 + 填充字节数&lt;/td>
+ &lt;td style="text-align: left">如果结构体类型不包含大于零的字段, 则其大小为零&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">array&lt;/td>
+ &lt;td style="text-align: left">(元素值大小) * (数组长度)&lt;/td>
+ &lt;td style="text-align: left">如果数组的元素类型大小为零, 则其大小为零&lt;/td>
+ &lt;/tr>
+ &lt;/tbody>
+&lt;/table>
+&lt;h2 id="值拷贝代价">值拷贝代价&lt;/h2>
+&lt;p>一般来说, 拷贝值的成本与值的大小成正比. 但是, 值的大小并不是计算值拷贝的唯一因素. 不同的 CPU 体系结构可能会针对具有特定大小的值专门优化值拷贝. 在实践中, 我们可以将大小小于四个本地字的值视为小值. 拷贝小值的成本很小.&lt;/p></description></item><item><title>为什么 Go 会有 nil channels</title><link>/post/why-are-there-nil-channels-in-go/</link><pubDate>Sat, 21 Apr 2018 22:25:15 +0000</pubDate><guid>/post/why-are-there-nil-channels-in-go/</guid><description>&lt;p>本文翻译自 &lt;a href="https://medium.com/justforfunc/why-are-there-nil-channels-in-go-9877cc0b2308">Why are there nil channels in Go&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>每个写过 Go 的人都知道 channels. 我们大多数人也知道 channels 的默认值是 nil. 但是我们很多人都不知道这个 nil 值是有用的. (译注: 老实说读到这篇文章之前我也认为 nil channels 没什么用, 不仅没用, 我还觉得对 nil channels 的写入操作应该 panic 才对, 就像对 nil map 的写入是 panic 一样, 甚至认为这是 Go 的设计不一致问题)&lt;/p>
+&lt;p>我从一个学习 Go 的开发者的 twitter 上得到了同样的问题, 他想知道是否 Go nil channels 的存在仅仅是为了完整性.&lt;/p>
+&lt;p>想知道是否有用是有意义的, 因为它们的行为表现的截然相反.&lt;/p>
+&lt;p>给定一个 nil channel c:&lt;/p>
+&lt;ul>
+&lt;li>&amp;lt;-c 从 c 接收将永远阻塞&lt;/li>
+&lt;li>c &amp;lt;- v 发送值到 c 会永远阻塞&lt;/li>
+&lt;li>close(c) 关闭 c 引发 panic&lt;/li>
+&lt;/ul>
+&lt;p>但我仍然坚持他们是有用的. 让我先介绍一个问题, 其解决方案起初看起来很明显, 但实际上并不像人们想象的那么容易, 实际上却从 nil channels 中受益.&lt;/p></description></item><item><title>Go 中的 nil</title><link>/post/go-nils/</link><pubDate>Fri, 20 Apr 2018 13:41:26 +0000</pubDate><guid>/post/go-nils/</guid><description>&lt;p>本文翻译自 &lt;a href="https://go101.org/article/nil.html">nils In Go&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>nil 是 Go 中一个熟悉而重要的预定义标识符. 它是很多类型零值(zero values)的字面量表示. 很多有一些其他流行语言经验的 Go 程序员新手视 nil 为其他语言 null(或者 NULL)的副本. 这是部分正确的, 但是 Go 中的 nil 和其他语言的 null(或者 NULL)有很多不同之处.&lt;/p>
+&lt;p>本文的剩余部分将列出与 nil 有关的各种事实和细节.&lt;/p>
+&lt;h2 id="go-中的-nil-是一个预定义标识符">Go 中的 nil 是一个预定义标识符&lt;/h2>
+&lt;p>你可以使用 nil 而不用声明它.&lt;/p>
+&lt;h2 id="nil-可以表示很多类型的零值">nil 可以表示很多类型的零值&lt;/h2>
+&lt;p>在 Go 中, nil 可以表示以下类型的零值:&lt;/p>
+&lt;ul>
+&lt;li>pointer (包括类型不安全的)&lt;/li>
+&lt;li>map&lt;/li>
+&lt;li>slice&lt;/li>
+&lt;li>function&lt;/li>
+&lt;li>channel&lt;/li>
+&lt;li>interface&lt;/li>
+&lt;/ul>
+&lt;p>换句话说, 在 Go 中, nil 可能是许多不同类型的值.&lt;/p>
+&lt;h2 id="nil-不是默认类型">nil 不是默认类型&lt;/h2>
+&lt;p>Go 中的每个其他预定义标识符都有一个默认类型. 比如,&lt;/p>
+&lt;ul>
+&lt;li>true 和 false 的默认类型都是 bool 类型.&lt;/li>
+&lt;li>iota 的默认类型是 int.&lt;/li>
+&lt;/ul>
+&lt;p>但是 nil 没有默认类型, 尽管它有很多可能的类型. 编译器必须有足够的信息来从上下文中推导出 nil 的类型.&lt;/p></description></item><item><title>Go 中的内存泄漏</title><link>/post/memory-leaking/</link><pubDate>Mon, 02 Apr 2018 14:58:32 +0000</pubDate><guid>/post/memory-leaking/</guid><description>&lt;p>本文翻译自 &lt;a href="https://go101.org/article/memory-leaking.html">Memory Leaking&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>当使用带有垃圾回收器(GC)的语言编程时, 通常我们不需要关心内存泄漏问题, 因为语言运行时(runtime)会定期收集未使用的内存. 但是, 我们确实需要了解一些可能导致轻微的或者真正的内存泄漏的特殊场景. 本文剩下的部分将列出几个这样的情况.&lt;/p>
+&lt;h2 id="求子字符串substrings导致的轻微内存泄露">求子字符串(Substrings)导致的轻微内存泄露&lt;/h2>
+&lt;p>Go 规范没有指定在子字符串表达式中涉及的结果字符串和基本字符串是否应共享相同的底层内存块，该内存块托管两个字符串的底层字节序列. Go 标准编译器/运行时确实会让它们共享相同的底层内存块. 这是一个很好的设计, 这既是内存也是 CPU 消耗的明智之举. 但它可能会导致内存泄漏.&lt;/p>
+&lt;p>例如, 调用下面的函数 f 后, 将有 1M 字节的内存泄漏(轻微), 直到其他地方修改了包级(package-level)变量 s0.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">var&lt;/span> &lt;span style="color:#a6e22e">s0&lt;/span> &lt;span style="color:#66d9ef">string&lt;/span> &lt;span style="color:#75715e">// package level variable&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">func&lt;/span> &lt;span style="color:#a6e22e">f&lt;/span>(&lt;span style="color:#a6e22e">s1&lt;/span> &lt;span style="color:#66d9ef">string&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// 假设 s1 是一个长度大于 50 的字符串.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">s0&lt;/span> = &lt;span style="color:#a6e22e">s1&lt;/span>[:&lt;span style="color:#ae81ff">50&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// 现在, s0 和 s1 共享相同的底层内存块.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// s1 现在不存活了, 但是 s0 依然存活.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// 尽管仅有 50 个字节在内存块中,&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// s0 仍旧存活的事实阻止了这 1M 字节的内存块被回收.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>为了避免这种轻微的内存泄漏, 我们可以将子字符串转换为一个 []byte 值, 然后将 []byte 值转换回 string.&lt;/p></description></item><item><title>Go 中的同步队列</title><link>/post/synchronization-queues-in-golang/</link><pubDate>Tue, 27 Mar 2018 21:14:05 +0000</pubDate><guid>/post/synchronization-queues-in-golang/</guid><description>&lt;p>本文翻译自 &lt;a href="https://medium.com/golangspec/synchronization-queues-in-golang-554f8e3a31a4">Synchronization queues in Golang&lt;/a>，版权归原作者所有。&lt;/p></description></item><item><title>定义 Go 模块</title><link>/post/vgo-module/</link><pubDate>Sun, 25 Feb 2018 15:00:04 +0000</pubDate><guid>/post/vgo-module/</guid><description>&lt;p>本文翻译自 &lt;a href="https://research.swtch.com/vgo-module">Defining Go Modules&lt;/a>，版权归原作者所有。&lt;/p></description></item><item><title>可复制, 可验证, 已验证的构建</title><link>/post/vgo-repro/</link><pubDate>Sat, 24 Feb 2018 19:00:04 +0000</pubDate><guid>/post/vgo-repro/</guid><description>&lt;p>本文翻译自 &lt;a href="https://research.swtch.com/vgo-repro">Reproducible, Verifiable, Verified Builds&lt;/a>，版权归原作者所有。&lt;/p></description></item><item><title>最小版本选择</title><link>/post/vgo-mvs/</link><pubDate>Fri, 23 Feb 2018 19:24:04 +0000</pubDate><guid>/post/vgo-mvs/</guid><description>&lt;p>本文翻译自 &lt;a href="https://research.swtch.com/vgo-mvs">Minimal Version Selection&lt;/a>，版权归原作者所有。&lt;/p></description></item><item><title>语义导入版本控制</title><link>/post/vgo-import/</link><pubDate>Thu, 22 Feb 2018 22:01:04 +0000</pubDate><guid>/post/vgo-import/</guid><description>&lt;p>本文翻译自 &lt;a href="https://research.swtch.com/vgo-import">Semantic Import Versioning&lt;/a>，版权归原作者所有。&lt;/p></description></item><item><title>版本化 Go 之旅</title><link>/post/vgo-tour/</link><pubDate>Thu, 22 Feb 2018 11:01:04 +0000</pubDate><guid>/post/vgo-tour/</guid><description>&lt;p>本文翻译自 &lt;a href="https://research.swtch.com/vgo-tour">A Tour of Versioned Go (vgo)&lt;/a>，版权归原作者所有。&lt;/p></description></item><item><title>Go += 包版本</title><link>/post/vgo-intro/</link><pubDate>Wed, 21 Feb 2018 15:01:04 +0000</pubDate><guid>/post/vgo-intro/</guid><description>&lt;p>本文翻译自 &lt;a href="https://research.swtch.com/vgo-intro">Go += Package Versioning&lt;/a>，版权归原作者所有。&lt;/p></description></item><item><title>Go 函数选项模式</title><link>/post/functional-options-pattern-in-go/</link><pubDate>Thu, 01 Feb 2018 12:00:04 +0000</pubDate><guid>/post/functional-options-pattern-in-go/</guid><description>&lt;p>本文翻译自 &lt;a href="https://halls-of-valhalla.org/beta/articles/functional-options-pattern-in-go,54/">Functional Options Pattern in Go&lt;/a>，版权归原作者所有。&lt;/p></description></item><item><title>Go 谚语</title><link>/post/go-proverbs/</link><pubDate>Sun, 28 Jan 2018 09:25:04 +0000</pubDate><guid>/post/go-proverbs/</guid><description>&lt;p>本文翻译自 &lt;a href="http://go-proverbs.github.io/">Go Proverbs&lt;/a>, 脱胎于 Rob Pike 在 &lt;a href="https://www.youtube.com/watch?v=PAAkCSZUG1c">Gopherfest SV 2015&lt;/a> 的演讲，版权归原作者所有。&lt;/p>
+&lt;h2 id="不要通过共享内存进行通信-通过通信共享内存-don">不要通过共享内存进行通信, 通过通信共享内存 (&lt;a href="https://www.bilibili.com/video/av18889438/?t=2m48s">Don&amp;rsquo;t communicate by sharing memory, share memory by communicating&lt;/a>)&lt;/h2>
+&lt;p>传统的线程模型（通常在编写 Java, C++ 和 Python 程序时使用）要求程序员使用共享内存在线程之间进行通信. 通常, 共享数据结构受锁保护, 线程将争夺这些锁访问数据, 在某些情况下, 通过使用 Python 的 Queue 等线程安全的数据结构可以使这变得更容易.&lt;/p>
+&lt;p>Go 的并发原语 (goroutines 和 channels) 为构造并发软件提供了一种优雅而独特的手段. (这些概念有一个有趣的历史, 要从 C.A.R.Hoare 的通信顺序进程说起.) Go 鼓励使用 channels 在 goroutines 之间传递对数据的引用, 而不是显式地使用锁来调解对共享数据的访问. 这种方法确保只有一个 goroutine 可以在给定的时间访问数据. 这个概念总结在 Effective Go 文档中 (任何 Go 程序员都必须阅读).&lt;/p>
+&lt;p>Go 官方博客中有一篇文章对该谚语解读, 可以参见&lt;a href="https://blog.golang.org/share-memory-by-communicating">原文&lt;/a>.&lt;/p>
+&lt;h2 id="并发不是并行-concurrency-is-not-parallelism">并发不是并行 (&lt;a href="https://www.bilibili.com/video/av18889438/?t=3m42s">Concurrency is not parallelism&lt;/a>)&lt;/h2>
+&lt;p>当人们听到 &lt;em>并发&lt;/em> 这个词的时候, 他们经常会想到并行, 这是一个相关的, 但非常独特的概念. 在编程中, 并发是独立执行的进程的组成, 而并行则是 (可能相关的) 计算的同时执行. 并发是一次处理很多事情. 并行是一次做很多事情.&lt;/p></description></item><item><title>Go 调度工作机制</title><link>/post/how-does-the-golang-scheduler-work/</link><pubDate>Sat, 27 Jan 2018 13:25:04 +0000</pubDate><guid>/post/how-does-the-golang-scheduler-work/</guid><description>&lt;p>本文是来自 Quora 上面一个 Go 相关的&lt;a href="https://www.quora.com/How-does-the-golang-scheduler-work/answer/Ian-Lance-Taylor?share=508736a1&amp;amp;srid=imO0">问题&lt;/a>.&lt;/p></description></item><item><title>MySQL Order By 按特定的字段值排序</title><link>/post/ordering-by-specific-field-values-with-mysql/</link><pubDate>Thu, 25 Jan 2018 11:55:04 +0000</pubDate><guid>/post/ordering-by-specific-field-values-with-mysql/</guid><description>&lt;p>本文翻译自 &lt;a href="https://www.electrictoolbox.com/mysql-order-specific-field-values/">Ordering by specific field values with MySQL&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>在 SQL 查询中可能有时需要使用 ASC 或 DESC 或使用特殊排序字段才能完成的特定顺序. MySQL 有一个 ORDER BY FIELD 函数可以用来做这个.&lt;/p></description></item><item><title>Go 命名返回值的好处</title><link>/post/golang-internals-part-2-nice-benefits-of-named-return-values/</link><pubDate>Mon, 22 Jan 2018 17:42:04 +0000</pubDate><guid>/post/golang-internals-part-2-nice-benefits-of-named-return-values/</guid><description>&lt;p>本文翻译自 &lt;a href="https://blog.minio.io/golang-internals-part-2-nice-benefits-of-named-return-values-1e95305c8687">Golang internals part 2: nice benefits of named return values&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>你可能知道 Golang 提供了命名返回值的能力. 到目前为止在 &lt;a href="https://github.com/minio/minio">minio&lt;/a> 中我们还没有使用这个功能, 但是这将会改变, 因为我们将在这个博客文章中解释一些隐藏的好处.&lt;/p></description></item><item><title>Go's Work Stealing Scheduler</title><link>/post/gos-work-stealing-scheduler/</link><pubDate>Sat, 20 Jan 2018 13:25:04 +0000</pubDate><guid>/post/gos-work-stealing-scheduler/</guid><description>&lt;p>本文翻译自 &lt;a href="https://rakyll.org/scheduler/">Go&amp;rsquo;s work-stealing scheduler&lt;/a>，版权归原作者所有。&lt;/p></description></item><item><title>Go 没有传引用</title><link>/post/there-is-no-pass-by-reference-in-go/</link><pubDate>Mon, 15 Jan 2018 16:05:04 +0000</pubDate><guid>/post/there-is-no-pass-by-reference-in-go/</guid><description>&lt;p>本文翻译自 &lt;a href="https://dave.cheney.net/2017/04/29/there-is_no_pass-by_reference_in_go">There is no pass-by-reference in Go&lt;/a>，版权归原作者所有。&lt;/p></description></item><item><title>为什么 Go 不实现分代和紧凑 gc</title><link>/post/why-golang-garbage-collector-not-implement-generational-and-compact-gc/</link><pubDate>Sat, 13 Jan 2018 16:30:04 +0000</pubDate><guid>/post/why-golang-garbage-collector-not-implement-generational-and-compact-gc/</guid><description>&lt;p>本文翻译自 &lt;a href="https://groups.google.com/forum/#!msg/golang-nuts/KJiyv2mV2pU/wdBUH1mHCAAJ">golang-nuts&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>有人在论坛里面问: 为什么 Golang 垃圾回收器不实现分代和紧凑 gc ?&lt;/p></description></item><item><title>Go Range 循环内幕</title><link>/post/go-range-loop-internals/</link><pubDate>Wed, 10 Jan 2018 20:20:04 +0000</pubDate><guid>/post/go-range-loop-internals/</guid><description>&lt;p>本文翻译自 &lt;a href="https://garbagecollected.org/2017/02/22/go-range-loop-internals/">Go Range Loop Internals&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>虽然他们非常方便, 但我总是发现 Go 的 Range 循环有点神秘. 我并不是第一个:&lt;/p></description></item></channel></rss>

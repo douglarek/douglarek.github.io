@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Engineering on Code talks</title><link>/tags/engineering/</link><description>Recent content in Engineering on Code talks</description><generator>Hugo</generator><language>zh-CN</language><copyright> Copyright © 2025 Leo Douglas</copyright><lastBuildDate>Tue, 09 Dec 2025 00:00:00 +0000</lastBuildDate><atom:link href="/tags/engineering/index.xml" rel="self" type="application/rss+xml"/><item><title>优秀工程师如何在大公司写出糟糕的代码</title><link>/post/how-good-engineers-write-bad-code-at-big-companies/</link><pubDate>Tue, 09 Dec 2025 00:00:00 +0000</pubDate><guid>/post/how-good-engineers-write-bad-code-at-big-companies/</guid><description>&lt;p>本文翻译自 &lt;a href="https://www.seangoedecke.com/bad-code-at-big-companies/">How good engineers write bad code at big companies&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>每隔几年就会有&lt;a href="https://ziglang.org/news/migrating-from-github-to-codeberg/">人&lt;/a>&lt;a href="https://github.com/microsoft/terminal/issues/10362">注意到&lt;/a>大型科技公司有时会产出令人惊讶的粗制滥造代码。如果你没有在大公司工作过，可能很难理解这种情况是如何发生的。大型科技公司薪酬优厚，足以吸引许多有能力的工程师。他们行动缓慢，看起来似乎有足够的时间做好扎实的工作。那么糟糕的代码是如何产生的呢？&lt;/p>
+&lt;h3 id="大多数代码变更都是由相对初学者完成的">大多数代码变更都是由相对初学者完成的&lt;/h3>
+&lt;p>我认为主要原因是&lt;strong>大公司充满了在其专业领域之外工作的工程师&lt;/strong>。大型科技公司员工的平均任期只有&lt;a href="https://stackoverflow.blog/2022/04/19/whats-the-average-tenure-of-an-engineer-at-a-big-tech-company-ep-434/">一到两年&lt;/a>&lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup>。事实上，大型科技公司的薪酬方案通常会对工程师的任期设置四年上限：四年后，初始股票授予完全兑现，这可能导致工程师的薪酬削减高达 50%。公司确实会延长临时性的年度补充授予，但这显然会激励工程师去寻找另一份工作，在那里他们不必每年担心自己是否能拿到另一半薪酬。&lt;/p>
+&lt;p>如果算上内部流动，情况会更糟。我在单个团队或代码库上停留的最长时间是三年，那还是在我职业生涯的早期。我预计至少每年都会被&lt;a href="https://www.youtube.com/watch?v=yDcaRklX7q4">重组&lt;/a>一次，而且通常频率更高。&lt;/p>
+&lt;p>然而，大型科技公司代码库的平均存续时间要长得多。我工作的许多服务已有十年或更长时间，多年来有过许多不同的负责人。这意味着许多大型科技公司的工程师一直在&amp;quot;摸索前进&amp;quot;。&lt;strong>相当高比例的代码变更是由&amp;quot;初学者&amp;quot;完成的&lt;/strong>：即在过去六个月内刚加入公司、代码库，甚至刚接触某种编程语言的人。&lt;/p>
+&lt;h3 id="老手">老手&lt;/h3>
+&lt;p>在某种程度上，这个问题可以通过&amp;quot;老手&amp;quot;来缓解：那些恰好在特定系统的周围待了足够长时间并培养出真正专业知识的工程师。这些工程师可以进行深入的代码审查，可靠地发现明显的问题。但依赖&amp;quot;老手&amp;quot;有两个问题。&lt;/p>
+&lt;p>首先，&lt;strong>这个过程完全是非正式的&lt;/strong>。大型科技公司在培养单个系统的长期专业知识方面投入的努力出奇地少，而一旦他们获得了这种专业知识，似乎根本不在乎保留它。相关工程师经常被调到不同的服务，他们要么基本上以志愿者的身份继续履行&amp;quot;老手&amp;quot;的职责，要么放弃它们，在一个全新的系统上成为相对的初学者。&lt;/p>
+&lt;p>其次，&lt;strong>经验丰富的工程师总是超负荷工作&lt;/strong>。作为少数几个对特定服务有深入专业知识的工程师之一，这是一份&lt;em>繁忙&lt;/em>的工作。你没有足够的时间亲自审查每一个软件变更，或积极参与每一个决策过程。记住&lt;em>你也有自己的工作要做&lt;/em>：如果你把所有时间都花在审查变更和参与讨论上，你可能会因为没有足够的个人产出而受到公司的惩罚。&lt;/p>
+&lt;h3 id="中等水平的高效工程师">中等水平的高效工程师&lt;/h3>
+&lt;p>综合以上所有因素，大型科技公司中等水平的高效&lt;sup id="fnref:2">&lt;a href="#fn:2" class="footnote-ref" role="doc-noteref">2&lt;/a>&lt;/sup>工程师是什么样子的？他们通常是：&lt;/p>
+&lt;ul>
+&lt;li>有足够的能力通过招聘门槛并能够完成工作，但要么&lt;/li>
+&lt;li>在一个对他们来说基本上是全新的代码库或语言上工作，要么&lt;/li>
+&lt;li>在努力应付大量代码变更的同时还要兼顾自己的工作。&lt;/li>
+&lt;/ul>
+&lt;p>他们几乎肯定是在按截止日期工作，或者为不同项目的一系列重叠截止日期工作。换句话说，&lt;strong>他们正在一个不适合产出高质量代码的环境中尽力而为。&lt;/strong>&lt;/p>
+&lt;p>这就是&amp;quot;明显&amp;quot;糟糕的代码如何产生的。例如，一个初级工程师接到一个关于烦人 bug 的工单，而他们对这个代码库几乎不熟悉。他们花了几天时间弄清楚，想出了一个粗糙的解决方案。一个更资深的&amp;quot;老手&amp;quot;（如果他们幸运的话）在空闲的半小时内扫了一眼，否决了它，并建议了一个稍微好一点、至少能工作的方案。初级工程师尽其所能实现了它，测试它能工作，简单审查后就发布了，所有相关人员立即转向更高优先级的工作。五年后有人注意到这个&lt;sup id="fnref:3">&lt;a href="#fn:3" class="footnote-ref" role="doc-noteref">3&lt;/a>&lt;/sup>，心想&amp;quot;哇，这太粗糙了——这么大的软件公司怎么会写出这么糟糕的代码&amp;quot;？&lt;/p>
+&lt;h3 id="大型科技公司对此无所谓">大型科技公司对此无所谓&lt;/h3>
+&lt;p>我写过很多关于导致这种情况的内部科技公司动态的文章。最直接的是，在&lt;a href="https://www.seangoedecke.com/seeing-like-a-software-company">《像软件公司一样看问题》&lt;/a>一文中，我认为大型科技公司始终将内部&lt;em>可读性&lt;/em>——即一眼就能看出谁在做什么并能随意改变的能力——置于生产力之上。大公司知道，将工程师视为可互换的并四处调动他们，会破坏他们在单个代码库中培养长期专业知识的能力。&lt;strong>这是一种深思熟虑的权衡&lt;/strong>。他们放弃了一定程度的专业知识和软件质量，以换取能够快速将熟练工程师部署到当月任何问题上的能力。&lt;/p>
+&lt;p>我不知道这是个好主意还是坏主意。这对大型科技公司来说似乎确实有效，尤其是在&amp;quot;你能多快转向与 AI 相关的东西&amp;quot;如此重要的现在。但如果你这样做，那么&lt;em>当然&lt;/em>会产出一些真正糟糕的代码。当你要求工程师在他们不熟悉的系统上匆忙完成工作时，就会发生这种情况。&lt;/p>
+&lt;p>&lt;strong>个人工程师完全无力改变这种动态&lt;/strong>。在 2025 年尤其如此，当时&lt;a href="https://www.seangoedecke.com/good-times-are-over">权力平衡已经倾斜&lt;/a>，从工程师转向科技公司领导层。作为个人工程师，你能做的最多就是努力成为&amp;quot;老手&amp;quot;：在至少一个领域培养专业知识，并用它来阻止最糟糕的变更，引导人们做出至少是最低限度明智的技术决策。但即使这样，往往也是在逆组织的潮流而动，如果做得不专业，可能会导致你被&lt;a href="https://www.reddit.com/r/csMajors/comments/1et7miz/what_you_need_to_know_about_performance/">列入绩效改进计划（PIP）&lt;/a>或更糟。&lt;/p>
+&lt;h3 id="纯粹工程与不纯粹工程">纯粹工程与不纯粹工程&lt;/h3>
+&lt;p>我认为很多问题归结为&lt;a href="https://www.seangoedecke.com/pure-and-impure-engineering">纯粹软件工程和不纯粹软件工程&lt;/a>之间的区别。对于纯粹工程师——从事独立技术项目的工程师，比如&lt;a href="https://ziglang.org/">编程语言&lt;/a>——糟糕代码的唯一解释就是无能。但不纯粹的工程师更像水管工或电工。他们在相对陌生的项目上按截止日期工作，即使他们的技术基础无可挑剔，这种情况的特定设置总是有&lt;em>某些&lt;/em>尴尬或令人惊讶的东西。对于不纯粹的工程师来说，糟糕的代码是不可避免的。只要整个系统运行得足够好，项目就是成功的。&lt;/p>
+&lt;p>在大型科技公司，工程师无法决定他们是在做纯粹还是不纯粹的工程工作。&lt;a href="https://www.seangoedecke.com/not-your-codebase">这不是他们的代码库&lt;/a>！如果公司想让你从数据库基础设施工作转到构建新的支付系统，他们完全有权这样做。你可能在不熟悉的系统中犯错误，或者你在数据库基础设施团队的老同事可能因为失去你的专业知识而受苦——这是&lt;strong>公司而非工程师&lt;/strong>做出的深思熟虑的权衡。&lt;/p>
+&lt;p>指出大公司糟糕代码的例子是可以的。如果别无其他，这可能是让这些特定例子得到修复的有效方法，因为高管们通常会抓住机会将坏的公关变成好的公关。但我认为将主要责任归咎于这些公司的工程师是一个错误&lt;sup id="fnref:4">&lt;a href="#fn:4" class="footnote-ref" role="doc-noteref">4&lt;/a>&lt;/sup>。如果你能挥动魔法棒让每个工程师强大两倍，&lt;em>你仍然会有糟糕的代码&lt;/em>，因为几乎没有人能够进入一个全新的代码库并快速做出零错误的变更。根本原因是&lt;strong>大多数大公司工程师被迫在不熟悉的代码库中完成大部分工作&lt;/strong>。&lt;/p>
+&lt;div class="footnotes" role="doc-endnotes">
+&lt;hr>
+&lt;ol>
+&lt;li id="fn:1">
+&lt;p>我很难找到一个好的原始数据来源。有一份 2013 年的 PayScale &lt;a href="https://www.payscale.com/data-packages/employee-loyalty/least-loyal-employees">报告&lt;/a>引用了 Google 1.1 年的中位数流动率，这个数字似乎偏低。&amp;#160;&lt;a href="#fnref:1" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:2">
+&lt;p>大型科技公司的许多工程师并不高效，但这本身就是一个独立的话题。我不想在这里深入讨论，原因有二：首先，我认为有能力的工程师产出的糟糕代码已经足够多，所以可以宽容一点，只把讨论范围限定在他们身上。其次，即使是无能的工程师写的代码，几乎总会有有能力的工程师本可以审查它，而为什么没有发生这种情况的问题仍然很有趣。&amp;#160;&lt;a href="#fnref:2" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:3">
+&lt;p>我这里想到的例子不是最近的 &lt;a href="https://ziglang.org/news/migrating-from-github-to-codeberg/">GitHub Actions 那个&lt;/a>，我对那个没有第一手经验。我可以想到至少十个发生在我身上的单独实例。&amp;#160;&lt;a href="#fnref:3" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li id="fn:4">
+&lt;p>在我看来，这主要是想象力的失败：认为你自己的工作环境一定与其他人的非常相似。&amp;#160;&lt;a href="#fnref:4" class="footnote-backref" role="doc-backlink">&amp;#x21a9;&amp;#xfe0e;&lt;/a>&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;/div></description></item></channel></rss>

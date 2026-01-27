@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Performance on Code talks</title><link>/tags/performance/</link><description>Recent content in Performance on Code talks</description><generator>Hugo</generator><language>zh-CN</language><copyright> Copyright © 2025 Leo Douglas</copyright><lastBuildDate>Tue, 09 Dec 2025 00:00:00 +0000</lastBuildDate><atom:link href="/tags/performance/index.xml" rel="self" type="application/rss+xml"/><item><title>深入解析 JVM 启动过程</title><link>/post/jvm-start-up/</link><pubDate>Tue, 09 Dec 2025 00:00:00 +0000</pubDate><guid>/post/jvm-start-up/</guid><description>&lt;p>本文翻译自 &lt;a href="https://inside.java/2025/01/28/jvm-start-up/">A Deep Dive into JVM Start-up&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>当你启动一个 Java 应用程序时，你可能会认为唯一执行的代码就是传递给 JVM 的 Java 字节码，即由 &lt;code>javac&lt;/code> 编译生成的 &lt;code>.class&lt;/code> 文件。但实际上，在启动过程中，JVM 会经历一系列复杂的步骤，为运行 Java 应用程序创建一个完整的运行环境。在本文中，我们将详细介绍 JVM 从执行 &lt;code>$ java&lt;/code> 到打印 &lt;code>Hello World&lt;/code> 所经历的步骤。如果你更喜欢视频形式，也可以在 Java YouTube 频道观看这个视频：&lt;/p>
+&lt;div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+ &lt;iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" loading="eager" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube-nocookie.com/embed/ED1oc7gn5uY?autoplay=0&amp;amp;controls=1&amp;amp;end=0&amp;amp;loop=0&amp;amp;mute=0&amp;amp;start=0" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" title="YouTube video">&lt;/iframe>
+ &lt;/div>
+
+&lt;h2 id="前言">前言&lt;/h2>
+&lt;p>为了让这次对 JVM 启动过程的讲解不至于过于庞大，我将使用以下几个约束条件来描述这个过程：&lt;/p>
+&lt;ul>
+&lt;li>我将描述 JVM 启动过程在 JDK 23 中的行为。你可以在&lt;a href="https://docs.oracle.com/javase/specs/jvms/se23/html/index.html">这里&lt;/a>查看 Java SE 23 的 JVM 规范。&lt;/li>
+&lt;li>我将使用 &lt;a href="https://en.wikipedia.org/wiki/HotSpot_(virtual_machine)">HotSpot JVM&lt;/a> 实现作为示例。这是目前使用最广泛的 JVM 实现，许多流行的 JDK 发行版都使用 HotSpot JVM 或其衍生版本。其他 JVM 实现可能在内部行为上略有不同。&lt;/li>
+&lt;li>最后，我将使用的主要代码示例是 &lt;code>HelloWorld&lt;/code>，尽管这是一个非常简单的应用程序，但它仍然会触发 JVM 启动过程的所有关键环节。&lt;/li>
+&lt;/ul>
+&lt;p>尽管有这些约束条件，但在阅读完本文后，你应该能够对 JVM 在启动过程中所经历的流程以及它们为何必要有一个相当全面的理解。这些知识在调试应用程序启动时遇到的问题时会很有帮助，在某些特定情况下还能帮助改善启动性能。不过，我们会在文章末尾更详细地讨论这一点。&lt;/p></description></item></channel></rss>

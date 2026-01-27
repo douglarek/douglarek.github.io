@@ -1,0 +1,212 @@
+<!doctype html><html lang=zh><head><title>深入解析 JVM 启动过程 &ndash; Code talks</title><meta name=viewport content="width=device-width,initial-scale=1"><meta charset=UTF-8><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin=anonymous referrerpolicy=no-referrer><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/academicons/1.9.4/css/academicons.min.css integrity="sha512-IW0nhlW5MgNydsXJO40En2EoCkTTjZhI3yuODrZIc8cQ4h1XcF53PsqDHa09NqnkXuIe0Oiyyj171BqZFwISBw==" crossorigin=anonymous referrerpolicy=no-referrer><link rel=stylesheet href=/css/palettes/base16-dark.css><link rel=stylesheet href=/css/risotto.css><link rel=stylesheet href=/css/custom.css><link rel=icon href=/favicon.ico><meta property="og:title" content="深入解析 JVM 启动过程 &ndash; Code talks"><meta property="og:url" content="/post/jvm-start-up/"><meta property="og:locale" content="zh-CN"><script async src="https://www.googletagmanager.com/gtag/js?id=G-4TVXFV2XZM%20"></script><script>var dnt,doNotTrack=!1;if(!1&&(dnt=navigator.doNotTrack||window.doNotTrack||navigator.msDoNotTrack,doNotTrack=dnt=="1"||dnt=="yes"),!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-4TVXFV2XZM ")}</script></head><body><div class=page><header class=page__header><nav class="page__nav main-nav"><ul><li class=nomarker><h1 class=page__logo><a href=/ class=page__logo-inner>Code talks</a></h1></li><li class=main-nav__item><a class=nav-main-item href=/post title>Posts</a></li><li class=main-nav__item><a class=nav-main-item href=/tags title>Tags</a></li><li class=main-nav__item><a class=nav-main-item href=https://github.com/douglarek title>GitHub</a></li></ul></nav></header><section class=page__body><header class=content__header><h1>深入解析 JVM 启动过程</h1><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6649330439620894" crossorigin=anonymous></script></header><div class=content__body><p>本文翻译自 <a href=https://inside.java/2025/01/28/jvm-start-up/>A Deep Dive into JVM Start-up</a>，版权归原作者所有。</p><p>当你启动一个 Java 应用程序时，你可能会认为唯一执行的代码就是传递给 JVM 的 Java 字节码，即由 <code>javac</code> 编译生成的 <code>.class</code> 文件。但实际上，在启动过程中，JVM 会经历一系列复杂的步骤，为运行 Java 应用程序创建一个完整的运行环境。在本文中，我们将详细介绍 JVM 从执行 <code>$ java</code> 到打印 <code>Hello World</code> 所经历的步骤。如果你更喜欢视频形式，也可以在 Java YouTube 频道观看这个视频：</p><div style=position:relative;padding-bottom:56.25%;height:0;overflow:hidden><iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" loading=eager referrerpolicy=strict-origin-when-cross-origin src="https://www.youtube-nocookie.com/embed/ED1oc7gn5uY?autoplay=0&amp;controls=1&amp;end=0&amp;loop=0&amp;mute=0&amp;start=0" style=position:absolute;top:0;left:0;width:100%;height:100%;border:0 title="YouTube video"></iframe></div><h2 id=前言>前言</h2><p>为了让这次对 JVM 启动过程的讲解不至于过于庞大，我将使用以下几个约束条件来描述这个过程：</p><ul><li>我将描述 JVM 启动过程在 JDK 23 中的行为。你可以在<a href=https://docs.oracle.com/javase/specs/jvms/se23/html/index.html>这里</a>查看 Java SE 23 的 JVM 规范。</li><li>我将使用 <a href=https://en.wikipedia.org/wiki/HotSpot_(virtual_machine)>HotSpot JVM</a> 实现作为示例。这是目前使用最广泛的 JVM 实现，许多流行的 JDK 发行版都使用 HotSpot JVM 或其衍生版本。其他 JVM 实现可能在内部行为上略有不同。</li><li>最后，我将使用的主要代码示例是 <code>HelloWorld</code>，尽管这是一个非常简单的应用程序，但它仍然会触发 JVM 启动过程的所有关键环节。</li></ul><p>尽管有这些约束条件，但在阅读完本文后，你应该能够对 JVM 在启动过程中所经历的流程以及它们为何必要有一个相当全面的理解。这些知识在调试应用程序启动时遇到的问题时会很有帮助，在某些特定情况下还能帮助改善启动性能。不过，我们会在文章末尾更详细地讨论这一点。</p><h2 id=jvm-初始化>JVM 初始化</h2><p>当用户执行 <code>java</code> 命令时，这会通过调用 JNI（Java Native Interface）函数 <code>JNI_CreateJavaVM()</code> 来启动 JVM 启动过程，你可以在<a href=https://github.com/openjdk/jdk/blob/jdk-23%2B0/src/hotspot/share/prims/jni.cpp#L3661C1-L3661C93>这里</a>查看这个函数的代码。这个 JNI 函数本身会执行几个重要的过程。</p><h3 id=验证用户输入>验证用户输入</h3><p>JVM 启动过程的第一步是验证用户输入：JVM 参数、要执行的工件和类路径。下面的日志输出显示了这个验证过程的进行：</p><pre tabindex=0><code>[arguments] VM Arguments:
+[arguments] jvm_args: -Xlog:all=trace
+[arguments] java_command: HelloWorld
+[arguments] java_class_path (initial): .
+[arguments] Launcher Type: SUN_STANDARD
+</code></pre><p><strong>💡注意：</strong> 你也可以通过使用 JVM 参数 <code>-Xlog:all=trace</code> 来查看这些日志。</p><h3 id=检测系统资源>检测系统资源</h3><p>验证用户输入后，下一步是检测可用的系统资源：处理器、系统内存和 JVM 可能使用的系统服务。可用系统资源的情况可能会影响 JVM 根据其内部启发式算法做出的决策。例如，JVM 默认选择的垃圾收集器将取决于 CPU 和系统内存的可用性，不过 JVM 的许多内部启发式算法都可以通过使用明确的 JVM 参数来覆盖。</p><pre tabindex=0><code>[os       ] Initial active processor count set to 11
+[gc,heap  ]   Maximum heap size 9663676416
+[gc,heap  ]   Initial heap size 603979776
+[gc,heap  ]   Minimum heap size 1363144
+[metaspace]  - commit_granule_bytes: 65536.
+[metaspace]  - commit_granule_words: 8192.
+[metaspace]  - virtual_space_node_default_size: 8388608.
+[metaspace]  - enlarge_chunks_in_place: 1.
+[os       ] Use of CLOCK_MONOTONIC is supported
+[os       ] Use of pthread_condattr_setclock is not supported
+</code></pre><h3 id=准备环境>准备环境</h3><p>在了解可用的系统资源后，JVM 将开始准备环境。在这里，HotSpot JVM 实现会生成 <code>hsprefdata</code>（HotSpot 性能数据）。这些数据被 <code>JConsole</code> 和 <code>VisualVM</code> 等工具用于检查和分析 JVM。这些数据通常存储在系统的 <code>/tmp</code> 目录中。下面只是 JVM 创建这些性能数据的一个例子，在启动过程中，这个过程会持续一段时间，并与其他过程并发进行。</p><pre tabindex=0><code>[perf,datacreation] name = sun.rt._sync_Inflations, dtype = 11, variability = 2, units = 4, dsize = 8, vlen = 0, pad_length = 4, size = 56, on_c_heap = FALSE, address = 0x0000000100c2c020, data address = 0x0000000100c2c050
+</code></pre><h3 id=选择垃圾收集器>选择垃圾收集器</h3><p>JVM 启动过程中的一个重要步骤是选择垃圾收集器（GC）。使用哪个 GC 可能会对应用程序的性能产生重大影响。默认情况下，JVM 会从两个 GC 中进行选择：Serial GC 和 G1 GC，除非另有指示。</p><p>从 JDK 23 开始，JVM 默认会选择 G1 GC，除非系统可用内存少于 1792 MB，和/或只有单个处理器，在这种情况下会选择 Serial GC。当然，还可能有其他 GC 可用，包括：Parallel GC、ZGC 等，这取决于你使用的特定 JDK 版本和发行版，每个 GC 都有其独特的性能特征和理想的工作负载。</p><pre tabindex=0><code>[gc           ] Using G1
+[gc,heap,coops] Trying to allocate at address 0x00000005c0000000 heap of size 0x240000000
+[os,map       ] Reserved [0x00000005c0000000 - 0x0000000800000000), (9663676416 bytes)
+[gc,heap,coops] Heap address: 0x00000005c0000000, size: 9216 MB, Compressed Oops mode: Zero based, Oop shift amount: 3
+</code></pre><h3 id=cds>CDS</h3><p>大约在这个时候，JVM 会查找 CDS 归档。CDS（Cached Data Storage，以前称为 Class Data Storage）是一个经过预处理的类文件归档，可以提高 JVM 的启动性能。我们将在<a href=#%E7%B1%BB%E9%93%BE%E6%8E%A5>类链接</a>部分介绍 CDS 如何提高 JVM 启动性能。不过，不要把"CDS"记得太牢，它即将被淘汰，我们稍后在展望 JVM 启动的未来时会介绍原因。</p><pre tabindex=0><code>[cds] trying to map [Java home]/lib/server/classes.jsa
+[cds] Opened archive [Java home]/lib/server/classes.jsa.
+</code></pre><h3 id=创建方法区>创建方法区</h3><p>JVM 初始化的最后一个步骤是创建方法区。这是一个特殊的堆外内存位置，用于存储 JVM 加载的类数据。虽然方法区不位于 JVM 的堆中，但垃圾收集器仍然会管理它。如果与类相关联的类加载器不再在作用域内，则存储在方法区中的类数据有资格被移除。</p><p><strong>💡 注意：</strong> 如果你使用的是 HotSpot JVM 实现，方法区被称为 <em>metaspace</em>。</p><pre tabindex=0><code>[metaspace,map] Trying to reserve at an EOR-compatible address
+[metaspace,map] Mapped at 0x00001fff00000000
+</code></pre><h2 id=类加载链接和初始化>类加载、链接和初始化</h2><p>一旦完成了最初的准备工作，JVM 启动过程的真正"核心"部分就开始了，这涉及到类加载、链接和初始化。</p><p>虽然 <a href=https://docs.oracle.com/javase/specs/jvms/se23/html/index.html>JVM 规范</a>按顺序描述了这些过程（第 5.3-5.5 节），但对于给定的类，这些过程在 HotSpot JVM 上不一定按照该顺序发生。如图表底部所示，作为类链接一部分的解析，可能在从验证之前到类初始化之后的任何时间点发生。某些过程，如类初始化，在技术上可能根本不会发生。我们将在接下来的章节中介绍所有这些内容。</p><p><img src=/images/jvm-class-load-link-init-chart.png alt=类加载、链接和初始化流程图></p><h3 id=类加载>类加载</h3><p>类加载在 <a href=https://docs.oracle.com/javase/specs/jvms/se23/html/jvms-5.html#jvms-5.3>JVM 规范第 5.3 节</a>中有详细说明。类加载是一个三步过程：JVM 定位类或接口的二进制表示，从中派生类或接口，并将该信息加载到 JVM 方法区——如果你使用的是 HotSpot JVM 实现，这个区域就是"metaspace"。</p><p>JVM 最强大的能力之一，也是它成为广泛使用平台的原因之一，是它能够<em>动态</em>加载类，允许 JVM 在运行时按需加载生成的类。这种能力被许多流行的框架和工具使用，例如 Spring 和 Mockito。实际上，即使是 JVM 本身在使用 lambda 表达式时也会执行按需代码生成，正如 <a href=https://github.com/openjdk/jdk/blob/master/src/java.base/share/classes/java/lang/invoke/InnerClassLambdaMetafactory.java>InnerClassLambdaMetafactory 类</a>中所示。</p><p>JVM 允许两种方式加载类，一种是使用引导类加载器（<a href=https://docs.oracle.com/javase/specs/jvms/se23/html/jvms-5.html#jvms-5.3.1>5.3.1</a>），另一种是自定义类加载器（<a href=https://docs.oracle.com/javase/specs/jvms/se23/html/jvms-5.html#jvms-5.3.2>5.3.2</a>）。后者是一个扩展了 <a href=https://github.com/openjdk/jdk/blob/jdk-23%2B0/src/java.base/share/classes/java/lang/ClassLoader.java>java.lang.ClassLoader</a> 类的类。实际上，自定义类加载器通常会在第三方库中定义，以支持该库的行为。</p><p>在本文中，我们将只关注引导类加载器，这是一个用机器码编写的特殊类加载器，由 JVM 提供。它在 <code>JNI_CreateJavaVM()</code> 的后期阶段实例化。</p><p>为了更好地理解类加载过程，我们需要看看 JVM 如何看待 <code>HelloWorld</code>：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>HelloWorld</span> <span style=color:#66d9ef>extends</span> Object {
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>public</span> <span style=color:#66d9ef>static</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>main</span>(String<span style=color:#f92672>[]</span> args){
+</span></span><span style=display:flex><span>		System.<span style=color:#a6e22e>out</span>.<span style=color:#a6e22e>println</span>(<span style=color:#e6db74>&#34;Hello World!&#34;</span>);
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>所有类在某个时刻都会扩展自 <code>java.lang.Object</code>。为了让 JVM 加载 <code>HelloWorld</code>，它首先需要加载 <code>HelloWorld</code> 显式和隐式依赖的所有类。让我们看看 <code>java.lang.Object</code> 中的所有方法签名：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Object</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>public</span> <span style=color:#a6e22e>Object</span>() {}
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>final</span> <span style=color:#66d9ef>native</span> Class<span style=color:#f92672>&lt;?&gt;</span> getClass()
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>native</span> <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>hashCode</span>()
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>boolean</span> <span style=color:#a6e22e>equals</span>(Object obj)
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>protected</span> <span style=color:#66d9ef>native</span> Object <span style=color:#a6e22e>clone</span>() <span style=color:#66d9ef>throws</span> CloneNotSupportedException
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>public</span> String <span style=color:#a6e22e>toString</span>()
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>final</span> <span style=color:#66d9ef>native</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>notify</span>();
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>final</span> <span style=color:#66d9ef>native</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>notifyAll</span>();
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>final</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>wait</span>() <span style=color:#66d9ef>throws</span> InterruptedException
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>final</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>wait</span>(<span style=color:#66d9ef>long</span> timeoutMillis) <span style=color:#66d9ef>throws</span> InterruptedException
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>final</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>wait</span>(<span style=color:#66d9ef>long</span> timeoutMillis, <span style=color:#66d9ef>int</span> nanos) <span style=color:#66d9ef>throws</span> InterruptedException
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>protected</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>finalize</span>() <span style=color:#66d9ef>throws</span> Throwable { }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>两个重要的方法是 <code>public final native Class&lt;?> getClass()</code> 和 <code>public String toString()</code>，因为这两个方法都引用了另一个类：分别是 <code>java.lang.Class</code> 和 <code>java.lang.String</code>。</p><p>如果我们看看 <code>java.lang.String</code>，它实现了几个接口：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>final</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>String</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>implements</span> java.<span style=color:#a6e22e>io</span>.<span style=color:#a6e22e>Serializable</span>, Comparable<span style=color:#f92672>&lt;</span>String<span style=color:#f92672>&gt;</span>, CharSequence,
+</span></span><span style=display:flex><span>Constable, ConstantDesc
+</span></span></code></pre></div><p>为了加载 <code>java.lang.String</code>，必须首先加载它实现的所有接口。如果我们查看日志输出，我们会看到这些类按照它们定义的顺序被加载，<code>java.lang.String</code> 最后被加载：</p><pre tabindex=0><code>[class,load] java.io.Serializable source: jrt:/java.base
+[class,load] java.lang.Comparable source: jrt:/java.base
+[class,load] java.lang.CharSequence source: jrt:/java.base
+[class,load] java.lang.constant.Constable source: jrt:/java.base
+[class,load] java.lang.constant.ConstantDesc source: jrt:/java.base
+[class,load] java.lang.String source: jrt:/java.base
+</code></pre><p>如果我们转到 <code>java.lang.Class</code>，我们会看到它也实现了几个接口，以及与 <code>java.lang.String</code> 相同的一些接口：<code>java.io.Serializable</code> 和 <code>java.lang.constant.Constable</code>。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>final</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Class</span><span style=color:#f92672>&lt;</span>T<span style=color:#f92672>&gt;</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>implements</span> java.<span style=color:#a6e22e>io</span>.<span style=color:#a6e22e>Serializable</span>,GenericDeclaration,Type,AnnotatedElement,
+</span></span><span style=display:flex><span>TypeDescriptor.<span style=color:#a6e22e>OfField</span><span style=color:#f92672>&lt;</span>Class<span style=color:#f92672>&lt;?&gt;&gt;</span>,Constable
+</span></span></code></pre></div><p>如果我们查看 JVM 日志，我们会看到接口再次按照它们定义的顺序被加载，然后才加载 <code>java.lang.Class</code>，但 <code>java.io.Serializable</code> 和 <code>java.lang.constant.Constable</code> 除外，因为它们在加载 <code>java.lang.String</code> 时已经被加载了。</p><pre tabindex=0><code>[class,load] java.lang.reflect.AnnotatedElement source: jrt:/java.base
+[class,load] java.lang.reflect.GenericDeclaration source: jrt:/java.base
+[class,load] java.lang.reflect.Type source: jrt:/java.base
+[class,load] java.lang.invoke.TypeDescriptor source: jrt:/java.base
+[class,load] java.lang.invoke.TypeDescriptor$OfField source: jrt:/java.base
+[class,load] java.lang.Class source: jrt:/java.base
+</code></pre><p><strong>💡 注意：</strong> 一般来说，JVM 对其过程采用惰性策略，在这种情况下是类加载。一个类通常只在另一个类主动引用它时才被加载，但由于 <code>java.lang.Object</code> 是所有 Java 类的特殊根类，JVM 会急切地加载 <code>java.lang.Class</code> 和 <code>java.lang.String</code>。如果你查看 <code>java.lang.Class</code>（<a href=https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/lang/Class.html>JavaDoc</a>）和 <code>java.lang.String</code>（<a href=https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/lang/String.html>JavaDoc</a>）的方法签名，你可能会注意到在执行像 <code>HelloWorld</code> 这样的应用程序时，许多类并没有被加载。例如 <code>Optional&lt;String> describeConstable()</code> 从未被引用，因此 <code>java.util.Optional</code> 从不被加载。这是 HotSpot 惰性策略的一个例子，或者说是不采取行动的例子。</p><p>类加载过程将贯穿 JVM 启动的大部分时间，在实际应用程序中，还会贯穿该应用程序生命周期的早期很大一部分时间，然后最终趋于稳定。在 <code>HelloWorld</code> 场景中，JVM 总共会加载大约 450 个类，这就是为什么我用 JVM 在启动时创建一个宇宙的类比，因为它做了很多工作。</p><p>让我们继续深入了解 JVM 启动的宇宙，看看类链接。</p><h3 id=类链接>类链接</h3><p>类链接在 <a href=https://docs.oracle.com/javase/specs/jvms/se23/html/jvms-5.html#jvms-5.4>JVM 规范第 5.4 节</a>中有详细说明，是一个更复杂的过程，因为它包括三个不同的子过程：</p><ul><li>验证 - <a href=https://docs.oracle.com/javase/specs/jvms/se23/html/jvms-5.html#jvms-5.4.1>5.4.1</a></li><li>准备 - <a href=https://docs.oracle.com/javase/specs/jvms/se23/html/jvms-5.html#jvms-5.4.2>5.4.2</a></li><li>解析 - <a href=https://docs.oracle.com/javase/specs/jvms/se23/html/jvms-5.html#jvms-5.4.3>5.4.3</a></li></ul><p>类链接中还有其他三个过程：访问控制、方法重写和方法选择，但这些超出了本文的范围。</p><p><img src=/images/jvm-class-linking-chart.png alt=类链接流程图></p><p>回到图表，验证、准备和解析不一定按照本文中将要介绍的顺序发生。解析可能早在验证之前发生，也可能晚至类初始化之后发生。</p><h4 id=验证>验证</h4><p>验证（<a href=https://docs.oracle.com/javase/specs/jvms/se23/html/jvms-5.html#jvms-5.4.1>5.4.1</a>）是一个确保类或接口在结构上正确的过程。如果需要，此过程可能会触发加载其他类，尽管作为结果加载的类本身不需要被验证或准备。</p><p><img src=/images/jvm-cds-graph.png alt="CDS 图表"></p><p>回到 CDS 的话题，在大多数正常情况下，JDK 类不会主动经历验证步骤。这是因为 CDS 提供的好处之一是归档中包含的类已经被验证过，减少了 JVM 在启动时需要做的工作，从而提高了启动性能。</p><p>如果你想了解更多关于 CDS 的信息，可以查看我的 <a href=https://youtu.be/vvlQv1Dh-HU>Stack Walker 视频</a>、我们在 <a href=https://dev.java/learn/jvm/cds-appcds/>dev.java 上关于 CDS 的文章</a>，或者<a href=https://inside.java/2022/09/26/sip067/>这篇 inside.java 文章</a>，了解如何将应用程序的类包含在 CDS 归档中。</p><p>一个<em>确实</em>需要被验证的类是 <code>HelloWorld</code>，我们可以在日志中看到 JVM 正在执行这个操作：</p><pre tabindex=0><code>[class,init            ] Start class verification for: HelloWorld
+[verification          ] Verifying class HelloWorld with new format
+[verification          ] Verifying method HelloWorld.&lt;init&gt;()V
+[verification          ] table = {
+[verification          ]   }
+[verification          ] bci: @0
+[verification          ] flags: { flagThisUninit }
+[verification          ] locals: { uninitializedThis }
+[verification          ] stack: { }
+[verification          ] offset = 0,  opcode = aload_0
+[verification          ] bci: @1
+</code></pre><h4 id=准备>准备</h4><p>准备（<a href=https://docs.oracle.com/javase/specs/jvms/se23/html/jvms-5.html#jvms-5.4.2>5.4.2</a>）处理将类中的静态字段初始化为其<em>默认</em>值。</p><p>为了更好地理解这一点，让我们使用这个简单的示例类：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>MyClass</span> {
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>static</span> <span style=color:#66d9ef>int</span> myStaticInt <span style=color:#f92672>=</span> 10; <span style=color:#75715e>//Initialized to 0</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>static</span> <span style=color:#66d9ef>int</span> myStaticInitializedInt; <span style=color:#75715e>//Initialized to 0</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>int</span> myInstanceInt <span style=color:#f92672>=</span> 30; <span style=color:#75715e>//Not initialized</span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>static</span> {
+</span></span><span style=display:flex><span>    myStaticInitializedInt <span style=color:#f92672>=</span> 20;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>它包含三个整数字段：<code>myStaticInt</code>、<code>myStaticInitializedInt</code> 和 <code>myInstanceInt</code>。</p><p>在这个例子中，<code>myStaticInt</code> 和 <code>myStaticInitializedInt</code> 都会被初始化为 <code>0</code>，这是原始 <code>int</code> 类型的默认值。</p><p>而 <code>myInstanceInt</code> 不会被初始化，因为它是实例字段，不是类字段。</p><p>我们稍后会介绍 <code>myStaticInt</code>、<code>myStaticInitializedInt</code> 字段何时被初始化为 <code>10</code> 和 <code>20</code> 的值。</p><h4 id=解析>解析</h4><p>解析（<a href=https://docs.oracle.com/javase/specs/jvms/se23/html/jvms-5.html#jvms-5.4.3>5.4.3</a>）的目标是解析类的常量池中的符号引用，供 JVM 指令使用。</p><p>为了更好地理解这一点，我们将使用 <code>javap</code> <a href=https://docs.oracle.com/en/java/javase/23/docs/specs/man/javap.html>工具</a>。这是一个标准的 JDK 命令行工具，用于反汇编 Java <code>.class</code> 文件。使用 <code>-verbose</code> 选项运行它将提供一个 JVM 如何解释它正在加载的类的视图。让我们在 <code>MyClass</code> 上运行 <code>javap</code>：</p><pre tabindex=0><code>$ javap –verbose MyClass
+class MyClass {
+  static int myStaticInt = 10; //Initialized to 0
+  static int myStaticInitializedInt; //Initialized to 0
+  int myInstanceInt = 30; //Not initialized
+  static {
+    myStaticInitializedInt = 20;
+  }
+}
+</code></pre><p>这个命令的结果如下所示：</p><pre tabindex=0><code>Constant pool:
+   #1 = Methodref          #2.#3          // java/lang/Object.&#34;&lt;init&gt;&#34;:()V
+   #2 = Class              #4             // java/lang/Object
+   #3 = NameAndType        #5:#6          // &#34;&lt;init&gt;&#34;:()V
+   #4 = Utf8               java/lang/Object
+   #5 = Utf8               &lt;init&gt;
+   #6 = Utf8               ()V
+   #7 = Fieldref           #8.#9          // MyClass.myInstanceInt:I
+   #8 = Class              #10            // MyClass
+   #9 = NameAndType        #11:#12        // myInstanceInt:I
+  #10 = Utf8               MyClass
+  #11 = Utf8               myInstanceInt
+  #12 = Utf8               I
+  #13 = Fieldref           #8.#14         // MyClass.myStaticInt:I
+  #14 = NameAndType        #15:#12        // myStaticInt:I
+  #15 = Utf8               myStaticInt
+  #16 = Fieldref           #8.#17         // MyClass.myStaticInitializedInt:I
+  #17 = NameAndType        #18:#12        // myStaticInitializedInt:I
+  #18 = Utf8               myStaticInitializedInt
+  #19 = Utf8               Code
+  #20 = Utf8               LineNumberTable
+  #21 = Utf8               &lt;clinit&gt;
+  #22 = Utf8               SourceFile
+  #23 = Utf8               MyClass.java
+{
+  static int myStaticInt;
+    descriptor: I
+    flags: (0x0008) ACC_STATIC
+
+  static int myStaticInitializedInt;
+    descriptor: I
+    flags: (0x0008) ACC_STATIC
+
+  int myInstanceInt;
+    descriptor: I
+    flags: (0x0000)
+
+  MyClass();
+    descriptor: ()V
+    flags: (0x0000)
+    Code:
+      stack=2, locals=1, args_size=1
+         0: aload_0
+         1: invokespecial #1                  // Method java/lang/Object.&#34;&lt;init&gt;&#34;:()V
+         4: aload_0
+         5: bipush        30
+         7: putfield      #7                  // Field myInstanceInt:I
+        10: return
+      LineNumberTable:
+        line 1: 0
+        line 4: 4
+
+  static {};
+    descriptor: ()V
+    flags: (0x0008) ACC_STATIC
+    Code:
+      stack=1, locals=0, args_size=0
+         0: bipush        10
+         2: putstatic     #13                 // Field myStaticInt:I
+         5: bipush        20
+         7: putstatic     #16                 // Field myStaticInitializedInt:I
+        10: return
+      LineNumberTable:
+        line 2: 0
+        line 6: 5
+        line 7: 10
+}
+</code></pre><p><strong>💡 注意：</strong> 这个输出已经稍微截断，删除了与本文无关的元数据。</p><p>这里有很多内容，所以让我们分解一下，逐步了解这一切的含义。</p><p>下面的部分是 <code>MyClass</code> 的（自动生成的）默认构造函数，它从调用 <code>MyClass</code> 的父类 <code>java.lang.Object</code> 的默认构造函数开始，然后将 <code>myInstanceInt</code> 设置为其分配的值 <code>30</code>。</p><pre tabindex=0><code>MyClass();
+  descriptor: ()V
+  flags: (0x0000)
+  Code:
+    stack=2, locals=1, args_size=1
+      0: aload_0
+      1: invokespecial #1 //Method java/lang/Object.&#34;&lt;init&gt;&#34;:()V
+      4: aload_0
+      5: bipush    30
+      7: putfield  #7 //Field myInstanceInt:I
+      10: return
+  LineNumberTable:
+    line 1: 0
+    line 4: 4
+</code></pre><p><strong>💡 注意：</strong> 毫无疑问，你会注意到 <code>aload_0</code>、<code>invokespecial</code>、<code>bipush</code>、<code>putfield</code> 等等。这些是 <a href=https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-6.html>JVM 指令</a>，是 JVM 用于实际执行其工作的<a href=https://en.wikipedia.org/wiki/Opcode>操作码</a>。</p><p>在 <code>invokespecial</code> 和 <code>putfield</code> 的右侧，有数字 <code>#1</code> 和 <code>#7</code>。这些是对 <code>MyClass</code> 的常量池（<a href=https://docs.oracle.com/javase/specs/jvms/se23/html/jvms-4.html#jvms-4.4>4.4</a>）的引用。让我们仔细看看它：</p><pre tabindex=0><code>Constant pool:
+   #1 = Methodref          #2.#3          // java/lang/Object.&#34;&lt;init&gt;&#34;:()V
+   #2 = Class              #4             // java/lang/Object
+   #3 = NameAndType        #5:#6          // &#34;&lt;init&gt;&#34;:()V
+   #4 = Utf8               java/lang/Object
+   #5 = Utf8               &lt;init&gt;
+   #6 = Utf8               ()V
+   #7 = Fieldref           #8.#9          // MyClass.myInstanceInt:I
+   #8 = Class              #10            // MyClass
+   #9 = NameAndType        #11:#12        // myInstanceInt:I
+  #10 = Utf8               MyClass
+  #11 = Utf8               myInstanceInt
+  #12 = Utf8               I
+  #13 = Fieldref           #8.#14         // MyClass.myStaticInt:I
+  #14 = NameAndType        #15:#12        // myStaticInt:I
+  #15 = Utf8               myStaticInt
+  #16 = Fieldref           #8.#17         // MyClass.myStaticInitializedInt:I
+  #17 = NameAndType        #18:#12        // myStaticInitializedInt:I
+  #18 = Utf8               myStaticInitializedInt
+  #19 = Utf8               Code
+  #20 = Utf8               LineNumberTable
+  #21 = Utf8               &lt;clinit&gt;
+  #22 = Utf8               SourceFile
+  #23 = Utf8               MyClass.java
+</code></pre><p><code>MyClass</code> 常量池中包含了它的所有符号引用。为了让 JVM 执行 <code>invokespecial</code> JVM 指令，它需要<em>解析</em>到 <code>java.lang.Object</code> 默认构造函数的链接。参考常量池，条目 1-6 提供了形成此链接所需的信息。</p><p><strong>💡 注意：</strong> <code>&lt;init></code> 是 <code>javac</code> 为类中的每个构造函数自动生成的特殊方法。</p><p>这种模式在 <code>putfield</code> 中也重复出现，它引用常量池条目 7，与条目 8-12 结合时，提供了解析设置 <code>myInstanceInt</code> 链接所需的必要信息。有关常量池的更多信息，请查看 <a href=https://docs.oracle.com/javase/specs/jvms/se23/html/jvms-4.html#jvms-4.4>JVM 规范中关于它的部分</a>。</p><p>解析过程可以从验证之前到类初始化之后的任何时间发生的原因是，它是惰性执行的，只有当 JVM 尝试执行类中的 JVM 指令时才会发生。并非所有加载的类都会执行 JVM 指令。例如，<code>java.lang.SecurityManager</code> 类被加载但从未触及，<a href=https://openjdk.org/jeps/486>因为它即将被淘汰</a>。类中也可能没有任何需要初始化的内容，JVM 会自动将其标记为已初始化。说到类初始化……</p><h3 id=类初始化>类初始化</h3><p>最后是类初始化，在 <a href=https://docs.oracle.com/javase/specs/jvms/se23/html/jvms-5.html#jvms-5.5>JVM 规范第 5.5 节</a>中有详细说明。类初始化涉及为静态字段分配 <code>ConstantValue</code>，并执行类中存在的任何静态初始化器（如果存在）。当 JVM 在类上调用 <code>new</code>、<code>getstatic</code>、<code>putstatic</code> 或 <code>invokestatic</code> JVM 指令中的任何一个时，它就会启动。</p><p>类的初始化由特殊的无参数方法 <code>void &lt;clinit></code> 处理，像 <code>&lt;init></code> 一样，它由 <code>javac</code> 自动生成。角括号（<code>&lt; ></code>）的包含是有意的，因为它们对于方法名称不是有效的字符，因此防止 Java 用户编写自己的自定义 <code>&lt;init></code> 或 <code>&lt;clinit></code> 方法。</p><p>不能保证总是创建 <code>&lt;clinit></code> 方法，因为它只在类中有静态初始化器或字段时才需要。如果一个类两者都没有，那么不会生成 <code>&lt;clinit></code>，如果在其上调用 <code>new</code>，JVM 会立即将该类标记为已初始化，实际上跳过了类初始化，这就是解析如何可以在类初始化<em>之后</em>发生。</p><p>由于 <code>MyClass</code> 确实有两个静态字段和一个静态初始化器块，它确实有一个 <code>&lt;clinit></code> 方法，回到 <code>javap</code> 的输出：</p><pre tabindex=0><code>  static {};
+    descriptor: ()V
+    flags: (0x0008) ACC_STATIC
+    Code:
+      stack=1, locals=0, args_size=0
+         0: bipush        10
+         2: putstatic     #13                 // Field myStaticInt:I
+         5: bipush        20
+         7: putstatic     #16                 // Field myStaticInitializedInt:I
+        10: return
+      LineNumberTable:
+        line 2: 0
+        line 6: 5
+        line 7: 10
+</code></pre><p><code>&lt;clinit></code> 的结构类似于 <code>&lt;init></code>，但没有调用父类的构造函数，并且使用了 <code>putstatic</code> 等 JVM 指令而不是 <code>putfield</code>。</p><h2 id=hello-world>Hello World!</h2><p>最终，JVM 将完成足够的准备工作，开始执行 <code>public static void main()</code> 中的用户代码，我们的 <code>Hello World!</code> 消息就位于那里：</p><pre tabindex=0><code>[0.062s][debug][class,resolve] java.io.FileOutputStream
+...
+Hello World!
+</code></pre><p>总共，JVM 会加载大约 450 个类，其中一部分也会被链接和初始化。在我的 M4 MacBook Pro 上，正如日志中所见，整个过程只用了 62 毫秒，即使在执行非常繁重的日志记录时也是如此。你可以在我的 <a href=https://gist.github.com/wkorando/34294017e1c7653ab9f9ed5c02f017a3>GitHub 这里</a>查看完整的日志。</p><h2 id=project-leyden>Project Leyden</h2><p>现在实际上是 JVM 启动的一个非常令人兴奋的时期。虽然每个 JDK 版本都在不断改进启动过程，但从 JDK 24 开始，来自 <a href=https://openjdk.org/projects/leyden/>Project Leyden</a> 的第一个特性将被合并到主线 JDK 版本中。</p><p>Project Leyden 的目标是减少：启动时间、达到峰值性能的时间和内存占用，并且是基于 CDS 完成的工作构建并取代它的。随着 Project Leyden 的集成，CDS 将被 AOT（ahead-of-time，提前编译）取代。Project Leyden 的功能将通过在训练运行期间记录 JVM 的行为，将该信息存储在缓存中，然后在后续启动时从该缓存加载来工作。如果你想了解更多关于 Project Leyden 的信息，请务必查看<a href=https://youtu.be/z9XgILeSwzk>这个视频</a>。</p><p>Project Leyden 的领先功能将是 <a href=https://openjdk.org/jeps/483>JEP 483: Ahead-of-Time Class Loading & Linking</a>。我们在本文中已经介绍了类加载和链接，因此提前执行该工作而不是在启动时执行的好处现在应该相当清楚了。</p><h2 id=结论>结论</h2><p>正如本文所述，JVM 启动过程是一个复杂的过程。响应可用系统资源、提供检查和分析 JVM 的手段、动态加载类等能力，确实带来了相当大的复杂性开销。</p><p>那么，除了对 JVM 有更深入的了解之外，还能从中得到什么？有两点值得指出，调试和性能，尽管它们的适用性可能也有些狭窄。</p><h3 id=调试>调试</h3><p>JVM 启动过程非常可靠，通常当错误发生时，其原因往往是明显的用户错误，或者可能是第三方库中的问题。希望对 JVM 试图做什么以及为什么这样做有更深入的了解，可以为那些更持久或难以理解的启动问题提供一些更好的指导。</p><h3 id=性能改进>性能改进</h3><p>另一个潜在的好处是，有了这些知识，你可能会找到一些小机会来提高应用程序的启动性能。特别是随着 JEP 483 在 JDK 24 中集成，未来类加载和链接行为可以进一步提高启动性能。不过我也要提醒的是，在大多数用例中，你编写的第一方代码通常只是在 JVM 上运行的代码的很小一部分。在库、框架和 JDK 本身之间，构成应用程序的代码通常只是冰山一角。</p><p><img src=/images/jvm-code-pyramid.png alt=代码金字塔></p></div><div id=disqus_thread></div><script>window.disqus_config=function(){},function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById("disqus_thread").innerHTML="Disqus comments not available by default when the website is previewed locally.";return}var t=document,e=t.createElement("script");e.async=!0,e.src="//douglarek.disqus.com/embed.js",e.setAttribute("data-timestamp",+new Date),(t.head||t.body).appendChild(e)}()</script><noscript>Please enable JavaScript to view the <a href=https://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a><footer class=content__footer></footer></section><section class=page__aside><div class=aside__content><p>2025-12-09</p><hr>On this page:<nav id=TableOfContents><ul><li><a href=#前言>前言</a></li><li><a href=#jvm-初始化>JVM 初始化</a><ul><li><a href=#验证用户输入>验证用户输入</a></li><li><a href=#检测系统资源>检测系统资源</a></li><li><a href=#准备环境>准备环境</a></li><li><a href=#选择垃圾收集器>选择垃圾收集器</a></li><li><a href=#cds>CDS</a></li><li><a href=#创建方法区>创建方法区</a></li></ul></li><li><a href=#类加载链接和初始化>类加载、链接和初始化</a><ul><li><a href=#类加载>类加载</a></li><li><a href=#类链接>类链接</a></li><li><a href=#类初始化>类初始化</a></li></ul></li><li><a href=#hello-world>Hello World!</a></li><li><a href=#project-leyden>Project Leyden</a></li><li><a href=#结论>结论</a><ul><li><a href=#调试>调试</a></li><li><a href=#性能改进>性能改进</a></li></ul></li></ul></nav></div></section><footer class=page__footer><p></p><br><br><p class=copyright>Copyright © 2025 Leo Douglas</p></footer></div></body></html>

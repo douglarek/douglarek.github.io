@@ -1,0 +1,223 @@
+<!doctype html><html lang=zh><head><title>一些常见的并发编程错误 &ndash; Code talks</title><meta name=viewport content="width=device-width,initial-scale=1"><meta charset=UTF-8><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin=anonymous referrerpolicy=no-referrer><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/academicons/1.9.4/css/academicons.min.css integrity="sha512-IW0nhlW5MgNydsXJO40En2EoCkTTjZhI3yuODrZIc8cQ4h1XcF53PsqDHa09NqnkXuIe0Oiyyj171BqZFwISBw==" crossorigin=anonymous referrerpolicy=no-referrer><link rel=stylesheet href=/css/palettes/base16-dark.css><link rel=stylesheet href=/css/risotto.css><link rel=stylesheet href=/css/custom.css><link rel=icon href=/favicon.ico><meta property="og:title" content="一些常见的并发编程错误 &ndash; Code talks"><meta property="og:url" content="/post/concurrent-common-mistakes/"><meta property="og:locale" content="zh-CN"><script async src="https://www.googletagmanager.com/gtag/js?id=G-4TVXFV2XZM%20"></script><script>var dnt,doNotTrack=!1;if(!1&&(dnt=navigator.doNotTrack||window.doNotTrack||navigator.msDoNotTrack,doNotTrack=dnt=="1"||dnt=="yes"),!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-4TVXFV2XZM ")}</script></head><body><div class=page><header class=page__header><nav class="page__nav main-nav"><ul><li class=nomarker><h1 class=page__logo><a href=/ class=page__logo-inner>Code talks</a></h1></li><li class=main-nav__item><a class=nav-main-item href=/post title>Posts</a></li><li class=main-nav__item><a class=nav-main-item href=/tags title>Tags</a></li><li class=main-nav__item><a class=nav-main-item href=https://github.com/douglarek title>GitHub</a></li></ul></nav></header><section class=page__body><header class=content__header><h1>一些常见的并发编程错误</h1><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6649330439620894" crossorigin=anonymous></script></header><div class=content__body><p>本文翻译自 <a href=https://go101.org/article/concurrent-common-mistakes.html>Some Common Concurrent Programming Mistakes</a>，版权归原作者所有。</p><p>Go 是内置了并发编程支持的语言. 通过使用关键字 <code>go</code> 来创建 goroutines (轻量级线程), 并且<a href=https://go101.org/article/channel-use-cases.html>使用</a> <a href=https://go101.org/article/channel.html>channels</a> 和 Go 提供的<a href=https://go101.org/article/concurrent-atomic-operation.html>其他并发</a><a href=https://go101.org/article/concurrent-synchronization-more.html%3CPaste%3E>同步的技术</a>, 并发编程变得简单, 灵活, 并且富有乐趣.</p><p>另一方面, Go 不会阻止 Go 程序员由于粗心或者缺乏经验导致的一些并发编程的错误. 本文接下来的部分将展示一些常见的 Go 并发编程错误, 来帮助 Go 程序员避免类似的错误.</p><h2 id=需要同步的时候没有同步>需要同步的时候没有同步</h2><p>代码行可能<a href=https://go101.org/article/memory-model.html>不会按书写代码的顺序执行</a>.</p><p>如下的程序有两个错误:</p><ul><li>首先, 主 goroutine 中 <code>b</code> 的读取和新 goroutine 中 <code>b</code> 的写入可能存在数据竞争.</li><li>其次, 条件 <code>b == true</code> 无法确保主 goroutine 满足 <code>a != nil</code>. 编译器和 CPU 在新 goroutine 中通过重排序进行优化, 所以运行时 <code>b</code> 的赋值可能发生在 <code>a</code> 的赋值之前, 导致当主 goroutine 中 <code>a</code> 的元素被修改的时候, <code>a</code> 仍旧是 <code>nil</code>.</li></ul><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>main</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> (
+</span></span><span style=display:flex><span>	<span style=color:#e6db74>&#34;time&#34;</span>
+</span></span><span style=display:flex><span>	<span style=color:#e6db74>&#34;runtime&#34;</span>
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>a</span> []<span style=color:#66d9ef>int</span> <span style=color:#75715e>// nil</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>b</span> <span style=color:#66d9ef>bool</span>  <span style=color:#75715e>// false</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#75715e>// a new goroutine</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>go</span> <span style=color:#66d9ef>func</span> () {
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>a</span> = make([]<span style=color:#66d9ef>int</span>, <span style=color:#ae81ff>3</span>)
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>b</span> = <span style=color:#66d9ef>true</span> <span style=color:#75715e>// write b</span>
+</span></span><span style=display:flex><span>	}()
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>for</span> !<span style=color:#a6e22e>b</span> { <span style=color:#75715e>// read b</span>
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Sleep</span>(<span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Second</span>)
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>runtime</span>.<span style=color:#a6e22e>Gosched</span>()
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>a</span>[<span style=color:#ae81ff>0</span>], <span style=color:#a6e22e>a</span>[<span style=color:#ae81ff>1</span>], <span style=color:#a6e22e>a</span>[<span style=color:#ae81ff>2</span>] = <span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>2</span> <span style=color:#75715e>// might panic</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>上面的程序可能在一台电脑上运行良好, 在另一台电脑上 panic. 或者它可能 N 次运行良好, N+1 次 panic.</p><p>我们应该使用 channels 或者 <code>sync</code> 标准库提供的同步技术来确保内存序. 比如,</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>main</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>a</span> []<span style=color:#66d9ef>int</span> = <span style=color:#66d9ef>nil</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>c</span> <span style=color:#f92672>:=</span> make(<span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>struct</span>{})
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#75715e>// a new goroutine</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>go</span> <span style=color:#66d9ef>func</span> () {
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>a</span> = make([]<span style=color:#66d9ef>int</span>, <span style=color:#ae81ff>3</span>)
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>c</span> <span style=color:#f92672>&lt;-</span> <span style=color:#66d9ef>struct</span>{}{}
+</span></span><span style=display:flex><span>	}()
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>c</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>a</span>[<span style=color:#ae81ff>0</span>], <span style=color:#a6e22e>a</span>[<span style=color:#ae81ff>1</span>], <span style=color:#a6e22e>a</span>[<span style=color:#ae81ff>2</span>] = <span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>1</span>, <span style=color:#ae81ff>2</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h2 id=使用-timesleep-做同步>使用 time.Sleep 做同步</h2><p>让我们先看一个简单的例子.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>main</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> (
+</span></span><span style=display:flex><span>	<span style=color:#e6db74>&#34;fmt&#34;</span>
+</span></span><span style=display:flex><span>	<span style=color:#e6db74>&#34;time&#34;</span>
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>x</span> = <span style=color:#ae81ff>123</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>go</span> <span style=color:#66d9ef>func</span>() {
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>x</span> = <span style=color:#ae81ff>789</span> <span style=color:#75715e>// write x</span>
+</span></span><span style=display:flex><span>	}()
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Sleep</span>(<span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Second</span>)
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#a6e22e>x</span>) <span style=color:#75715e>// read x</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>我们期望程序打印 <code>789</code>. 如果我们运行它, 它确实打印 <code>789</code>, 差不多总是这样. 但是它是否是一个具有良好同步的程序 ? 不 ! 原因是 Go 运行时不保证 <code>x</code> 的写入发生在 <code>x</code> 的读取之前. 某些条件下, 比如大部分 CPU 资源被运行在同一 OS 的程序消费, <code>x</code> 的写入可能发生在 <code>x</code> 的读取之后. 这就是为什么我们永远不要使用 <code>time.Sleep</code> 在正式项目中做同步.</p><p>让我们再看另一个例子.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>main</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> (
+</span></span><span style=display:flex><span>	<span style=color:#e6db74>&#34;fmt&#34;</span>
+</span></span><span style=display:flex><span>	<span style=color:#e6db74>&#34;time&#34;</span>
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>var</span> <span style=color:#a6e22e>x</span> = <span style=color:#ae81ff>0</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>num</span> = <span style=color:#ae81ff>123</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>p</span> = <span style=color:#f92672>&amp;</span><span style=color:#a6e22e>num</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>c</span> <span style=color:#f92672>:=</span> make(<span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>int</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>go</span> <span style=color:#66d9ef>func</span>() {
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>c</span> <span style=color:#f92672>&lt;-</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>p</span> <span style=color:#f92672>+</span> <span style=color:#a6e22e>x</span>
+</span></span><span style=display:flex><span>	}()
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Sleep</span>(<span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Second</span>)
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>num</span> = <span style=color:#ae81ff>789</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>c</span>)
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>你期望程序输出什么 ? <code>123</code> 还是 <code>789</code> ? 事实上, 该输出是编译器相关的. 对于标准 Go 编译器 1.11, 程序非常有可能输出 <code>123</code>. 但是理论上, 它也可能输出 <code>789</code>, 或者另一个不期望的数.</p><p>现在, 让我们把 <code>c &lt;- *p + x</code> 改成 <code>c &lt;- *p</code>, 并且重新运行程序. 你会发现输出变成 <code>789</code> (对于标准 Go 编译器 1.11). 再说一次, 该输出是编译器相关的.</p><p>是的, 上面的程序有数据竞争. 表达式 <code>*p</code> 可能会在 <code>num = 789</code> 赋值操作之前,之后抑或同时求值. <code>time.Sleep</code> 无法确保 <code>*p</code> 的求值发生在赋值操作之前.</p><p>对于这个特殊的例子, 我们应该在创建新的 goroutine 之前存储要发送的值到一个临时的值里面, 并且在新 goroutine 里发送该临时值来移除数据竞争.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>...</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>tmp</span> <span style=color:#f92672>:=</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>p</span> <span style=color:#f92672>+</span> <span style=color:#a6e22e>x</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>go</span> <span style=color:#66d9ef>func</span>() {
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>c</span> <span style=color:#f92672>&lt;-</span> <span style=color:#a6e22e>tmp</span>
+</span></span><span style=display:flex><span>	}()
+</span></span><span style=display:flex><span><span style=color:#f92672>...</span>
+</span></span></code></pre></div><h2 id=任由-goroutines-挂起hanging>任由 Goroutines 挂起(Hanging)</h2><p>挂起的 goroutines 是指永远保持阻塞的 goroutines. 有许多原因导致 goroutines 挂起. 比如,</p><ul><li>一个 goroutine 尝试从一个 nil channel 接收值或者从一个没有任何 goroutine 发送数据的 channel 接收值.</li><li>一个 goroutine 尝试发送值到 nil channel 或者发送值到一个没有任何 goroutine 从中读取值的 channel.</li><li>一个 goroutine 自己死锁.</li><li>一组 goroutines 相互死锁.</li><li>一个 goroutine 在执行没有 <code>default</code> 分支的 <code>select</code> 代码块时阻塞, 并且 <code>select</code> 代码块中 <code>case</code> 关键字之后的所有 channel 操作永远阻塞.</li></ul><p>除了有时候我们故意让主 goroutine 挂起来避免程序退出, 大多数其他的挂起 goroutine 案例都是不期望的. 对于 Go 运行时来说很难判断一个处于阻塞状态的 goroutine 是否挂起还是处于临时的阻塞状态. 所以 Go 运行时从来不会释放由挂起的 goroutine 消费的资源.</p><p>在<a href=https://go101.org/article/channel-use-cases.html#first-response-wins>谁先响应谁赢</a>的 channel 使用案例中, 如果之后使用的 channel 容量不够大, 那么当尝试将结果发送到之后的 channel 时, 一些较慢的响应 goroutines 将会挂起. 例如, 如果调用以下函数, 将会有 4 个 goroutines 永远处于阻塞状态.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>request</span>() <span style=color:#66d9ef>int</span> {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>c</span> <span style=color:#f92672>:=</span> make(<span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>int</span>)
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>for</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>:=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>i</span> &lt; <span style=color:#ae81ff>5</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span> {
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>i</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>i</span>
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>go</span> <span style=color:#66d9ef>func</span>() {
+</span></span><span style=display:flex><span>			<span style=color:#a6e22e>c</span> <span style=color:#f92672>&lt;-</span> <span style=color:#a6e22e>i</span> <span style=color:#75715e>// 4 goroutines will hang here.</span>
+</span></span><span style=display:flex><span>		}()
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>return</span> <span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>c</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>为避免这四个 goroutines 挂起, channel c 的容量必须至少为 4.</p><p>在<a href=https://go101.org/article/channel-use-cases.html#first-response-wins-2>谁先响应谁赢的第二种方式的</a> channel 使用案例中, 如果用的 channel 是无缓冲的，则 channel 接收者可能永远不会得到响应并挂起. 例如, 如果在 goroutine 中调用以下函数, 则 goroutine 可能会挂起. 原因是, 如果五个 try-send 操作都发生在接收操作 <code>&lt;-c</code> 准备就绪之前, 则所有五个 try-send 操作都将无法发送值, 因此调用者 goroutine 将永远不会收到值.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>request</span>() <span style=color:#66d9ef>int</span> {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>c</span> <span style=color:#f92672>:=</span> make(<span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>int</span>)
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>for</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>:=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>i</span> &lt; <span style=color:#ae81ff>5</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span> {
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>i</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>i</span>
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>go</span> <span style=color:#66d9ef>func</span>() {
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>select</span> {
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>case</span> <span style=color:#a6e22e>c</span> <span style=color:#f92672>&lt;-</span> <span style=color:#a6e22e>i</span>:
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>default</span>:
+</span></span><span style=display:flex><span>			}
+</span></span><span style=display:flex><span>		}()
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>return</span> <span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>c</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>将 channel <code>c</code> 更改为缓冲 channel 将保证五个尝试发送操作中的至少一个成功, 以便调用方 goroutine 永远不会挂起在上述函数中.</p><h2 id=在-sync-标准库中复制类型的值>在 sync 标准库中复制类型的值</h2><p>在实践中, <code>sync</code> 标准库中(<code>Locker</code> 接口值除外)类型的值不应该被拷贝. 我们应该只拷贝这些值的指针.</p><p>以下是(不好的并发编程)的例子. 这个例子中, 当调用 <code>Counter.Value</code> 时, 一个 <code>Counter</code> 接收值会被拷贝. 作为接收值的一个字段, <code>Counter</code> 接收值的 <code>Mutex</code> 字段也会被拷贝. 该拷贝不是同步的, 所以拷贝的 <code>Mutex</code> 可能已经被破坏. 即使它没有损坏, 它所保护的是复制的 <code>Counter</code> 接收者值的访问, 这通常是没有意义的.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>import</span> <span style=color:#e6db74>&#34;sync&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>type</span> <span style=color:#a6e22e>Counter</span> <span style=color:#66d9ef>struct</span> {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>sync</span>.<span style=color:#a6e22e>Mutex</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>n</span> <span style=color:#66d9ef>int64</span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// This method is okay.</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> (<span style=color:#a6e22e>c</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>Counter</span>) <span style=color:#a6e22e>Increase</span>(<span style=color:#a6e22e>d</span> <span style=color:#66d9ef>int64</span>) (<span style=color:#a6e22e>r</span> <span style=color:#66d9ef>int64</span>) {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>c</span>.<span style=color:#a6e22e>Lock</span>()
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>c</span>.<span style=color:#a6e22e>n</span> <span style=color:#f92672>+=</span> <span style=color:#a6e22e>d</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>r</span> = <span style=color:#a6e22e>c</span>.<span style=color:#a6e22e>n</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>c</span>.<span style=color:#a6e22e>Unlock</span>()
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>return</span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// The method is bad. When it is called, a Counter</span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// receiver value will be copied.</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> (<span style=color:#a6e22e>c</span> <span style=color:#a6e22e>Counter</span>) <span style=color:#a6e22e>Value</span>() (<span style=color:#a6e22e>r</span> <span style=color:#66d9ef>int64</span>) {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>c</span>.<span style=color:#a6e22e>Lock</span>()
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>r</span> = <span style=color:#a6e22e>c</span>.<span style=color:#a6e22e>n</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>c</span>.<span style=color:#a6e22e>Unlock</span>()
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>return</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>我们应该将 <code>Value</code> 方法的接收者类型更改为指针类型 <code>*Counter</code>, 以避免复制 <code>Mutex</code> 值.</p><p>官方 Go SDK 中提供的 <code>go vet</code> 命令将报告潜在的错误值拷贝.</p><h2 id=在错误的地方调用-syncwaitgroup>在错误的地方调用 sync.WaitGroup</h2><p>每个 <code>sync.WaitGroup</code> 值在内部维护一个计数器, 计数器的初始值为零. 如果 <code>WaitGroup</code> 值的计数器为零, 则对 <code>WaitGroup</code> 值的 <code>Wait</code> 方法的调用将不会阻塞, 否则调用将阻塞, 直到计数器值变为零.</p><p>要使 WaitGroup 值的使用有意义, 当 WaitGroup 值的计数器为零时, 对 <code>WaitGroup</code> 值的 <code>Wait</code> 方法的相应调用必须发生在调用 <code>WaitGroup</code> 值的 <code>Add</code> 方法之前.</p><p>例如, 在以下程序中, 在不正确的位置调用 <code>Add</code> 方法, 这使得最终打印的数字不总是 <code>100</code>. 实际上, 程序的最终打印数可以是 <code>[0, 100]</code> 范围内的任意数字. 原因是在 <code>Wait</code> 方法调用之前不保证发生 <code>Add</code> 方法调用.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>main</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> (
+</span></span><span style=display:flex><span>	<span style=color:#e6db74>&#34;fmt&#34;</span>
+</span></span><span style=display:flex><span>	<span style=color:#e6db74>&#34;sync&#34;</span>
+</span></span><span style=display:flex><span>	<span style=color:#e6db74>&#34;sync/atomic&#34;</span>
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>wg</span> <span style=color:#a6e22e>sync</span>.<span style=color:#a6e22e>WaitGroup</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>x</span> <span style=color:#66d9ef>int32</span> = <span style=color:#ae81ff>0</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>for</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>:=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>i</span> &lt; <span style=color:#ae81ff>100</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span> {
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>go</span> <span style=color:#66d9ef>func</span>() {
+</span></span><span style=display:flex><span>			<span style=color:#a6e22e>wg</span>.<span style=color:#a6e22e>Add</span>(<span style=color:#ae81ff>1</span>)
+</span></span><span style=display:flex><span>			<span style=color:#a6e22e>atomic</span>.<span style=color:#a6e22e>AddInt32</span>(<span style=color:#f92672>&amp;</span><span style=color:#a6e22e>x</span>, <span style=color:#ae81ff>1</span>)
+</span></span><span style=display:flex><span>			<span style=color:#a6e22e>wg</span>.<span style=color:#a6e22e>Done</span>()
+</span></span><span style=display:flex><span>		}()
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#e6db74>&#34;To wait ...&#34;</span>)
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>wg</span>.<span style=color:#a6e22e>Wait</span>()
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#a6e22e>atomic</span>.<span style=color:#a6e22e>LoadInt32</span>(<span style=color:#f92672>&amp;</span><span style=color:#a6e22e>x</span>))
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>为了使程序按预期运行, 我们应该将 <code>Add</code> 方法调用移出 <code>for</code> 循环中创建的新 goroutine, 如下面的代码所示.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>...</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>for</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>:=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>i</span> &lt; <span style=color:#ae81ff>100</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span> {
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>wg</span>.<span style=color:#a6e22e>Add</span>(<span style=color:#ae81ff>1</span>)
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>go</span> <span style=color:#66d9ef>func</span>() {
+</span></span><span style=display:flex><span>			<span style=color:#a6e22e>atomic</span>.<span style=color:#a6e22e>AddInt32</span>(<span style=color:#f92672>&amp;</span><span style=color:#a6e22e>x</span>, <span style=color:#ae81ff>1</span>)
+</span></span><span style=display:flex><span>			<span style=color:#a6e22e>wg</span>.<span style=color:#a6e22e>Done</span>()
+</span></span><span style=display:flex><span>		}()
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span><span style=color:#f92672>...</span>
+</span></span></code></pre></div><h2 id=错误使用-channels-作为-futures>错误使用 Channels 作为 Futures</h2><p>从文章<a href=https://go101.org/article/channel-use-cases.html>channel 使用案例</a>中, 我们知道一些函数会返回 <a href=https://go101.org/article/channel-use-cases.html#future-promise>channels 作为 futures</a>. 假设 <code>fa</code> 和<code>fb</code> 是两个这样的函数, 那么下面的调用将不正确地使用 future 参数.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#a6e22e>doSomethingWithFutureArguments</span>(<span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>fa</span>(), <span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>fb</span>())
+</span></span></code></pre></div><p>在上面的代码行中, 两个 channel 接收操作是顺序处理的, 而不是同时处理的. 我们应该将其修改为以下内容以同时处理它们.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#a6e22e>ca</span>, <span style=color:#a6e22e>cb</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>fa</span>(), <span style=color:#a6e22e>fb</span>()
+</span></span><span style=display:flex><span><span style=color:#a6e22e>doSomethingWithFutureArguments</span>(<span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>ca</span>, <span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>cb</span>)
+</span></span></code></pre></div><h2 id=不是从最后一个活跃的发送者-goroutine-关闭-channels>不是从最后一个活跃的发送者 Goroutine 关闭 Channels</h2><p>Go 程序员常犯的一个错误就是当还有一些其他 goroutine 可能会在之后向该 channel 发送值时关闭一个 channel. 当这种潜在的发送(到关闭的 channel)真的发生时，会发生 panic.</p><p>一些有名的 Go 项目也犯过这样的错误, 比如 Kubernetes 项目中的<a href="https://github.com/kubernetes/kubernetes/pull/45291/files?diff=split">这个</a>以及<a href="https://github.com/kubernetes/kubernetes/pull/39479/files?diff=split">这个 bug</a>.</p><p>请阅读<a href=https://go101.org/article/channel-closing.html>这篇文章</a>, 了解如何安全, 优雅地关闭 channel.</p><h2 id=64-位值的原子操作不保证-64-位对齐>64 位值的原子操作不保证 64 位对齐</h2><p>到目前为止(Go 1.11), 对于标准的 Go 编译器, 64 位原子操作所涉及的值的地址需要 64 位对齐. 如果不这样做可能会导致 panic. 对于标准 Go 编译器, 此类故障只会发生在32位体系架构上. 请阅读<a href=https://go101.org/article/memory-layout.html>内存布局</a>, 了解如何保证 64 位字地址在 32 位操作系统上 64 位对齐.</p><h2 id=不重视-timeafter-调用带来的大量资源消耗>不重视 time.After 调用带来的大量资源消耗</h2><p><code>time</code> 标准库中的 <code>After</code> 函数返回<a href=https://go101.org/article/channel-use-cases.html#timer>一个延迟通知的 channel</a>. 该函数很方便, 但每次调用都会创建 <code>time.Timer</code> 类型的新值. 新创建的 <code>Timer</code> 值将在 <code>After</code> 函数传递的参数指定的持续时间内保持活跃状态. 如果在持续时间内多次调用该函数, 则会有许多 <code>Timer</code> 值存活并消耗大量内存和计算.</p><p>例如, 如果调用以下 <code>longRunning</code> 函数, 并且在一分钟内有数百万条消息进来, 那么在一定时期内将有数百万个 <code>Timer</code> 值存活, 即使这些 <code>Timer</code> 值中的大部分已经变得无用.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>import</span> (
+</span></span><span style=display:flex><span>	<span style=color:#e6db74>&#34;fmt&#34;</span>
+</span></span><span style=display:flex><span>	<span style=color:#e6db74>&#34;time&#34;</span>
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// The function will return if a message arrival interval</span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// is larger than one minute.</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>longRunning</span>(<span style=color:#a6e22e>messages</span> <span style=color:#f92672>&lt;-</span><span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>string</span>) {
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>for</span> {
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>select</span> {
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>case</span> <span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>After</span>(<span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Minute</span>):
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>return</span>
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>case</span> <span style=color:#a6e22e>msg</span> <span style=color:#f92672>:=</span> <span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>messages</span>:
+</span></span><span style=display:flex><span>			<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#a6e22e>msg</span>)
+</span></span><span style=display:flex><span>		}
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>为避免在上面的代码中创建太多的 <code>Timer</code> 值, 我们应该使用单个 <code>Timer</code> 值来完成相同的工作.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>longRunning</span>(<span style=color:#a6e22e>messages</span> <span style=color:#f92672>&lt;-</span><span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>string</span>) {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>timer</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>NewTimer</span>(<span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Minute</span>)
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>defer</span> <span style=color:#a6e22e>timer</span>.<span style=color:#a6e22e>Stop</span>()
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>for</span> {
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>select</span> {
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>case</span> <span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>timer</span>.<span style=color:#a6e22e>C</span>:
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>return</span>
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>case</span> <span style=color:#a6e22e>msg</span> <span style=color:#f92672>:=</span> <span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>messages</span>:
+</span></span><span style=display:flex><span>			<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#a6e22e>msg</span>)
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>if</span> !<span style=color:#a6e22e>timer</span>.<span style=color:#a6e22e>Stop</span>() {
+</span></span><span style=display:flex><span>				<span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>timer</span>.<span style=color:#a6e22e>C</span>
+</span></span><span style=display:flex><span>			}
+</span></span><span style=display:flex><span>		}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>		<span style=color:#75715e>// The above &#34;if&#34; block can also be put here.</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>timer</span>.<span style=color:#a6e22e>Reset</span>(<span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Minute</span>)
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h2 id=错误的使用-timetimer>错误的使用 time.Timer</h2><p>上一节中展示了 <code>time.Timer</code> 值的惯用法的例子. 应该注意的一个细节是应该始终调用 <code>Reset</code> 方法来停止或者过期 <code>time.Timer</code> 值.</p><p>在 <code>select</code> 块的第一个 <code>case</code> 分支的末尾, <code>time.Timer</code> 值已经过期, 因此我们不需要停止它. 但是我们必须在第二个分支中停止计时器. 如果第二个分支缺失 <code>if</code> 代码块, 发送(通过 Go 运行时)到 channel (<code>timer.C</code>) 可能会和 <code>Reset</code> 方法调用产生竞争, 并且 <code>longRunning</code> 函数可能比预期早返回, 因为 <code>Reset</code> 方法仅会重设内部计时器为零, 它不会清除已经发送到 <code>timer.C</code> channel 的值.</p><p>比如, 如下的程序非常可能在 1 秒内退出而不是 10 秒. 而且更重要的是, 程序是没有数据竞争的.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>main</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> (
+</span></span><span style=display:flex><span>	<span style=color:#e6db74>&#34;fmt&#34;</span>
+</span></span><span style=display:flex><span>	<span style=color:#e6db74>&#34;time&#34;</span>
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>start</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Now</span>()
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>timer</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>NewTimer</span>(<span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Second</span><span style=color:#f92672>/</span><span style=color:#ae81ff>2</span>)
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>select</span> {
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>case</span> <span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>timer</span>.<span style=color:#a6e22e>C</span>:
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>default</span>:
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Sleep</span>(<span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Second</span>) <span style=color:#75715e>// go here</span>
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>timer</span>.<span style=color:#a6e22e>Reset</span>(<span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Second</span> <span style=color:#f92672>*</span> <span style=color:#ae81ff>10</span>)
+</span></span><span style=display:flex><span>	<span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>timer</span>.<span style=color:#a6e22e>C</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Since</span>(<span style=color:#a6e22e>start</span>)) <span style=color:#75715e>// 1.000188181s</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p><code>time.Timer</code> 值可以在不再使用时保持非停止状态, 但建议最后停止它.</p><p>它很容易出错, 不建议在多个 goroutine 中同时使用 <code>time.Timer</code> 值.</p><p>我们不应该依赖 <code>Reset</code> 方法调用的返回值. <code>Reset</code> 方法的返回结果仅用于兼容性目的.</p></div><div id=disqus_thread></div><script>window.disqus_config=function(){},function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById("disqus_thread").innerHTML="Disqus comments not available by default when the website is previewed locally.";return}var t=document,e=t.createElement("script");e.async=!0,e.src="//douglarek.disqus.com/embed.js",e.setAttribute("data-timestamp",+new Date),(t.head||t.body).appendChild(e)}()</script><noscript>Please enable JavaScript to view the <a href=https://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a><footer class=content__footer></footer></section><section class=page__aside><div class=aside__content><p>2018-09-14</p><hr>On this page:<nav id=TableOfContents><ul><li><a href=#需要同步的时候没有同步>需要同步的时候没有同步</a></li><li><a href=#使用-timesleep-做同步>使用 time.Sleep 做同步</a></li><li><a href=#任由-goroutines-挂起hanging>任由 Goroutines 挂起(Hanging)</a></li><li><a href=#在-sync-标准库中复制类型的值>在 sync 标准库中复制类型的值</a></li><li><a href=#在错误的地方调用-syncwaitgroup>在错误的地方调用 sync.WaitGroup</a></li><li><a href=#错误使用-channels-作为-futures>错误使用 Channels 作为 Futures</a></li><li><a href=#不是从最后一个活跃的发送者-goroutine-关闭-channels>不是从最后一个活跃的发送者 Goroutine 关闭 Channels</a></li><li><a href=#64-位值的原子操作不保证-64-位对齐>64 位值的原子操作不保证 64 位对齐</a></li><li><a href=#不重视-timeafter-调用带来的大量资源消耗>不重视 time.After 调用带来的大量资源消耗</a></li><li><a href=#错误的使用-timetimer>错误的使用 time.Timer</a></li></ul></nav></div></section><footer class=page__footer><p></p><br><br><p class=copyright>Copyright © 2025 Leo Douglas</p></footer></div></body></html>

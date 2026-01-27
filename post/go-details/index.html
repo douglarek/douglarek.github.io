@@ -1,0 +1,386 @@
+<!doctype html><html lang=zh><head><title>Go 细节 &ndash; Code talks</title><meta name=viewport content="width=device-width,initial-scale=1"><meta charset=UTF-8><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin=anonymous referrerpolicy=no-referrer><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/academicons/1.9.4/css/academicons.min.css integrity="sha512-IW0nhlW5MgNydsXJO40En2EoCkTTjZhI3yuODrZIc8cQ4h1XcF53PsqDHa09NqnkXuIe0Oiyyj171BqZFwISBw==" crossorigin=anonymous referrerpolicy=no-referrer><link rel=stylesheet href=/css/palettes/base16-dark.css><link rel=stylesheet href=/css/risotto.css><link rel=stylesheet href=/css/custom.css><link rel=icon href=/favicon.ico><meta property="og:title" content="Go 细节 &ndash; Code talks"><meta property="og:url" content="/post/go-details/"><meta property="og:locale" content="zh-CN"><script async src="https://www.googletagmanager.com/gtag/js?id=G-4TVXFV2XZM%20"></script><script>var dnt,doNotTrack=!1;if(!1&&(dnt=navigator.doNotTrack||window.doNotTrack||navigator.msDoNotTrack,doNotTrack=dnt=="1"||dnt=="yes"),!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-4TVXFV2XZM ")}</script></head><body><div class=page><header class=page__header><nav class="page__nav main-nav"><ul><li class=nomarker><h1 class=page__logo><a href=/ class=page__logo-inner>Code talks</a></h1></li><li class=main-nav__item><a class=nav-main-item href=/post title>Posts</a></li><li class=main-nav__item><a class=nav-main-item href=/tags title>Tags</a></li><li class=main-nav__item><a class=nav-main-item href=https://github.com/douglarek title>GitHub</a></li></ul></nav></header><section class=page__body><header class=content__header><h1>Go 细节</h1><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6649330439620894" crossorigin=anonymous></script></header><div class=content__body><p>本文翻译自 <a href=https://go101.org/article/details.html>Go Details 101</a>，版权归原作者所有。</p><h2 id=代码包>代码包</h2><p>##这些md还有一个问题，就是 markdown 的标记，如 ## ，### 一个包可以在源文件中多次导入</p><p>Go 源文件可以多次导入相同的包, 但导入名称必须不同. 这些相同的包导入引用相同的包实例.</p><p>例如:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>main</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> <span style=color:#e6db74>&#34;fmt&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> <span style=color:#e6db74>&#34;io&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> <span style=color:#a6e22e>inout</span> <span style=color:#e6db74>&#34;io&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#f92672>&amp;</span><span style=color:#a6e22e>inout</span>.<span style=color:#a6e22e>EOF</span> <span style=color:#f92672>==</span> <span style=color:#f92672>&amp;</span><span style=color:#a6e22e>io</span>.<span style=color:#a6e22e>EOF</span>) <span style=color:#75715e>// true</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 id=package-mypkg-后的注释--import-xyzmypkg-对于-go-编译器是有意义的>package mypkg 后的注释 // import &ldquo;x.y.z.mypkg&rdquo; 对于 Go 编译器是有意义的</h3><p>例如, 当导入此包的源文件由标准 Go 编译器编译时, 以下包的导入路径必须为 &ldquo;x.y.z.mypkg&rdquo;.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>mypkg</span> <span style=color:#75715e>// import &#34;x.y.z.mypkg&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>...</span>
+</span></span></code></pre></div><h2 id=流程控制>流程控制</h2><h3 id=swith-和-select-中的-default-分支可以放在所有-case-分支之前-之后-或者之间>swith 和 select 中的 default 分支可以放在所有 case 分支之前, 之后, 或者之间.</h3><p>与许多其他语言相比, 一个明显的区别在于 switch-case 控制流程块中默认分支的顺序可以是任意的. 例如, 以下三个 switch-case 控制流程块彼此等效.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#66d9ef>switch</span> <span style=color:#a6e22e>n</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>rand</span>.<span style=color:#a6e22e>Intn</span>(<span style=color:#ae81ff>3</span>); <span style=color:#a6e22e>n</span> {
+</span></span><span style=display:flex><span><span style=color:#66d9ef>case</span> <span style=color:#ae81ff>0</span>: <span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#e6db74>&#34;n == 0&#34;</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>case</span> <span style=color:#ae81ff>1</span>: <span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#e6db74>&#34;n == 1&#34;</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>default</span>: <span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#e6db74>&#34;n == 2&#34;</span>)
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>switch</span> <span style=color:#a6e22e>n</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>rand</span>.<span style=color:#a6e22e>Intn</span>(<span style=color:#ae81ff>3</span>); <span style=color:#a6e22e>n</span> {
+</span></span><span style=display:flex><span><span style=color:#66d9ef>default</span>: <span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#e6db74>&#34;n == 2&#34;</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>case</span> <span style=color:#ae81ff>0</span>: <span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#e6db74>&#34;n == 0&#34;</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>case</span> <span style=color:#ae81ff>1</span>: <span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#e6db74>&#34;n == 1&#34;</span>)
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>switch</span> <span style=color:#a6e22e>n</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>rand</span>.<span style=color:#a6e22e>Intn</span>(<span style=color:#ae81ff>3</span>); <span style=color:#a6e22e>n</span> {
+</span></span><span style=display:flex><span><span style=color:#66d9ef>case</span> <span style=color:#ae81ff>0</span>: <span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#e6db74>&#34;n == 0&#34;</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>default</span>: <span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#e6db74>&#34;n == 2&#34;</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>case</span> <span style=color:#ae81ff>1</span>: <span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#e6db74>&#34;n == 1&#34;</span>)
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 id=defer-匿名函数可以修改嵌套函数的命名返回结果>defer 匿名函数可以修改嵌套函数的命名返回结果</h3><p>例如:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>main</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> <span style=color:#e6db74>&#34;fmt&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>Triple</span>(<span style=color:#a6e22e>n</span> <span style=color:#66d9ef>int</span>) (<span style=color:#a6e22e>r</span> <span style=color:#66d9ef>int</span>) {
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>defer</span> <span style=color:#66d9ef>func</span>() {
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>r</span> <span style=color:#f92672>+=</span> <span style=color:#a6e22e>n</span> <span style=color:#75715e>// modify the return value</span>
+</span></span><span style=display:flex><span>	}()
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>return</span> <span style=color:#a6e22e>n</span> <span style=color:#f92672>+</span> <span style=color:#a6e22e>n</span> <span style=color:#75715e>// &lt;=&gt; r = n + n; return</span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#a6e22e>Triple</span>(<span style=color:#ae81ff>5</span>)) <span style=color:#75715e>// 15</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 class=.. id=对于切片-s-循环-for-i--range-s--不等于-for-i--0-i--lens-i>对于切片 s, 循环 for i = range s {&mldr;} 不等于 for i = 0; i &lt; len(s); i++</h3><p>对于两个循环, 迭代变量 i 的相应最终值可能不同.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>main</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> <span style=color:#e6db74>&#34;fmt&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>var</span> <span style=color:#a6e22e>i</span> <span style=color:#66d9ef>int</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>fa</span>(<span style=color:#a6e22e>s</span> []<span style=color:#66d9ef>int</span>, <span style=color:#a6e22e>n</span> <span style=color:#66d9ef>int</span>) <span style=color:#66d9ef>int</span> {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>i</span> = <span style=color:#a6e22e>n</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>for</span> <span style=color:#a6e22e>i</span> = <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>i</span> &lt; len(<span style=color:#a6e22e>s</span>); <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span> {}
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>return</span> <span style=color:#a6e22e>i</span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>fb</span>(<span style=color:#a6e22e>s</span> []<span style=color:#66d9ef>int</span>, <span style=color:#a6e22e>n</span> <span style=color:#66d9ef>int</span>) <span style=color:#66d9ef>int</span> {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>i</span> = <span style=color:#a6e22e>n</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>for</span> <span style=color:#a6e22e>i</span> = <span style=color:#66d9ef>range</span> <span style=color:#a6e22e>s</span> {}
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>return</span> <span style=color:#a6e22e>i</span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>s</span> <span style=color:#f92672>:=</span> []<span style=color:#66d9ef>int</span>{<span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>5</span>, <span style=color:#ae81ff>7</span>, <span style=color:#ae81ff>11</span>, <span style=color:#ae81ff>13</span>}
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#a6e22e>fa</span>(<span style=color:#a6e22e>s</span>, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>), <span style=color:#a6e22e>fb</span>(<span style=color:#a6e22e>s</span>, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>)) <span style=color:#75715e>// 6 5</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>s</span> = <span style=color:#66d9ef>nil</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#a6e22e>fa</span>(<span style=color:#a6e22e>s</span>, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>), <span style=color:#a6e22e>fb</span>(<span style=color:#a6e22e>s</span>, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>)) <span style=color:#75715e>// 0 -1</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 id=使用-osexit-函数退出程序并使用-runtimegoexit-函数退出-goroutine>使用 os.Exit 函数退出程序并使用 runtime.Goexit 函数退出 goroutine</h3><p>我们可以通过调用 os.Exit 函数从任何函数中退出程序. os.Exit 函数调用取一个 int 码作为参数并且将该码返回给操作系统.</p><p>例如:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#75715e>// exit-example.go</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>main</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> <span style=color:#e6db74>&#34;os&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> <span style=color:#e6db74>&#34;time&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>go</span> <span style=color:#66d9ef>func</span>() {
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Sleep</span>(<span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Second</span>)
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>os</span>.<span style=color:#a6e22e>Exit</span>(<span style=color:#ae81ff>1</span>)
+</span></span><span style=display:flex><span>	}()
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>select</span>{}
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>运行:</p><pre tabindex=0><code>$ go run a.go
+exit status 1
+$ echo $?
+1
+</code></pre><p>我们可以通过调用 runtime.Goexit 函数来退出一个 goroutine. runtime.Goexit 函数没有参数.</p><p>一个例子:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>main</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> <span style=color:#e6db74>&#34;fmt&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> <span style=color:#e6db74>&#34;runtime&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>c</span> <span style=color:#f92672>:=</span> make(<span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>int</span>)
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>go</span> <span style=color:#66d9ef>func</span>() {
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>defer</span> <span style=color:#66d9ef>func</span>() {<span style=color:#a6e22e>c</span> <span style=color:#f92672>&lt;-</span> <span style=color:#ae81ff>1</span>}()
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>defer</span> <span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#e6db74>&#34;Go&#34;</span>)
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>func</span>() {
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>defer</span> <span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#e6db74>&#34;C&#34;</span>)
+</span></span><span style=display:flex><span>			<span style=color:#a6e22e>runtime</span>.<span style=color:#a6e22e>Goexit</span>()
+</span></span><span style=display:flex><span>		}()
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#e6db74>&#34;Java&#34;</span>)
+</span></span><span style=display:flex><span>	}()
+</span></span><span style=display:flex><span>	<span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>c</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h2 id=指针>指针</h2><h3 id=对于数值指针-p-表达式-p-相当于-p-如果-p-不是数值指针-则-p-编译不过>对于数值指针 p, 表达式 *p++ 相当于 (*p)++. 如果 p 不是数值指针, 则 *p++ 编译不过</h3><p>在 Go 中, 指针不能进行算术运算. 对于指针值 p, 语句 p++ 在 Go 中是非法的. 如果 p 是一个指向数值的指针, 那么 Go 编译器会将 *v++ 视为 (*v)++.</p><p>例如:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>main</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> <span style=color:#e6db74>&#34;fmt&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>a</span> <span style=color:#f92672>:=</span> int64(<span style=color:#ae81ff>5</span>)
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>p</span> <span style=color:#f92672>:=</span> <span style=color:#f92672>&amp;</span><span style=color:#a6e22e>a</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#75715e>// The following two lines don&#39;t compile.</span>
+</span></span><span style=display:flex><span>	<span style=color:#75715e>/*
+</span></span></span><span style=display:flex><span><span style=color:#75715e>	p++
+</span></span></span><span style=display:flex><span><span style=color:#75715e>	p = (&amp;a) + 8
+</span></span></span><span style=display:flex><span><span style=color:#75715e>	*/</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#f92672>*</span><span style=color:#a6e22e>p</span><span style=color:#f92672>++</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#f92672>*</span><span style=color:#a6e22e>p</span>, <span style=color:#a6e22e>a</span>)   <span style=color:#75715e>// 6 6</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#a6e22e>p</span> <span style=color:#f92672>==</span> <span style=color:#f92672>&amp;</span><span style=color:#a6e22e>a</span>) <span style=color:#75715e>// true</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 id=如果两种类型的基本类型相同-则两个命名指针类型的值可以相互转换-两种指针类型的底层类型可能不同>如果两种类型的基本类型相同, 则两个命名指针类型的值可以相互转换. 两种指针类型的底层类型可能不同.</h3><p>给定非接口值 x 和非接口类型 T, 假定 x 的类型为 Tx,</p><ul><li>如果 Tx 和 T 共享相同的底层类型(忽略结构体 tags), 那么 x 可以显示地转换为 T, 尤其当 Tx 或者 T 不是一个定义类型并且它们的底层类型相同(考虑结构体 tags), 那么 x 可以隐式地转换为 T.</li><li>如果 Tx 和 T 具有不同的底层类型, 但 Tx 和 T 都是<a href=https://go101.org/article/type-system-overview.html#non-defined-type>非定义</a>的指针类型, 并且它们的基类型共享相同的底层类型(忽略结构体 tags), 则 x 可以(并且必须)可以显示地转换为 T.</li></ul><p>一般性例子:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>main</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>	<span style=color:#75715e>// []int, IntSlice and MySlice share</span>
+</span></span><span style=display:flex><span>	<span style=color:#75715e>// the same underlying type: []int</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>type</span> <span style=color:#a6e22e>IntSlice</span> []<span style=color:#66d9ef>int</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>type</span> <span style=color:#a6e22e>MySlice</span>  []<span style=color:#66d9ef>int</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>s</span>  = []<span style=color:#66d9ef>int</span>{}
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>is</span> = <span style=color:#a6e22e>IntSlice</span>{}
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>ms</span> = <span style=color:#a6e22e>MySlice</span>{}
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>x</span> <span style=color:#66d9ef>struct</span>{<span style=color:#a6e22e>n</span> <span style=color:#66d9ef>int</span> <span style=color:#e6db74>`foo`</span>}
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>y</span> <span style=color:#66d9ef>struct</span>{<span style=color:#a6e22e>n</span> <span style=color:#66d9ef>int</span> <span style=color:#e6db74>`bar`</span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#75715e>// The two lines both fail to compile.</span>
+</span></span><span style=display:flex><span>	<span style=color:#75715e>/*
+</span></span></span><span style=display:flex><span><span style=color:#75715e>	is = ms
+</span></span></span><span style=display:flex><span><span style=color:#75715e>	ms = is
+</span></span></span><span style=display:flex><span><span style=color:#75715e>	*/</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#75715e>// Must use explicit conversions here.</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>is</span> = <span style=color:#a6e22e>IntSlice</span>(<span style=color:#a6e22e>ms</span>)
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>ms</span> = <span style=color:#a6e22e>MySlice</span>(<span style=color:#a6e22e>is</span>)
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>x</span> = <span style=color:#66d9ef>struct</span>{<span style=color:#a6e22e>n</span> <span style=color:#66d9ef>int</span> <span style=color:#e6db74>`foo`</span>}(<span style=color:#a6e22e>y</span>)
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>y</span> = <span style=color:#66d9ef>struct</span>{<span style=color:#a6e22e>n</span> <span style=color:#66d9ef>int</span> <span style=color:#e6db74>`bar`</span>}(<span style=color:#a6e22e>x</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#75715e>// Implicit conversions are okay here.</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>s</span> = <span style=color:#a6e22e>is</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>is</span> = <span style=color:#a6e22e>s</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>s</span> = <span style=color:#a6e22e>ms</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>ms</span> = <span style=color:#a6e22e>s</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>指针的例子:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>main</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>type</span> <span style=color:#a6e22e>MyInt</span> <span style=color:#66d9ef>int</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>type</span> <span style=color:#a6e22e>IntPtr</span> <span style=color:#f92672>*</span><span style=color:#66d9ef>int</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>type</span> <span style=color:#a6e22e>MyIntPtr</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>MyInt</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>pi</span> = new(<span style=color:#66d9ef>int</span>) <span style=color:#75715e>// type is *int</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>ip</span> <span style=color:#a6e22e>IntPtr</span> = <span style=color:#a6e22e>pi</span> <span style=color:#75715e>// ok, same underlying type</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#75715e>// var _ *MyInt = pi // can&#39;t convert implicitly</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>_</span> = (<span style=color:#f92672>*</span><span style=color:#a6e22e>MyInt</span>)(<span style=color:#a6e22e>pi</span>) <span style=color:#75715e>// ok, must explicitly</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#75715e>// var _ MyIntPtr = pi  // can&#39;t convert implicitly</span>
+</span></span><span style=display:flex><span>	<span style=color:#75715e>// var _ = MyIntPtr(pi) // can&#39;t convert explicitly</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>_</span> <span style=color:#a6e22e>MyIntPtr</span> = (<span style=color:#f92672>*</span><span style=color:#a6e22e>MyInt</span>)(<span style=color:#a6e22e>pi</span>)  <span style=color:#75715e>// ok</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>_</span> = <span style=color:#a6e22e>MyIntPtr</span>((<span style=color:#f92672>*</span><span style=color:#a6e22e>MyInt</span>)(<span style=color:#a6e22e>pi</span>)) <span style=color:#75715e>// ok</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#75715e>// var _ MyIntPtr = ip  // can&#39;t convert implicitly</span>
+</span></span><span style=display:flex><span>	<span style=color:#75715e>// var _ = MyIntPtr(ip) // can&#39;t convert explicitly</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>_</span> <span style=color:#a6e22e>MyIntPtr</span> = (<span style=color:#f92672>*</span><span style=color:#a6e22e>MyInt</span>)((<span style=color:#f92672>*</span><span style=color:#66d9ef>int</span>)(<span style=color:#a6e22e>ip</span>))  <span style=color:#75715e>// ok</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>_</span> = <span style=color:#a6e22e>MyIntPtr</span>((<span style=color:#f92672>*</span><span style=color:#a6e22e>MyInt</span>)((<span style=color:#f92672>*</span><span style=color:#66d9ef>int</span>)(<span style=color:#a6e22e>ip</span>))) <span style=color:#75715e>// ok</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 id=不同零大小的值的地址可能相同也可能不同>不同零大小的值的地址可能相同也可能不同.</h3><p>两个零大小值的地址是否相等取决于编译器和编译器版本.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>main</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> <span style=color:#e6db74>&#34;fmt&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>a</span> <span style=color:#f92672>:=</span> <span style=color:#66d9ef>struct</span>{}{}
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>b</span> <span style=color:#f92672>:=</span> <span style=color:#66d9ef>struct</span>{}{}
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>x</span> <span style=color:#f92672>:=</span> <span style=color:#66d9ef>struct</span>{}{}
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>y</span> <span style=color:#f92672>:=</span> <span style=color:#66d9ef>struct</span>{}{}
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>m</span> <span style=color:#f92672>:=</span> [<span style=color:#ae81ff>10</span>]<span style=color:#66d9ef>struct</span>{}{}
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>n</span> <span style=color:#f92672>:=</span> [<span style=color:#ae81ff>10</span>]<span style=color:#66d9ef>struct</span>{}{}
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>o</span> <span style=color:#f92672>:=</span> [<span style=color:#ae81ff>10</span>]<span style=color:#66d9ef>struct</span>{}{}
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>p</span> <span style=color:#f92672>:=</span> [<span style=color:#ae81ff>10</span>]<span style=color:#66d9ef>struct</span>{}{}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#f92672>&amp;</span><span style=color:#a6e22e>x</span>, <span style=color:#f92672>&amp;</span><span style=color:#a6e22e>y</span>, <span style=color:#f92672>&amp;</span><span style=color:#a6e22e>o</span>, <span style=color:#f92672>&amp;</span><span style=color:#a6e22e>p</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#75715e>// For the standard Go compiler (1.10),</span>
+</span></span><span style=display:flex><span>	<span style=color:#75715e>// x, y, o and p escape to heap,</span>
+</span></span><span style=display:flex><span>	<span style=color:#75715e>// but a, b, m and n are allocated on stack.</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#f92672>&amp;</span><span style=color:#a6e22e>a</span> <span style=color:#f92672>==</span> <span style=color:#f92672>&amp;</span><span style=color:#a6e22e>b</span>) <span style=color:#75715e>// false</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#f92672>&amp;</span><span style=color:#a6e22e>x</span> <span style=color:#f92672>==</span> <span style=color:#f92672>&amp;</span><span style=color:#a6e22e>y</span>) <span style=color:#75715e>// true</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#f92672>&amp;</span><span style=color:#a6e22e>a</span> <span style=color:#f92672>==</span> <span style=color:#f92672>&amp;</span><span style=color:#a6e22e>x</span>) <span style=color:#75715e>// false</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#f92672>&amp;</span><span style=color:#a6e22e>m</span> <span style=color:#f92672>==</span> <span style=color:#f92672>&amp;</span><span style=color:#a6e22e>n</span>) <span style=color:#75715e>// false</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#f92672>&amp;</span><span style=color:#a6e22e>o</span> <span style=color:#f92672>==</span> <span style=color:#f92672>&amp;</span><span style=color:#a6e22e>p</span>) <span style=color:#75715e>// true</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#f92672>&amp;</span><span style=color:#a6e22e>n</span> <span style=color:#f92672>==</span> <span style=color:#f92672>&amp;</span><span style=color:#a6e22e>p</span>) <span style=color:#75715e>// false</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>上面代码中的输出用于标准 Go 编译器 1.10.</p><h3 id=指针类型的基类型可能是指针类型本身>指针类型的基类型可能是指针类型本身</h3><p>一个例子:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>main</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>type</span> <span style=color:#a6e22e>P</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>P</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>p</span> <span style=color:#a6e22e>P</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>p</span> = <span style=color:#f92672>&amp;</span><span style=color:#a6e22e>p</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>p</span> = <span style=color:#f92672>**************</span><span style=color:#a6e22e>p</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>同样,</p><ul><li>切片类型的元素类型可以是切片类型本身,</li><li>显示类型的元素类型可以是映射类型本身,</li><li>管道类型的元素类型可以是管道类型本身,</li><li>函数类型的参数和结果类型可以是函数类型本身.</li></ul><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>main</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>type</span> <span style=color:#a6e22e>S</span> []<span style=color:#a6e22e>S</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>type</span> <span style=color:#a6e22e>M</span> <span style=color:#66d9ef>map</span>[<span style=color:#66d9ef>string</span>]<span style=color:#a6e22e>M</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>type</span> <span style=color:#a6e22e>C</span> <span style=color:#66d9ef>chan</span> <span style=color:#a6e22e>C</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>type</span> <span style=color:#a6e22e>F</span> <span style=color:#66d9ef>func</span>(<span style=color:#a6e22e>F</span>) <span style=color:#a6e22e>F</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>s</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>S</span>{<span style=color:#ae81ff>0</span>:<span style=color:#66d9ef>nil</span>}
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>s</span>[<span style=color:#ae81ff>0</span>] = <span style=color:#a6e22e>s</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>m</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>M</span>{<span style=color:#e6db74>&#34;Go&#34;</span>: <span style=color:#66d9ef>nil</span>}
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>m</span>[<span style=color:#e6db74>&#34;Go&#34;</span>] = <span style=color:#a6e22e>m</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>c</span> <span style=color:#f92672>:=</span> make(<span style=color:#a6e22e>C</span>, <span style=color:#ae81ff>3</span>)
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>c</span> <span style=color:#f92672>&lt;-</span> <span style=color:#a6e22e>c</span>; <span style=color:#a6e22e>c</span> <span style=color:#f92672>&lt;-</span> <span style=color:#a6e22e>c</span>; <span style=color:#a6e22e>c</span> <span style=color:#f92672>&lt;-</span> <span style=color:#a6e22e>c</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>f</span> <span style=color:#a6e22e>F</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>f</span> = <span style=color:#66d9ef>func</span>(<span style=color:#a6e22e>F</span>)<span style=color:#a6e22e>F</span> {<span style=color:#66d9ef>return</span> <span style=color:#a6e22e>f</span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>_</span> = <span style=color:#a6e22e>s</span>[<span style=color:#ae81ff>0</span>][<span style=color:#ae81ff>0</span>][<span style=color:#ae81ff>0</span>][<span style=color:#ae81ff>0</span>][<span style=color:#ae81ff>0</span>][<span style=color:#ae81ff>0</span>][<span style=color:#ae81ff>0</span>][<span style=color:#ae81ff>0</span>]
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>_</span> = <span style=color:#a6e22e>m</span>[<span style=color:#e6db74>&#34;Go&#34;</span>][<span style=color:#e6db74>&#34;Go&#34;</span>][<span style=color:#e6db74>&#34;Go&#34;</span>][<span style=color:#e6db74>&#34;Go&#34;</span>]
+</span></span><span style=display:flex><span>	<span style=color:#f92672>&lt;-&lt;-&lt;-</span><span style=color:#a6e22e>c</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>f</span>(<span style=color:#a6e22e>f</span>(<span style=color:#a6e22e>f</span>(<span style=color:#a6e22e>f</span>(<span style=color:#a6e22e>f</span>))))
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 id=关于选择器的细节>关于选择器的细节</h3><p>对于一个指针值, 不管其类型是否定义, 如果它的(指针)类型的基类型是一个结构体类型, 那么指针值可以访问它引用的结构体值的字段. 但是, 如果指针值的类型是定义的类型, 则该值无法访问其引用的值的方法.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>main</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>type</span> <span style=color:#a6e22e>T</span> <span style=color:#66d9ef>struct</span> {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>x</span> <span style=color:#66d9ef>int</span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> (<span style=color:#a6e22e>T</span>) <span style=color:#a6e22e>m</span>(){} <span style=color:#75715e>// T has one method.</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>type</span> <span style=color:#a6e22e>P</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>T</span>  <span style=color:#75715e>// a defined one-level pointer type.</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>type</span> <span style=color:#a6e22e>PP</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>P</span> <span style=color:#75715e>// a defined two-level pointer type.</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>t</span> <span style=color:#a6e22e>T</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>tp</span> = <span style=color:#f92672>&amp;</span><span style=color:#a6e22e>t</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>tpp</span> = <span style=color:#f92672>&amp;</span><span style=color:#a6e22e>tp</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>p</span> <span style=color:#a6e22e>P</span> = <span style=color:#a6e22e>tp</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>pp</span> <span style=color:#a6e22e>PP</span> = <span style=color:#f92672>&amp;</span><span style=color:#a6e22e>p</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>tp</span>.<span style=color:#a6e22e>x</span> = <span style=color:#ae81ff>12</span>  <span style=color:#75715e>// okay</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>p</span>.<span style=color:#a6e22e>x</span> = <span style=color:#ae81ff>34</span>   <span style=color:#75715e>// okay</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>pp</span>.<span style=color:#a6e22e>x</span> = <span style=color:#ae81ff>56</span>  <span style=color:#75715e>// error: type PP has no field or method x</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>tpp</span>.<span style=color:#a6e22e>x</span> = <span style=color:#ae81ff>78</span> <span style=color:#75715e>// error: type **T has no field or method x)</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>tp</span>.<span style=color:#a6e22e>m</span>()  <span style=color:#75715e>// okay. Type *T also has a &#34;m&#34; method.</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>p</span>.<span style=color:#a6e22e>m</span>()   <span style=color:#75715e>// error: type P has no field or method m</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>pp</span>.<span style=color:#a6e22e>m</span>()  <span style=color:#75715e>// error: type PP has no field or method m</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>tpp</span>.<span style=color:#a6e22e>m</span>() <span style=color:#75715e>// error: type **T has no field or method m</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h2 id=容器>容器</h2><h3 id=嵌套复合字面量可以简化>嵌套复合字面量可以简化</h3><p>如果复合字面量嵌套了许多其他复合字面量, 那么这些嵌套复合字面量可以简化为 {&mldr;} 形式.</p><p>例如, 切片值字面量:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#75715e>// A slcie value of a type whose element type is *[4]byte.</span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// The element type is a pointer type whose base type is [4]byte.</span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// The pointer base type is an array type whose element type is byte.</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>var</span> <span style=color:#a6e22e>heads</span> = []<span style=color:#f92672>*</span>[<span style=color:#ae81ff>4</span>]<span style=color:#66d9ef>byte</span>{
+</span></span><span style=display:flex><span>	<span style=color:#f92672>&amp;</span>[<span style=color:#ae81ff>4</span>]<span style=color:#66d9ef>byte</span>{<span style=color:#e6db74>&#39;P&#39;</span>, <span style=color:#e6db74>&#39;N&#39;</span>, <span style=color:#e6db74>&#39;G&#39;</span>, <span style=color:#e6db74>&#39; &#39;</span>},
+</span></span><span style=display:flex><span>	<span style=color:#f92672>&amp;</span>[<span style=color:#ae81ff>4</span>]<span style=color:#66d9ef>byte</span>{<span style=color:#e6db74>&#39;G&#39;</span>, <span style=color:#e6db74>&#39;I&#39;</span>, <span style=color:#e6db74>&#39;F&#39;</span>, <span style=color:#e6db74>&#39; &#39;</span>},
+</span></span><span style=display:flex><span>	<span style=color:#f92672>&amp;</span>[<span style=color:#ae81ff>4</span>]<span style=color:#66d9ef>byte</span>{<span style=color:#e6db74>&#39;J&#39;</span>, <span style=color:#e6db74>&#39;P&#39;</span>, <span style=color:#e6db74>&#39;E&#39;</span>, <span style=color:#e6db74>&#39;G&#39;</span>},
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>可以简化为:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#66d9ef>var</span> <span style=color:#a6e22e>heads</span> = []<span style=color:#f92672>*</span>[<span style=color:#ae81ff>4</span>]<span style=color:#66d9ef>byte</span>{
+</span></span><span style=display:flex><span>	{<span style=color:#e6db74>&#39;P&#39;</span>, <span style=color:#e6db74>&#39;N&#39;</span>, <span style=color:#e6db74>&#39;G&#39;</span>, <span style=color:#e6db74>&#39; &#39;</span>},
+</span></span><span style=display:flex><span>	{<span style=color:#e6db74>&#39;G&#39;</span>, <span style=color:#e6db74>&#39;I&#39;</span>, <span style=color:#e6db74>&#39;F&#39;</span>, <span style=color:#e6db74>&#39; &#39;</span>},
+</span></span><span style=display:flex><span>	{<span style=color:#e6db74>&#39;J&#39;</span>, <span style=color:#e6db74>&#39;P&#39;</span>, <span style=color:#e6db74>&#39;E&#39;</span>, <span style=color:#e6db74>&#39;G&#39;</span>},
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>如下例子中的数组字面量:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#66d9ef>type</span> <span style=color:#a6e22e>language</span> <span style=color:#66d9ef>struct</span> {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>name</span> <span style=color:#66d9ef>string</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>year</span> <span style=color:#66d9ef>int</span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>var</span> <span style=color:#a6e22e>_</span> = [<span style=color:#f92672>...</span>]<span style=color:#a6e22e>language</span>{
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>language</span>{<span style=color:#e6db74>&#34;C&#34;</span>, <span style=color:#ae81ff>1972</span>},
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>language</span>{<span style=color:#e6db74>&#34;Python&#34;</span>, <span style=color:#ae81ff>1991</span>},
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>language</span>{<span style=color:#e6db74>&#34;Go&#34;</span>, <span style=color:#ae81ff>2009</span>},
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>可以简化为:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#66d9ef>var</span> <span style=color:#a6e22e>_</span> = [<span style=color:#f92672>...</span>]<span style=color:#a6e22e>language</span>{
+</span></span><span style=display:flex><span>	{<span style=color:#e6db74>&#34;C&#34;</span>, <span style=color:#ae81ff>1972</span>},
+</span></span><span style=display:flex><span>	{<span style=color:#e6db74>&#34;Python&#34;</span>, <span style=color:#ae81ff>1991</span>},
+</span></span><span style=display:flex><span>	{<span style=color:#e6db74>&#34;Go&#34;</span>, <span style=color:#ae81ff>2009</span>},
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>如下是映射值字面量的一个例子:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#66d9ef>type</span> <span style=color:#a6e22e>LangCategory</span> <span style=color:#66d9ef>struct</span> {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>dynamic</span> <span style=color:#66d9ef>bool</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>strong</span>  <span style=color:#66d9ef>bool</span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// A value of map type whose key type is a struct type and</span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// whose element type is another map type &#34;map[string]int&#34;.</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>var</span> <span style=color:#a6e22e>_</span> = <span style=color:#66d9ef>map</span>[<span style=color:#a6e22e>LangCategory</span>]<span style=color:#66d9ef>map</span>[<span style=color:#66d9ef>string</span>]<span style=color:#66d9ef>int</span>{
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>LangCategory</span>{<span style=color:#66d9ef>true</span>, <span style=color:#66d9ef>true</span>}: <span style=color:#66d9ef>map</span>[<span style=color:#66d9ef>string</span>]<span style=color:#66d9ef>int</span>{
+</span></span><span style=display:flex><span>		<span style=color:#e6db74>&#34;Python&#34;</span>: <span style=color:#ae81ff>1991</span>,
+</span></span><span style=display:flex><span>		<span style=color:#e6db74>&#34;Erlang&#34;</span>: <span style=color:#ae81ff>1986</span>,
+</span></span><span style=display:flex><span>	},
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>LangCategory</span>{<span style=color:#66d9ef>true</span>, <span style=color:#66d9ef>false</span>}: <span style=color:#66d9ef>map</span>[<span style=color:#66d9ef>string</span>]<span style=color:#66d9ef>int</span>{
+</span></span><span style=display:flex><span>		<span style=color:#e6db74>&#34;JavaScript&#34;</span>: <span style=color:#ae81ff>1995</span>,
+</span></span><span style=display:flex><span>	},
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>LangCategory</span>{<span style=color:#66d9ef>false</span>, <span style=color:#66d9ef>true</span>}: <span style=color:#66d9ef>map</span>[<span style=color:#66d9ef>string</span>]<span style=color:#66d9ef>int</span>{
+</span></span><span style=display:flex><span>		<span style=color:#e6db74>&#34;Go&#34;</span>:   <span style=color:#ae81ff>2009</span>,
+</span></span><span style=display:flex><span>		<span style=color:#e6db74>&#34;Rust&#34;</span>: <span style=color:#ae81ff>2010</span>,
+</span></span><span style=display:flex><span>	},
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>LangCategory</span>{<span style=color:#66d9ef>false</span>, <span style=color:#66d9ef>false</span>}: <span style=color:#66d9ef>map</span>[<span style=color:#66d9ef>string</span>]<span style=color:#66d9ef>int</span>{
+</span></span><span style=display:flex><span>		<span style=color:#e6db74>&#34;C&#34;</span>: <span style=color:#ae81ff>1972</span>,
+</span></span><span style=display:flex><span>	},
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>可以简化为:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#66d9ef>var</span> <span style=color:#a6e22e>_</span> = <span style=color:#66d9ef>map</span>[<span style=color:#a6e22e>LangCategory</span>]<span style=color:#66d9ef>map</span>[<span style=color:#66d9ef>string</span>]<span style=color:#66d9ef>int</span>{
+</span></span><span style=display:flex><span>	{<span style=color:#66d9ef>true</span>, <span style=color:#66d9ef>true</span>}: {
+</span></span><span style=display:flex><span>		<span style=color:#e6db74>&#34;Python&#34;</span>: <span style=color:#ae81ff>1991</span>,
+</span></span><span style=display:flex><span>		<span style=color:#e6db74>&#34;Erlang&#34;</span>: <span style=color:#ae81ff>1986</span>,
+</span></span><span style=display:flex><span>	},
+</span></span><span style=display:flex><span>	{<span style=color:#66d9ef>true</span>, <span style=color:#66d9ef>false</span>}: {
+</span></span><span style=display:flex><span>		<span style=color:#e6db74>&#34;JavaScript&#34;</span>: <span style=color:#ae81ff>1995</span>,
+</span></span><span style=display:flex><span>	},
+</span></span><span style=display:flex><span>	{<span style=color:#66d9ef>false</span>, <span style=color:#66d9ef>true</span>}: {
+</span></span><span style=display:flex><span>		<span style=color:#e6db74>&#34;Go&#34;</span>:   <span style=color:#ae81ff>2009</span>,
+</span></span><span style=display:flex><span>		<span style=color:#e6db74>&#34;Rust&#34;</span>: <span style=color:#ae81ff>2010</span>,
+</span></span><span style=display:flex><span>	},
+</span></span><span style=display:flex><span>	{<span style=color:#66d9ef>false</span>, <span style=color:#66d9ef>false</span>}: {
+</span></span><span style=display:flex><span>		<span style=color:#e6db74>&#34;C&#34;</span>: <span style=color:#ae81ff>1972</span>,
+</span></span><span style=display:flex><span>	},
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>请注意, 在上面的几个例子中, 每个复合字面量中最后一项之后的逗号不能省略.</p><h3 id=在某些情况下-可以使用数组指针作为数组>在某些情况下, 可以使用数组指针作为数组</h3><p>在许多情况下, 我们可以使用指向数组的指针作为数组.</p><p>我们可以通过指向数组的指针来迭代数组的元素. 对于长度较大的数组, 这种方法效率更高, 因为复制指针比复制大数组效率更高. 在下面的例子中, 两个循环块是等价的, 并且都是高效的.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>main</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> <span style=color:#e6db74>&#34;fmt&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>a</span> [<span style=color:#ae81ff>100</span>]<span style=color:#66d9ef>int</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>for</span> <span style=color:#a6e22e>i</span>, <span style=color:#a6e22e>n</span> <span style=color:#f92672>:=</span> <span style=color:#66d9ef>range</span> <span style=color:#f92672>&amp;</span><span style=color:#a6e22e>a</span> { <span style=color:#75715e>// copying a pointer is cheap</span>
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#a6e22e>i</span>, <span style=color:#a6e22e>n</span>)
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>for</span> <span style=color:#a6e22e>i</span>, <span style=color:#a6e22e>n</span> <span style=color:#f92672>:=</span> <span style=color:#66d9ef>range</span> <span style=color:#a6e22e>a</span>[:] { <span style=color:#75715e>// copying a slice is cheap</span>
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#a6e22e>i</span>, <span style=color:#a6e22e>n</span>)
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>如果第二个迭代参数既不被忽略(用 _ )也不被省略(不写), 那么覆盖零数组指针的范围将会 panic. 在以下示例中, 前两个循环块中的每一个都会打印五个索引, 但最后一个会产生 panic.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>main</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> <span style=color:#e6db74>&#34;fmt&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>p</span> <span style=color:#f92672>*</span>[<span style=color:#ae81ff>5</span>]<span style=color:#66d9ef>int</span> <span style=color:#75715e>// nil</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>for</span> <span style=color:#a6e22e>i</span>, <span style=color:#a6e22e>_</span> <span style=color:#f92672>:=</span> <span style=color:#66d9ef>range</span> <span style=color:#a6e22e>p</span> { <span style=color:#75715e>// okay</span>
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#a6e22e>i</span>)
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>for</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>:=</span> <span style=color:#66d9ef>range</span> <span style=color:#a6e22e>p</span> { <span style=color:#75715e>// okay</span>
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#a6e22e>i</span>)
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>for</span> <span style=color:#a6e22e>i</span>, <span style=color:#a6e22e>n</span> <span style=color:#f92672>:=</span> <span style=color:#66d9ef>range</span> <span style=color:#a6e22e>p</span> { <span style=color:#75715e>// panic</span>
+</span></span><span style=display:flex><span>		<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#a6e22e>i</span>, <span style=color:#a6e22e>n</span>)
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>数组指针也可以用来索引数组元素. 通过 nil 数组指针索引数组元素会产生 panic.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>main</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> <span style=color:#e6db74>&#34;fmt&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>a</span> <span style=color:#f92672>:=</span> [<span style=color:#ae81ff>5</span>]<span style=color:#66d9ef>int</span>{<span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>5</span>, <span style=color:#ae81ff>7</span>, <span style=color:#ae81ff>11</span>}
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>p</span> <span style=color:#f92672>:=</span> <span style=color:#f92672>&amp;</span><span style=color:#a6e22e>a</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>p</span>[<span style=color:#ae81ff>0</span>], <span style=color:#a6e22e>p</span>[<span style=color:#ae81ff>1</span>] = <span style=color:#ae81ff>17</span>, <span style=color:#ae81ff>19</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#a6e22e>a</span>) <span style=color:#75715e>// [17 19 5 7 11]</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>p</span> = <span style=color:#66d9ef>nil</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>p</span>[<span style=color:#ae81ff>0</span>] = <span style=color:#ae81ff>31</span> <span style=color:#75715e>// panic</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>我们也可以从数组指针派生切片. 从 nil 数组指针派生切片会产生 panic.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>main</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> <span style=color:#e6db74>&#34;fmt&#34;</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>pa</span> <span style=color:#f92672>:=</span> <span style=color:#f92672>&amp;</span>[<span style=color:#ae81ff>5</span>]<span style=color:#66d9ef>int</span>{<span style=color:#ae81ff>2</span>, <span style=color:#ae81ff>3</span>, <span style=color:#ae81ff>5</span>, <span style=color:#ae81ff>7</span>, <span style=color:#ae81ff>11</span>}
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>s</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>pa</span>[<span style=color:#ae81ff>1</span>:<span style=color:#ae81ff>3</span>]
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#a6e22e>s</span>) <span style=color:#75715e>// [3 5]</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>pa</span> = <span style=color:#66d9ef>nil</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>s</span> = <span style=color:#a6e22e>pa</span>[<span style=color:#ae81ff>1</span>:<span style=color:#ae81ff>3</span>] <span style=color:#75715e>// panic</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>我们也可以传递数组指针作为内置的 len 和 cap 函数的参数. 传入 nil 数组指针参数给这两个函数不会产生 panic.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#66d9ef>var</span> <span style=color:#a6e22e>pa</span> <span style=color:#f92672>*</span>[<span style=color:#ae81ff>5</span>]<span style=color:#66d9ef>int</span> <span style=color:#75715e>// nil</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(len(<span style=color:#a6e22e>pa</span>), cap(<span style=color:#a6e22e>pa</span>)) <span style=color:#75715e>// 5 5</span>
+</span></span></code></pre></div></div><div id=disqus_thread></div><script>window.disqus_config=function(){},function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById("disqus_thread").innerHTML="Disqus comments not available by default when the website is previewed locally.";return}var t=document,e=t.createElement("script");e.async=!0,e.src="//douglarek.disqus.com/embed.js",e.setAttribute("data-timestamp",+new Date),(t.head||t.body).appendChild(e)}()</script><noscript>Please enable JavaScript to view the <a href=https://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a><footer class=content__footer></footer></section><section class=page__aside><div class=aside__content><p>2018-05-08</p><hr>On this page:<nav id=TableOfContents><ul><li><a href=#代码包>代码包</a><ul><li><a href=#package-mypkg-后的注释--import-xyzmypkg-对于-go-编译器是有意义的>package mypkg 后的注释 // import &ldquo;x.y.z.mypkg&rdquo; 对于 Go 编译器是有意义的</a></li></ul></li><li><a href=#流程控制>流程控制</a><ul><li><a href=#swith-和-select-中的-default-分支可以放在所有-case-分支之前-之后-或者之间>swith 和 select 中的 default 分支可以放在所有 case 分支之前, 之后, 或者之间.</a></li><li><a href=#defer-匿名函数可以修改嵌套函数的命名返回结果>defer 匿名函数可以修改嵌套函数的命名返回结果</a></li><li><a href=#对于切片-s-循环-for-i--range-s--不等于-for-i--0-i--lens-i>对于切片 s, 循环 for i = range s {&mldr;} 不等于 for i = 0; i &lt; len(s); i++</a></li><li><a href=#使用-osexit-函数退出程序并使用-runtimegoexit-函数退出-goroutine>使用 os.Exit 函数退出程序并使用 runtime.Goexit 函数退出 goroutine</a></li></ul></li><li><a href=#指针>指针</a><ul><li><a href=#对于数值指针-p-表达式-p-相当于-p-如果-p-不是数值指针-则-p-编译不过>对于数值指针 p, 表达式 *p++ 相当于 (*p)++. 如果 p 不是数值指针, 则 *p++ 编译不过</a></li><li><a href=#如果两种类型的基本类型相同-则两个命名指针类型的值可以相互转换-两种指针类型的底层类型可能不同>如果两种类型的基本类型相同, 则两个命名指针类型的值可以相互转换. 两种指针类型的底层类型可能不同.</a></li><li><a href=#不同零大小的值的地址可能相同也可能不同>不同零大小的值的地址可能相同也可能不同.</a></li><li><a href=#指针类型的基类型可能是指针类型本身>指针类型的基类型可能是指针类型本身</a></li><li><a href=#关于选择器的细节>关于选择器的细节</a></li></ul></li><li><a href=#容器>容器</a><ul><li><a href=#嵌套复合字面量可以简化>嵌套复合字面量可以简化</a></li><li><a href=#在某些情况下-可以使用数组指针作为数组>在某些情况下, 可以使用数组指针作为数组</a></li></ul></li></ul></nav></div></section><footer class=page__footer><p></p><br><br><p class=copyright>Copyright © 2025 Leo Douglas</p></footer></div></body></html>

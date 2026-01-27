@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Nosplit on Code talks</title><link>/tags/nosplit/</link><description>Recent content in Nosplit on Code talks</description><generator>Hugo</generator><language>zh-CN</language><copyright> Copyright © 2025 Leo Douglas</copyright><lastBuildDate>Thu, 10 Jul 2025 00:00:00 +0800</lastBuildDate><atom:link href="/tags/nosplit/index.xml" rel="self" type="application/rss+xml"/><item><title>Go 语言中的 //go:nosplit 指令解析</title><link>/post/go-nosplit-directive/</link><pubDate>Thu, 10 Jul 2025 00:00:00 +0800</pubDate><guid>/post/go-nosplit-directive/</guid><description>&lt;p>本文翻译自 &lt;a href="https://mcyoung.xyz/2025/07/07/nosplit/">//go:nosplit&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>&lt;code>//go:nosplit&lt;/code> 是什么？&lt;/p>
+&lt;p>大多数人不知道 Go 有特殊的指令语法。不幸的是，它不是真正的语法，它只是一个注释。例如，&lt;code>//go:noinline&lt;/code> 会导致下一个函数声明永远不会被内联，这对于改变调用它的函数的内联成本很有用。指令有三种类型：&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://pkg.go.dev/cmd/compile#hdr-Function_Directives">&lt;code>gc&lt;/code> 的文档注释&lt;/a>中记录的指令。这包括 &lt;code>//go:noinline&lt;/code> 和 &lt;code>//line&lt;/code>。&lt;/li>
+&lt;li>在其他地方记录的指令，例如 &lt;code>//go:build&lt;/code> 和 &lt;code>//go:generate&lt;/code>。&lt;/li>
+&lt;li>在 &lt;a href="https://cs.opensource.google/go/go/+/refs/tags/go1.24.4:src/runtime/HACKING.md">&lt;code>runtime/HACKING.md&lt;/code>&lt;/a> 中记录的指令，只有在将 &lt;code>-+&lt;/code> 标志传递给 &lt;code>gc&lt;/code> 时才能使用。这包括 &lt;code>//go:nowritebarrier&lt;/code>。&lt;/li>
+&lt;li>完全没有文档的指令，可以通过搜索编译器的测试来发现它们的存在。这包括 &lt;code>//go:nocheckptr&lt;/code>、&lt;code>//go:nointerface&lt;/code> 和 &lt;code>//go:debug&lt;/code>。&lt;/li>
+&lt;/ul>
+&lt;p>我们最感兴趣的是第一种类型的指令：&lt;code>//go:nosplit&lt;/code>。根据文档：&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;code>//go:nosplit&lt;/code> 指令必须紧跟函数声明。它指定函数必须省略其常规的栈溢出检查。这最常用于低级运行时代码，在调用协程被抢占不安全时调用。&lt;/p>&lt;/blockquote>
+&lt;p>这到底是什么意思？普通程序代码可以使用此注解，但其行为定义不明确。让我们深入探讨。&lt;/p>
+&lt;h2 id="go-栈增长">Go 栈增长&lt;/h2>
+&lt;p>Go 为新的 goroutine 分配非常小的栈，这些栈会动态增长。这使得程序可以生成大量短生命周期的 goroutine，而无需在它们的栈上花费大量内存。这意味着栈溢出非常容易发生。每个函数都知道其栈的大小，&lt;code>runtime.g&lt;/code>（goroutine 结构体）包含栈的结束位置；如果栈指针小于它（栈向上增长），控制权就会传递给 &lt;code>runtime.morestack&lt;/code>，它会有效地抢占 goroutine，同时调整其栈的大小。实际上，每个 Go 函数周围都有以下代码：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">TEXT&lt;/span> .&lt;span style="color:#a6e22e">f&lt;/span>(&lt;span style="color:#a6e22e">SB&lt;/span>), &lt;span style="color:#a6e22e">ABIInternal&lt;/span>, &lt;span style="color:#960050;background-color:#1e0010">$&lt;/span>&lt;span style="color:#ae81ff">24&lt;/span>&lt;span style="color:#f92672">-&lt;/span>&lt;span style="color:#ae81ff">16&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">CMPQ&lt;/span> &lt;span style="color:#a6e22e">SP&lt;/span>, &lt;span style="color:#ae81ff">16&lt;/span>(&lt;span style="color:#a6e22e">R14&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">JLS&lt;/span> &lt;span style="color:#a6e22e">grow&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">PUSHQ&lt;/span> &lt;span style="color:#a6e22e">BP&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">MOVQ&lt;/span> &lt;span style="color:#a6e22e">SP&lt;/span>, &lt;span style="color:#a6e22e">BP&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">SUBQ&lt;/span> &lt;span style="color:#960050;background-color:#1e0010">$&lt;/span>&lt;span style="color:#ae81ff">16&lt;/span>, &lt;span style="color:#a6e22e">SP&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e">// Function body...&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">ADDQ&lt;/span> &lt;span style="color:#960050;background-color:#1e0010">$&lt;/span>&lt;span style="color:#ae81ff">16&lt;/span>, &lt;span style="color:#a6e22e">SP&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">POPQ&lt;/span> &lt;span style="color:#a6e22e">BP&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">RET&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">grow&lt;/span>:
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">MOVQ&lt;/span> &lt;span style="color:#a6e22e">AX&lt;/span>, &lt;span style="color:#ae81ff">8&lt;/span>(&lt;span style="color:#a6e22e">SP&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">MOVQ&lt;/span> &lt;span style="color:#a6e22e">BX&lt;/span>, &lt;span style="color:#ae81ff">16&lt;/span>(&lt;span style="color:#a6e22e">SP&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">CALL&lt;/span> &lt;span style="color:#a6e22e">runtime&lt;/span>.&lt;span style="color:#a6e22e">morestack_noctxt&lt;/span>(&lt;span style="color:#a6e22e">SB&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">MOVQ&lt;/span> &lt;span style="color:#ae81ff">8&lt;/span>(&lt;span style="color:#a6e22e">SP&lt;/span>), &lt;span style="color:#a6e22e">AX&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">MOVQ&lt;/span> &lt;span style="color:#ae81ff">16&lt;/span>(&lt;span style="color:#a6e22e">SP&lt;/span>), &lt;span style="color:#a6e22e">BX&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#a6e22e">JMP&lt;/span> .&lt;span style="color:#a6e22e">f&lt;/span>(&lt;span style="color:#a6e22e">SB&lt;/span>)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>请注意，&lt;code>r14&lt;/code> 持有指向当前 &lt;code>runtime.g&lt;/code> 的指针，栈限制是该结构体中的第三个字大小的字段（&lt;code>runtime.g.stackguard0&lt;/code>），因此偏移量为 16。如果栈即将耗尽，它会跳转到函数末尾的一个特殊块，该块会溢出所有参数寄存器，陷入运行时，一旦完成，就会取消溢出参数并重新启动函数。请注意，参数在调整 &lt;code>rsp&lt;/code> 之前溢出，这意味着参数被写入调用者的栈帧。这是 Go ABI 的一部分；调用者必须在其栈帧顶部为它调用的任何函数分配空间，以便在必要时溢出所有寄存器以进行抢占。抢占是不可重入的，也就是说，在已经被抢占的 G 上下文中，或者根本没有 G 的情况下运行的函数，都不能被这个检查再次抢占。&lt;/p></description></item></channel></rss>

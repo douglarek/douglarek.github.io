@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Java on Code talks</title><link>/tags/java/</link><description>Recent content in Java on Code talks</description><generator>Hugo</generator><language>zh-CN</language><copyright> Copyright © 2025 Leo Douglas</copyright><lastBuildDate>Tue, 27 Jan 2026 00:00:00 +0000</lastBuildDate><atom:link href="/tags/java/index.xml" rel="self" type="application/rss+xml"/><item><title>Java 的面向数据编程：超越 Records</title><link>/post/beyond-records-translation/</link><pubDate>Tue, 27 Jan 2026 00:00:00 +0000</pubDate><guid>/post/beyond-records-translation/</guid><description>&lt;p>本文翻译自 &lt;a href="https://openjdk.org/projects/amber/design-notes/beyond-records">Data-Oriented Programming for Java: Beyond Records&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;h2 id="引言">引言&lt;/h2>
+&lt;p>每个人都喜欢 records；它们允许我们创建浅层不可变的数据持有类——我们可以将其视为&amp;quot;具名元组&amp;quot;——这些类派生自简洁的状态描述，并且可以通过模式匹配解构 records。但是 records 有严格的约束，并非所有数据持有类都符合 records 的限制。也许它们有一些可变状态，或者有不属于状态描述的派生或缓存状态，或者它们的表示和 API 不完全匹配，或者它们需要在层次结构中分解状态。在这些类中，即使它们也可能是&amp;quot;数据持有者&amp;quot;，用户体验就像从悬崖上掉下来一样。即使与 record 理想有一点点偏差，也意味着必须回到白板重新开始，编写显式的构造函数声明、访问器方法声明和 Object 方法实现——并且放弃通过模式匹配进行解构。&lt;/p>
+&lt;p>从 records 设计过程开始，我们就牢记一个目标：让更广泛的类能够获得&amp;quot;record 的好处&amp;quot;：减少声明负担、参与解构，以及即将推出的&lt;a href="https://openjdk.org/jeps/468">重构（reconstruction）&lt;/a>。在设计 records 期间，我们还探索了许多较弱的语义模型，这些模型可以提供更大的灵活性。虽然当时它们都未能达到 &lt;em>records 的目标&lt;/em>，但我们可以施加一组较弱的语义约束，允许更大的灵活性，同时仍然支持我们想要的特性，以及与偏离 record 理想的程度相称的某种程度的语法简洁性，而不会出现&amp;quot;掉下悬崖&amp;quot;的行为。&lt;/p>
+&lt;p>Records、sealed 类以及使用 record 模式进行解构构成了 Java&amp;quot;面向数据编程&amp;quot;的第一个特性弧。在考虑了众多设计思想之后，我们现在准备推进下一个&amp;quot;面向数据编程&amp;quot;特性弧：&lt;em>carrier 类&lt;/em>（以及接口）。&lt;/p>
+&lt;h2 id="超越-record-模式">超越 Record 模式&lt;/h2>
+&lt;p>Record 模式允许将 record 实例解构为其组件。Record 模式可以在 &lt;code>instanceof&lt;/code> 和 &lt;code>switch&lt;/code> 中使用，并且当 record 模式也是穷尽的时，将可以在即将推出的 &lt;a href="https://mail.openjdk.org/pipermail/amber-spec-experts/2026-January/004306.html">&lt;em>模式赋值语句&lt;/em>&lt;/a> 特性中使用。&lt;/p>
+&lt;p>在探索&amp;quot;类如何能够参与与 records 相同类型的解构&amp;quot;这个问题时，我们最初关注的是类中的一种新声明形式——&amp;ldquo;解构器（deconstructor）&amp;quot;——它作为构造函数的反向操作。正如构造函数接受组件值并产生聚合实例一样，解构器将接受聚合实例并恢复其组件值。&lt;/p>
+&lt;p>但随着这一探索的展开，更有趣的问题变成了：哪些类首先适合解构？这个问题的答案将我们引向了表达解构的不同方法。适合解构的类是那些像 records 一样，只不过是特定数据元组的载体。这不仅仅是类 &lt;em>拥有&lt;/em> 的东西，比如构造函数或方法，而是类 &lt;em>是什么&lt;/em>。因此，将解构描述为类的顶层属性更有意义。这反过来又带来了许多简化。&lt;/p>
+&lt;h2 id="状态描述的力量">状态描述的力量&lt;/h2>
+&lt;p>Records 是一个语义特性；它们只是偶然地简洁。但它们 &lt;em>确实&lt;/em> 简洁；当我们声明一个 record 时：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">record&lt;/span> &lt;span style="color:#a6e22e">Point&lt;/span>(&lt;span style="color:#66d9ef">int&lt;/span> x, &lt;span style="color:#66d9ef">int&lt;/span> y) {... }
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>我们自动获得合理的 API（规范构造函数、解构模式、每个组件的访问器方法）和实现（字段、构造函数、访问器方法、Object 方法）。如果我们愿意，可以显式指定其中的大部分（字段除外），但大多数情况下我们不必这样做，因为默认值正是我们想要的。&lt;/p></description></item><item><title>JSpecify 空值用户指南</title><link>/post/jspecify-nullness-user-guide/</link><pubDate>Wed, 31 Dec 2025 00:00:00 +0000</pubDate><guid>/post/jspecify-nullness-user-guide/</guid><description>&lt;p>本文翻译自 &lt;a href="https://jspecify.dev/docs/user-guide/">Nullness User Guide&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>在 Java 代码中，表达式是否可能求值为 &lt;code>null&lt;/code> 通常只在自然语言中记录，甚至根本没有记录。JSpecify 的空值注解让程序员能够以一致且定义良好的方式表达 Java 代码的空值性。&lt;/p>
+&lt;p>JSpecify 定义了描述 Java 类型是否包含 &lt;code>null&lt;/code> 值的注解。这些注解对以下方面很有用（例如）:&lt;/p>
+&lt;ul>
+&lt;li>阅读代码的程序员,&lt;/li>
+&lt;li>帮助开发人员避免 &lt;code>NullPointerException&lt;/code> 的工具,&lt;/li>
+&lt;li>执行运行时检查和测试生成的工具,以及&lt;/li>
+&lt;li>文档系统。&lt;/li>
+&lt;/ul>
+&lt;h2 id="java-变量是引用">Java 变量是引用&lt;/h2>
+&lt;p>在 Java 中，所有非基本类型变量要么是 &lt;code>null&lt;/code>，要么是对对象的引用。我们经常认为像 &lt;code>String x&lt;/code> 这样的声明意味着 &lt;code>x&lt;/code> 是一个 &lt;code>String&lt;/code>，但它实际上意味着 &lt;code>x&lt;/code> &lt;em>要么&lt;/em>是 &lt;code>null&lt;/code> &lt;em>要么&lt;/em>是对实际 &lt;code>String&lt;/code> 对象的引用。JSpecify 为您提供了一种明确表达您真正含义的方法，即您是真的这样认为，还是您真的认为 &lt;code>x&lt;/code> 绝对是对 &lt;code>String&lt;/code> 对象的引用而不是 &lt;code>null&lt;/code>。&lt;/p>
+&lt;h2 id="类型和空值性">类型和空值性&lt;/h2>
+&lt;p>JSpecify 为您提供了规则，用于确定每种类型用法具有四种空值性中的哪一种:&lt;/p>
+&lt;ul>
+&lt;li>它可以包含 &lt;code>null&lt;/code>（它是&amp;quot;可空的&amp;quot;）。&lt;/li>
+&lt;li>它不会包含 &lt;code>null&lt;/code>（它是&amp;quot;非空的&amp;quot;）。&lt;/li>
+&lt;li>仅对类型变量：如果替换它的类型参数包含 &lt;code>null&lt;/code>，则它包含 &lt;code>null&lt;/code>（它具有&amp;quot;参数化空值性&amp;quot;）。&lt;/li>
+&lt;li>我们不知道它是否可以包含 &lt;code>null&lt;/code>（它具有&amp;quot;未指定的空值性&amp;quot;）。这相当于没有 JSpecify 注解的世界状态。&lt;/li>
+&lt;/ul>
+&lt;p>对于给定的变量 &lt;code>x&lt;/code>，如果 &lt;code>x&lt;/code> 可以是 &lt;code>null&lt;/code>，那么 &lt;code>x.getClass()&lt;/code> 是不安全的，因为它可能产生 &lt;code>NullPointerException&lt;/code>。如果 &lt;code>x&lt;/code> 不能是 &lt;code>null&lt;/code>，&lt;code>x.getClass()&lt;/code> 永远不会产生 &lt;code>NullPointerException&lt;/code>。如果我们不知道 &lt;code>x&lt;/code> 是否可以是 &lt;code>null&lt;/code>，我们就不知道 &lt;code>x.getClass()&lt;/code> 是否安全（至少就 JSpecify 而言）。&lt;/p></description></item><item><title>Java 并行流</title><link>/post/parallel-streams/</link><pubDate>Thu, 11 Dec 2025 14:00:00 +0000</pubDate><guid>/post/parallel-streams/</guid><description>&lt;p>本文翻译自 &lt;a href="https://dev.java/learn/api/streams/parallel-streams/">Parallelizing Streams&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;h2 id="优化流计算">优化流计算&lt;/h2>
+&lt;p>Stream API 的一个非常令人兴奋的特性是流能够并行处理数据。使用 Stream API 并行处理数据非常简单，只需在任何现有流上调用 &lt;code>parallel()&lt;/code> 方法即可。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">int&lt;/span> parallelSum &lt;span style="color:#f92672">=&lt;/span> IntStream.&lt;span style="color:#a6e22e">range&lt;/span>(0, 10)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .&lt;span style="color:#a6e22e">parallel&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .&lt;span style="color:#a6e22e">sum&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>IO.&lt;span style="color:#a6e22e">println&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;Sum = &amp;#34;&lt;/span> &lt;span style="color:#f92672">+&lt;/span> parallelSum);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>运行此代码会得到以下结果。&lt;/p>
+&lt;pre tabindex="0">&lt;code>Sum = 45
+&lt;/code>&lt;/pre>&lt;p>这个求和实际上是并行计算的。不过在这么小的示例中，你可能不会注意到任何性能提升。&lt;/p>
+&lt;p>为什么要并行计算数据？可能是为了更快地得到计算结果。并行流会比顺序流更快地给出结果吗？这个问题的答案并不像听起来那么简单。在某些情况下是的，但在其他一些情况下，不幸的是，不会。尽管听起来令人失望，但并行流并不总是比顺序流快。&lt;/p>
+&lt;p>考虑到这一点，你应该谨慎：选择使用并行流不是一个可以轻易做出的决定。在考虑并行化之前，你需要问自己几个问题。&lt;/p>
+&lt;p>首先，问问自己，你需要它吗？你的应用程序中是否有未满足的性能要求？你确定性能问题来自你正在考虑并行计算的流处理吗？你计划如何衡量性能提升，以确保对这个特定计算并行化确实改善了应用程序的性能？&lt;/p>
+&lt;p>并行化会消耗更多的计算能力。你是否有空闲的 CPU 或 CPU 核心可以分配给这个计算？你能否在不减慢应用程序其余部分的情况下为计算分配更多 CPU 周期？&lt;/p>
+&lt;p>并行化会消耗线程。你是否有空闲线程可以分配给计算？如果你在 Web 服务器中运行的应用程序上工作，那么你的线程用于处理 HTTP 请求。你愿意将它们用于其他事情吗？&lt;/p>
+&lt;p>一旦你选择了并行化，那么你需要确保流计算的性能确实得到了改善。你应该在尽可能接近生产环境的上下文中测量这种性能提升。&lt;/p>
+&lt;p>在本教程中，我们涵盖了几个关键要素，这些要素将帮助你评估并行化可能带来的收益，以及一些应该让你对并行化保持警惕的其他要素。但归根结底，唯一能告诉你并行化是否值得的是测试和测量执行时间。&lt;/p>
+&lt;h2 id="并行化实现">并行化实现&lt;/h2>
+&lt;p>Stream API 中的并行化是通过递归分解流正在处理的数据来实现的。它构建在 JDK 7 中添加的 Fork/Join 框架之上。&lt;/p>
+&lt;p>分解包括将流正在处理的数据分成两部分。然后每个部分由自己的 CPU 核心处理，该核心可能决定再次递归分割它。&lt;/p>
+&lt;p>在某个时刻，框架将决定给定部分中的数据量足够小，可以正常处理。然后将处理这个数据子集，并计算部分结果。然后将这个部分结果与其他 CPU 核心上从其他部分计算的其他部分结果合并。&lt;/p>
+&lt;p>并行化确实会带来开销。与在多个 CPU 核心上分配计算的收益相比，这种开销必须很小。否则，并行化将恶化计算性能而不是改善它们。&lt;/p>
+&lt;p>让我们逐一检查所有这些步骤，看看什么可能阻止你获得更好的性能提升。&lt;/p>
+&lt;h2 id="理解数据局部性">理解数据局部性&lt;/h2>
+&lt;p>数据局部性会影响数据处理的速度，无论是顺序处理还是并行处理。局部性越好，计算就越快。&lt;/p>
+&lt;p>为了让 CPU 可用，你的数据必须从计算机的主内存传输到 CPU 的缓存。从物理上讲，主内存是计算机的一个特定组件，与 CPU 分离。另一方面，缓存与 CPU 的核心计算元素共享同一硅片。它们通过主板和不同的通信总线连接在一起。与 CPU 核心从其缓存访问数据的速度相比，将数据从主内存传输到 CPU 缓存非常慢。&lt;/p></description></item><item><title>Java 虚拟线程</title><link>/post/java-virtual-threads/</link><pubDate>Thu, 11 Dec 2025 00:00:00 +0000</pubDate><guid>/post/java-virtual-threads/</guid><description>&lt;p>本文翻译自 &lt;a href="https://dev.java/learn/new-features/virtual-threads/">Virtual Threads&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;h2 id="为什么需要虚拟线程">为什么需要虚拟线程？&lt;/h2>
+&lt;p>Java 1.0 于 1995 年发布时，其 API 中包含约一百个类，其中就有 &lt;code>java.lang.Thread&lt;/code>。Java 是第一个直接支持并发编程的主流编程语言。&lt;/p>
+&lt;p>从 Java 1.2 开始，每个 Java 线程都运行在底层操作系统提供的&lt;strong>平台线程&lt;/strong>上。（在 Java 1.1 及之前的版本中，在某些平台上，所有 Java 线程由单个平台线程执行。）&lt;/p>
+&lt;p>平台线程的成本不低。启动一个平台线程需要数千条 CPU 指令，并且会消耗几兆字节的内存。服务器应用程序可能需要处理大量并发请求，为每个请求分配一个独立的平台线程变得不可行。在典型的服务器应用中，这些请求大部分时间都处于&lt;strong>阻塞&lt;/strong>状态，等待数据库或其他服务返回结果。&lt;/p>
+&lt;p>提高吞吐量的传统方法是使用非阻塞 API。程序员不是等待结果，而是指定当结果可用时应调用哪个方法，以及在失败时调用另一个方法。这种方式很快就会变得令人不快，因为回调会不断嵌套。&lt;/p>
+&lt;p>JEP 425 在 Java 19 中引入了&lt;strong>虚拟线程&lt;/strong>。多个虚拟线程运行在一个平台线程上。每当虚拟线程阻塞时，它就会被&lt;strong>卸载&lt;/strong>，平台线程随即运行另一个虚拟线程。（&amp;ldquo;虚拟线程&amp;quot;这个名称类似于虚拟内存映射到实际 RAM。）虚拟线程在 Java 20 中成为预览特性（JEP 436），并在 Java 21 中正式发布。&lt;/p>
+&lt;p>有了虚拟线程，阻塞的成本变得很低。当结果不能立即获得时，你只需在虚拟线程中阻塞即可。你可以使用熟悉的编程结构——分支、循环、try 块——而不是一系列回调。&lt;/p>
+&lt;p>虚拟线程在并发任务数量庞大且任务主要阻塞在网络 I/O 上时非常有用。对于 CPU 密集型任务，它们没有任何优势。对于此类任务，可以考虑使用&lt;a href="https://dev.java/learn/api/streams/parallel-streams/">并行流&lt;/a>或&lt;a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/RecursiveTask.html">递归 fork-join 任务&lt;/a>。&lt;/p>
+&lt;h2 id="创建虚拟线程">创建虚拟线程&lt;/h2>
+&lt;p>工厂方法 &lt;code>Executors.newVirtualThreadPerTaskExecutor()&lt;/code> 返回一个 &lt;code>ExecutorService&lt;/code>，它会在单独的虚拟线程中运行每个任务。例如：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">import&lt;/span> java.util.concurrent.*;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">public&lt;/span> &lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">VirtualThreadDemo&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">public&lt;/span> &lt;span style="color:#66d9ef">static&lt;/span> &lt;span style="color:#66d9ef">void&lt;/span> &lt;span style="color:#a6e22e">main&lt;/span>(String&lt;span style="color:#f92672">[]&lt;/span> args) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">final&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span> NTASKS &lt;span style="color:#f92672">=&lt;/span> 100;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ExecutorService service &lt;span style="color:#f92672">=&lt;/span> Executors.&lt;span style="color:#a6e22e">newVirtualThreadPerTaskExecutor&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">for&lt;/span> (&lt;span style="color:#66d9ef">int&lt;/span> i &lt;span style="color:#f92672">=&lt;/span> 0; i &lt;span style="color:#f92672">&amp;lt;&lt;/span> NTASKS; i&lt;span style="color:#f92672">++&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> service.&lt;span style="color:#a6e22e">submit&lt;/span>(() &lt;span style="color:#f92672">-&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">long&lt;/span> id &lt;span style="color:#f92672">=&lt;/span> Thread.&lt;span style="color:#a6e22e">currentThread&lt;/span>().&lt;span style="color:#a6e22e">threadId&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> LockSupport.&lt;span style="color:#a6e22e">parkNanos&lt;/span>(1_000_000_000);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> IO.&lt;span style="color:#a6e22e">println&lt;/span>(id);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> service.&lt;span style="color:#a6e22e">close&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>顺便说一下，这段代码使用 &lt;code>LockSupport.parkNanos&lt;/code> 而不是 &lt;code>Thread.sleep&lt;/code>，这样我们就不必捕获麻烦的 &lt;code>InterruptedException&lt;/code>。&lt;/p></description></item><item><title>深入解析 JVM 启动过程</title><link>/post/jvm-start-up/</link><pubDate>Tue, 09 Dec 2025 00:00:00 +0000</pubDate><guid>/post/jvm-start-up/</guid><description>&lt;p>本文翻译自 &lt;a href="https://inside.java/2025/01/28/jvm-start-up/">A Deep Dive into JVM Start-up&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>当你启动一个 Java 应用程序时，你可能会认为唯一执行的代码就是传递给 JVM 的 Java 字节码，即由 &lt;code>javac&lt;/code> 编译生成的 &lt;code>.class&lt;/code> 文件。但实际上，在启动过程中，JVM 会经历一系列复杂的步骤，为运行 Java 应用程序创建一个完整的运行环境。在本文中，我们将详细介绍 JVM 从执行 &lt;code>$ java&lt;/code> 到打印 &lt;code>Hello World&lt;/code> 所经历的步骤。如果你更喜欢视频形式，也可以在 Java YouTube 频道观看这个视频：&lt;/p>
+&lt;div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+ &lt;iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" loading="eager" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube-nocookie.com/embed/ED1oc7gn5uY?autoplay=0&amp;amp;controls=1&amp;amp;end=0&amp;amp;loop=0&amp;amp;mute=0&amp;amp;start=0" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" title="YouTube video">&lt;/iframe>
+ &lt;/div>
+
+&lt;h2 id="前言">前言&lt;/h2>
+&lt;p>为了让这次对 JVM 启动过程的讲解不至于过于庞大，我将使用以下几个约束条件来描述这个过程：&lt;/p>
+&lt;ul>
+&lt;li>我将描述 JVM 启动过程在 JDK 23 中的行为。你可以在&lt;a href="https://docs.oracle.com/javase/specs/jvms/se23/html/index.html">这里&lt;/a>查看 Java SE 23 的 JVM 规范。&lt;/li>
+&lt;li>我将使用 &lt;a href="https://en.wikipedia.org/wiki/HotSpot_(virtual_machine)">HotSpot JVM&lt;/a> 实现作为示例。这是目前使用最广泛的 JVM 实现，许多流行的 JDK 发行版都使用 HotSpot JVM 或其衍生版本。其他 JVM 实现可能在内部行为上略有不同。&lt;/li>
+&lt;li>最后，我将使用的主要代码示例是 &lt;code>HelloWorld&lt;/code>，尽管这是一个非常简单的应用程序，但它仍然会触发 JVM 启动过程的所有关键环节。&lt;/li>
+&lt;/ul>
+&lt;p>尽管有这些约束条件，但在阅读完本文后，你应该能够对 JVM 在启动过程中所经历的流程以及它们为何必要有一个相当全面的理解。这些知识在调试应用程序启动时遇到的问题时会很有帮助，在某些特定情况下还能帮助改善启动性能。不过，我们会在文章末尾更详细地讨论这一点。&lt;/p></description></item></channel></rss>

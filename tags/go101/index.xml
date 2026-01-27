@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Go101 on Code talks</title><link>/tags/go101/</link><description>Recent content in Go101 on Code talks</description><generator>Hugo</generator><language>zh-CN</language><copyright> Copyright © 2025 Leo Douglas</copyright><lastBuildDate>Fri, 14 Sep 2018 10:11:27 +0000</lastBuildDate><atom:link href="/tags/go101/index.xml" rel="self" type="application/rss+xml"/><item><title>一些常见的并发编程错误</title><link>/post/concurrent-common-mistakes/</link><pubDate>Fri, 14 Sep 2018 10:11:27 +0000</pubDate><guid>/post/concurrent-common-mistakes/</guid><description>&lt;p>本文翻译自 &lt;a href="https://go101.org/article/concurrent-common-mistakes.html">Some Common Concurrent Programming Mistakes&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>Go 是内置了并发编程支持的语言. 通过使用关键字 &lt;code>go&lt;/code> 来创建 goroutines (轻量级线程), 并且&lt;a href="https://go101.org/article/channel-use-cases.html">使用&lt;/a> &lt;a href="https://go101.org/article/channel.html">channels&lt;/a> 和 Go 提供的&lt;a href="https://go101.org/article/concurrent-atomic-operation.html">其他并发&lt;/a>&lt;a href="https://go101.org/article/concurrent-synchronization-more.html%3CPaste%3E">同步的技术&lt;/a>, 并发编程变得简单, 灵活, 并且富有乐趣.&lt;/p>
+&lt;p>另一方面, Go 不会阻止 Go 程序员由于粗心或者缺乏经验导致的一些并发编程的错误. 本文接下来的部分将展示一些常见的 Go 并发编程错误, 来帮助 Go 程序员避免类似的错误.&lt;/p>
+&lt;h2 id="需要同步的时候没有同步">需要同步的时候没有同步&lt;/h2>
+&lt;p>代码行可能&lt;a href="https://go101.org/article/memory-model.html">不会按书写代码的顺序执行&lt;/a>.&lt;/p>
+&lt;p>如下的程序有两个错误:&lt;/p>
+&lt;ul>
+&lt;li>首先, 主 goroutine 中 &lt;code>b&lt;/code> 的读取和新 goroutine 中 &lt;code>b&lt;/code> 的写入可能存在数据竞争.&lt;/li>
+&lt;li>其次, 条件 &lt;code>b == true&lt;/code> 无法确保主 goroutine 满足 &lt;code>a != nil&lt;/code>. 编译器和 CPU 在新 goroutine 中通过重排序进行优化, 所以运行时 &lt;code>b&lt;/code> 的赋值可能发生在 &lt;code>a&lt;/code> 的赋值之前, 导致当主 goroutine 中 &lt;code>a&lt;/code> 的元素被修改的时候, &lt;code>a&lt;/code> 仍旧是 &lt;code>nil&lt;/code>.&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">package&lt;/span> &lt;span style="color:#a6e22e">main&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">import&lt;/span> (
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#e6db74">&amp;#34;time&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#e6db74">&amp;#34;runtime&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">func&lt;/span> &lt;span style="color:#a6e22e">main&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#66d9ef">var&lt;/span> &lt;span style="color:#a6e22e">a&lt;/span> []&lt;span style="color:#66d9ef">int&lt;/span> &lt;span style="color:#75715e">// nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#66d9ef">var&lt;/span> &lt;span style="color:#a6e22e">b&lt;/span> &lt;span style="color:#66d9ef">bool&lt;/span> &lt;span style="color:#75715e">// false&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#75715e">// a new goroutine&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#66d9ef">go&lt;/span> &lt;span style="color:#66d9ef">func&lt;/span> () {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		&lt;span style="color:#a6e22e">a&lt;/span> = make([]&lt;span style="color:#66d9ef">int&lt;/span>, &lt;span style="color:#ae81ff">3&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		&lt;span style="color:#a6e22e">b&lt;/span> = &lt;span style="color:#66d9ef">true&lt;/span> &lt;span style="color:#75715e">// write b&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	}()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#66d9ef">for&lt;/span> !&lt;span style="color:#a6e22e">b&lt;/span> { &lt;span style="color:#75715e">// read b&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		&lt;span style="color:#a6e22e">time&lt;/span>.&lt;span style="color:#a6e22e">Sleep&lt;/span>(&lt;span style="color:#a6e22e">time&lt;/span>.&lt;span style="color:#a6e22e">Second&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		&lt;span style="color:#a6e22e">runtime&lt;/span>.&lt;span style="color:#a6e22e">Gosched&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#a6e22e">a&lt;/span>[&lt;span style="color:#ae81ff">0&lt;/span>], &lt;span style="color:#a6e22e">a&lt;/span>[&lt;span style="color:#ae81ff">1&lt;/span>], &lt;span style="color:#a6e22e">a&lt;/span>[&lt;span style="color:#ae81ff">2&lt;/span>] = &lt;span style="color:#ae81ff">0&lt;/span>, &lt;span style="color:#ae81ff">1&lt;/span>, &lt;span style="color:#ae81ff">2&lt;/span> &lt;span style="color:#75715e">// might panic&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>上面的程序可能在一台电脑上运行良好, 在另一台电脑上 panic. 或者它可能 N 次运行良好, N+1 次 panic.&lt;/p></description></item><item><title>Go 问答 101</title><link>/post/go-faq-101/</link><pubDate>Fri, 20 Jul 2018 13:41:26 +0000</pubDate><guid>/post/go-faq-101/</guid><description>&lt;p>本文翻译自 &lt;a href="https://go101.org/article/unofficial-faq.html">Go FAQ 101&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;h2 id="编译器和运行时">编译器和运行时&lt;/h2>
+&lt;h2 id="编译错误-non-name--on-left-side-of--什么意思">编译错误 non-name *** on left side of := 什么意思&lt;/h2>
+&lt;p>到现在为止(Go 1.10), 对于短变量声明有一个&lt;a href="https://golang.org/ref/spec#Short_variable_declarations">强制性规则&lt;/a>:&lt;/p>
+&lt;blockquote>
+&lt;p>:= 左侧的所有条目必须是纯标识符, 并且至少有一个是新变量名.&lt;/p>&lt;/blockquote>
+&lt;p>这意味着容器元素(&lt;code>x[i]&lt;/code>), 结构体字段(&lt;code>x.f&lt;/code>), 指针解引用(&lt;code>*&lt;/code>)以及限制性标识符不能出现在 &lt;code>:=&lt;/code> 的左侧. 目前, 针对这个问题有一个&lt;a href="https://github.com/golang/go/issues/377">公开 issue&lt;/a>. 看起来 Go 作者们想把这个问题留到 Go 2.0.&lt;/p>
+&lt;h2 id="编译错误-unexpected-newline-expecting---什么意思">编译错误 unexpected newline, expecting { &amp;hellip; 什么意思&lt;/h2>
+&lt;p>在 Go 中, 我们不能在随意的位置折断一行代码. 具体细节可以阅读 &lt;a href="https://go101.org/article/line-break-rules.html">Go 换行规则&lt;/a>. 通过该规则, 一般来说, 在大括号之前不允许换行.&lt;/p>
+&lt;p>比如下面的代码:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">if&lt;/span> &lt;span style="color:#66d9ef">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">for&lt;/span> &lt;span style="color:#a6e22e">i&lt;/span> &lt;span style="color:#f92672">:=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>; &lt;span style="color:#a6e22e">i&lt;/span> &amp;lt; &lt;span style="color:#ae81ff">10&lt;/span>; &lt;span style="color:#a6e22e">i&lt;/span>&lt;span style="color:#f92672">++&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">var&lt;/span> &lt;span style="color:#a6e22e">_&lt;/span> = []&lt;span style="color:#66d9ef">int&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#ae81ff">1&lt;/span>, &lt;span style="color:#ae81ff">2&lt;/span>, &lt;span style="color:#ae81ff">3&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>将解释成:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">if&lt;/span> &lt;span style="color:#66d9ef">true&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">for&lt;/span> &lt;span style="color:#a6e22e">i&lt;/span> &lt;span style="color:#f92672">:=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>; &lt;span style="color:#a6e22e">i&lt;/span> &amp;lt; &lt;span style="color:#ae81ff">10&lt;/span>; &lt;span style="color:#a6e22e">i&lt;/span>&lt;span style="color:#f92672">++&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">var&lt;/span> &lt;span style="color:#a6e22e">_&lt;/span> = []&lt;span style="color:#66d9ef">int&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>{
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#ae81ff">1&lt;/span>, &lt;span style="color:#ae81ff">2&lt;/span>, &lt;span style="color:#ae81ff">3&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Go 编译器会对每一个开放的大括号给出一个错误. 为了避免这些错误, 我们应该重写代码如下:&lt;/p></description></item><item><title>Go 细节</title><link>/post/go-details/</link><pubDate>Tue, 08 May 2018 16:45:15 +0000</pubDate><guid>/post/go-details/</guid><description>&lt;p>本文翻译自 &lt;a href="https://go101.org/article/details.html">Go Details 101&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;h2 id="代码包">代码包&lt;/h2>
+&lt;p>##这些md还有一个问题，就是 markdown 的标记，如 ## ，### 一个包可以在源文件中多次导入&lt;/p>
+&lt;p>Go 源文件可以多次导入相同的包, 但导入名称必须不同. 这些相同的包导入引用相同的包实例.&lt;/p>
+&lt;p>例如:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">package&lt;/span> &lt;span style="color:#a6e22e">main&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">import&lt;/span> &lt;span style="color:#e6db74">&amp;#34;fmt&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">import&lt;/span> &lt;span style="color:#e6db74">&amp;#34;io&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">import&lt;/span> &lt;span style="color:#a6e22e">inout&lt;/span> &lt;span style="color:#e6db74">&amp;#34;io&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">func&lt;/span> &lt;span style="color:#a6e22e">main&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#a6e22e">fmt&lt;/span>.&lt;span style="color:#a6e22e">Println&lt;/span>(&lt;span style="color:#f92672">&amp;amp;&lt;/span>&lt;span style="color:#a6e22e">inout&lt;/span>.&lt;span style="color:#a6e22e">EOF&lt;/span> &lt;span style="color:#f92672">==&lt;/span> &lt;span style="color:#f92672">&amp;amp;&lt;/span>&lt;span style="color:#a6e22e">io&lt;/span>.&lt;span style="color:#a6e22e">EOF&lt;/span>) &lt;span style="color:#75715e">// true&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="package-mypkg-后的注释--import-xyzmypkg-对于-go-编译器是有意义的">package mypkg 后的注释 // import &amp;ldquo;x.y.z.mypkg&amp;rdquo; 对于 Go 编译器是有意义的&lt;/h3>
+&lt;p>例如, 当导入此包的源文件由标准 Go 编译器编译时, 以下包的导入路径必须为 &amp;ldquo;x.y.z.mypkg&amp;rdquo;.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">package&lt;/span> &lt;span style="color:#a6e22e">mypkg&lt;/span> &lt;span style="color:#75715e">// import &amp;#34;x.y.z.mypkg&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">...&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="流程控制">流程控制&lt;/h2>
+&lt;h3 id="swith-和-select-中的-default-分支可以放在所有-case-分支之前-之后-或者之间">swith 和 select 中的 default 分支可以放在所有 case 分支之前, 之后, 或者之间.&lt;/h3>
+&lt;p>与许多其他语言相比, 一个明显的区别在于 switch-case 控制流程块中默认分支的顺序可以是任意的. 例如, 以下三个 switch-case 控制流程块彼此等效.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">switch&lt;/span> &lt;span style="color:#a6e22e">n&lt;/span> &lt;span style="color:#f92672">:=&lt;/span> &lt;span style="color:#a6e22e">rand&lt;/span>.&lt;span style="color:#a6e22e">Intn&lt;/span>(&lt;span style="color:#ae81ff">3&lt;/span>); &lt;span style="color:#a6e22e">n&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">case&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>: &lt;span style="color:#a6e22e">fmt&lt;/span>.&lt;span style="color:#a6e22e">Println&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;n == 0&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">case&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>: &lt;span style="color:#a6e22e">fmt&lt;/span>.&lt;span style="color:#a6e22e">Println&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;n == 1&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">default&lt;/span>: &lt;span style="color:#a6e22e">fmt&lt;/span>.&lt;span style="color:#a6e22e">Println&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;n == 2&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">switch&lt;/span> &lt;span style="color:#a6e22e">n&lt;/span> &lt;span style="color:#f92672">:=&lt;/span> &lt;span style="color:#a6e22e">rand&lt;/span>.&lt;span style="color:#a6e22e">Intn&lt;/span>(&lt;span style="color:#ae81ff">3&lt;/span>); &lt;span style="color:#a6e22e">n&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">default&lt;/span>: &lt;span style="color:#a6e22e">fmt&lt;/span>.&lt;span style="color:#a6e22e">Println&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;n == 2&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">case&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>: &lt;span style="color:#a6e22e">fmt&lt;/span>.&lt;span style="color:#a6e22e">Println&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;n == 0&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">case&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>: &lt;span style="color:#a6e22e">fmt&lt;/span>.&lt;span style="color:#a6e22e">Println&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;n == 1&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">switch&lt;/span> &lt;span style="color:#a6e22e">n&lt;/span> &lt;span style="color:#f92672">:=&lt;/span> &lt;span style="color:#a6e22e">rand&lt;/span>.&lt;span style="color:#a6e22e">Intn&lt;/span>(&lt;span style="color:#ae81ff">3&lt;/span>); &lt;span style="color:#a6e22e">n&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">case&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>: &lt;span style="color:#a6e22e">fmt&lt;/span>.&lt;span style="color:#a6e22e">Println&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;n == 0&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">default&lt;/span>: &lt;span style="color:#a6e22e">fmt&lt;/span>.&lt;span style="color:#a6e22e">Println&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;n == 2&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">case&lt;/span> &lt;span style="color:#ae81ff">1&lt;/span>: &lt;span style="color:#a6e22e">fmt&lt;/span>.&lt;span style="color:#a6e22e">Println&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;n == 1&amp;#34;&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="defer-匿名函数可以修改嵌套函数的命名返回结果">defer 匿名函数可以修改嵌套函数的命名返回结果&lt;/h3>
+&lt;p>例如:&lt;/p></description></item><item><title>Go 类型系统概述</title><link>/post/type-system-overview/</link><pubDate>Mon, 07 May 2018 14:48:57 +0000</pubDate><guid>/post/type-system-overview/</guid><description>&lt;p>本文翻译自 &lt;a href="https://go101.org/article/type-system-overview.html">Overview Of Go Type System&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>本文将介绍 Go 中的各种类型. Go 类型系统中的各种概念也将被引入. 如果不了解这些概念, 就很难对 Go 有透彻的理解.&lt;/p>
+&lt;h2 id="概念-基本类型">概念: 基本类型&lt;/h2>
+&lt;p>Go 中内置的基本类型已经在&lt;a href="https://go101.org/article/basic-types-and-value-literals.html">内置的基本类型和基本值字面量&lt;/a>中引入. 为了使本文完整, 这些内建的基本类型在这里重新列出.&lt;/p>
+&lt;ul>
+&lt;li>内建字符串类型: string.&lt;/li>
+&lt;li>内建布尔类型: bool.&lt;/li>
+&lt;li>内建数字类型:
+&lt;ul>
+&lt;li>int8, uint8 (byte), int16, uint16, int32 (rune), uint32, int64, uint64, int, uint, uinptr.&lt;/li>
+&lt;li>float32, float64.&lt;/li>
+&lt;li>complex64, complex128.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>除了&lt;a href="https://go101.org/article/string.html">字符串类型&lt;/a>, Go 101 系列文章不会在其他基本类型上作过多解释.&lt;/p>
+&lt;h2 id="概念-复合类型">概念: 复合类型&lt;/h2>
+&lt;p>Go 支持以下复合类型:&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://go101.org/article/pointer.html">指针类型&lt;/a> - 和 C 指针一样.&lt;/li>
+&lt;li>&lt;a href="https://go101.org/article/struct.html">结构体类型&lt;/a> - 和 C 结构体一样.&lt;/li>
+&lt;li>&lt;a href="https://go101.org/article/function.html">函数类型&lt;/a> - 函数是 Go 的一等类型.&lt;/li>
+&lt;li>&lt;a href="https://go101.org/article/container.html">容器类型&lt;/a>:
+&lt;ul>
+&lt;li>数组类型 - 固定长度的容器类型.&lt;/li>
+&lt;li>切片类型 - 动态长度和动态容量的容器类型.&lt;/li>
+&lt;li>映射类型 - 映射是关联数组(或字典). 标准 Go 编译器将映射实现为哈希表.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>&lt;a href="https://go101.org/article/channel.html">管道类型&lt;/a> - 管道(channels) 用于在 goroutine (Go 中的绿色线程) 之间同步数据.&lt;/li>
+&lt;li>&lt;a href="https://go101.org/article/interface.html">接口类型&lt;/a> - 接口在反射和多态中起着关键作用.&lt;/li>
+&lt;/ul>
+&lt;p>与基本类型不同, 复合类型可以表示为它们各自的类型字面量. 以下是各种复合类型的一些字面量表示示例.&lt;/p></description></item><item><title>Go 的值拷贝代价</title><link>/post/go-value-copy-cost/</link><pubDate>Fri, 27 Apr 2018 19:13:51 +0000</pubDate><guid>/post/go-value-copy-cost/</guid><description>&lt;p>本文翻译自 &lt;a href="https://go101.org/article/value-copy-cost.html">Go Value Copy Costs&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>值拷贝在 Go 语言编程中普遍发生. 赋值, 参数传递, channel 值发送以及接收操作都会涉及值拷贝. 本文将讨论 Go 中的值拷贝代价.&lt;/p>
+&lt;h2 id="值大小">值大小&lt;/h2>
+&lt;p>值的大小意味着该值(&lt;a href="https://go101.org/article/value-part.html">直接部分&lt;/a>)将在内存中占用多少字节. 值的间接底层部分不影响值的大小.&lt;/p>
+&lt;p>在 Go 中, 如果两个值的类型属于同一类型, 并且类型不是基本类型, 字符串类型, 接口类型, 数组类型和结构体类型, 那么这两个值的大小总是相等.&lt;/p>
+&lt;p>事实上, 对于标准的 Go 编译器/运行时, 两个字符串值的大小也总是相等, 对于两个接口值的大小也是一样的.&lt;/p>
+&lt;p>对于标准的 Go 编译器/运行时, 相同类型的值具有相同的值大小. 因此, 我们通常将值的大小称为值类型的大小.&lt;/p>
+&lt;p>数组类型的大小取决于元素类型的大小和数组类型的长度. 数组类型大小是数组元素类型大小与数组长度的乘积.&lt;/p>
+&lt;p>结构类型的大小取决于它的所有字段. 因为在两个相邻字段之间可能存在一些填充字节, 所以结构类型大小不小于(并且通常大于)结构字段的相应类型大小之和.&lt;/p>
+&lt;p>下表列出了各种类型的值大小. 在表中, 一个字表示一个本地字, 它在 32 位操作系统上是 4 字节, 在 64 位操作系统上是 8 字节.&lt;/p>
+&lt;table>
+ &lt;thead>
+ &lt;tr>
+ &lt;th style="text-align: left">类型&lt;/th>
+ &lt;th style="text-align: left">Go 1.10 的值大小&lt;/th>
+ &lt;th style="text-align: left">Go 规范要求&lt;/th>
+ &lt;/tr>
+ &lt;/thead>
+ &lt;tbody>
+ &lt;tr>
+ &lt;td style="text-align: left">bool&lt;/td>
+ &lt;td style="text-align: left">1 字节&lt;/td>
+ &lt;td style="text-align: left">未明确&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">int8, uint8(byte)&lt;/td>
+ &lt;td style="text-align: left">1 字节&lt;/td>
+ &lt;td style="text-align: left">1 字节&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">int16, uint16&lt;/td>
+ &lt;td style="text-align: left">2 字节&lt;/td>
+ &lt;td style="text-align: left">2 字节&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">int32 (rune), uint32, float32&lt;/td>
+ &lt;td style="text-align: left">4 字节&lt;/td>
+ &lt;td style="text-align: left">4 字节&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">int64, uint64, float64, complex64&lt;/td>
+ &lt;td style="text-align: left">8 字节&lt;/td>
+ &lt;td style="text-align: left">8 字节&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">complex128&lt;/td>
+ &lt;td style="text-align: left">16 字节&lt;/td>
+ &lt;td style="text-align: left">16 字节&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">int, uint&lt;/td>
+ &lt;td style="text-align: left">1 字&lt;/td>
+ &lt;td style="text-align: left">体系结构相关, 4 或 8 个字节&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">uintptr&lt;/td>
+ &lt;td style="text-align: left">1 字&lt;/td>
+ &lt;td style="text-align: left">足够大以存储指针值的未解释位&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">string&lt;/td>
+ &lt;td style="text-align: left">2 字&lt;/td>
+ &lt;td style="text-align: left">未明确&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">pointer&lt;/td>
+ &lt;td style="text-align: left">1 字&lt;/td>
+ &lt;td style="text-align: left">未明确&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">slice&lt;/td>
+ &lt;td style="text-align: left">3 字&lt;/td>
+ &lt;td style="text-align: left">未明确&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">map&lt;/td>
+ &lt;td style="text-align: left">1 字&lt;/td>
+ &lt;td style="text-align: left">未明确&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">channel&lt;/td>
+ &lt;td style="text-align: left">1 字&lt;/td>
+ &lt;td style="text-align: left">未明确&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">function&lt;/td>
+ &lt;td style="text-align: left">1 字&lt;/td>
+ &lt;td style="text-align: left">未明确&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">interface&lt;/td>
+ &lt;td style="text-align: left">2 字&lt;/td>
+ &lt;td style="text-align: left">未明确&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">struct&lt;/td>
+ &lt;td style="text-align: left">所有字段的大小总和 + 填充字节数&lt;/td>
+ &lt;td style="text-align: left">如果结构体类型不包含大于零的字段, 则其大小为零&lt;/td>
+ &lt;/tr>
+ &lt;tr>
+ &lt;td style="text-align: left">array&lt;/td>
+ &lt;td style="text-align: left">(元素值大小) * (数组长度)&lt;/td>
+ &lt;td style="text-align: left">如果数组的元素类型大小为零, 则其大小为零&lt;/td>
+ &lt;/tr>
+ &lt;/tbody>
+&lt;/table>
+&lt;h2 id="值拷贝代价">值拷贝代价&lt;/h2>
+&lt;p>一般来说, 拷贝值的成本与值的大小成正比. 但是, 值的大小并不是计算值拷贝的唯一因素. 不同的 CPU 体系结构可能会针对具有特定大小的值专门优化值拷贝. 在实践中, 我们可以将大小小于四个本地字的值视为小值. 拷贝小值的成本很小.&lt;/p></description></item><item><title>Go 中的 nil</title><link>/post/go-nils/</link><pubDate>Fri, 20 Apr 2018 13:41:26 +0000</pubDate><guid>/post/go-nils/</guid><description>&lt;p>本文翻译自 &lt;a href="https://go101.org/article/nil.html">nils In Go&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>nil 是 Go 中一个熟悉而重要的预定义标识符. 它是很多类型零值(zero values)的字面量表示. 很多有一些其他流行语言经验的 Go 程序员新手视 nil 为其他语言 null(或者 NULL)的副本. 这是部分正确的, 但是 Go 中的 nil 和其他语言的 null(或者 NULL)有很多不同之处.&lt;/p>
+&lt;p>本文的剩余部分将列出与 nil 有关的各种事实和细节.&lt;/p>
+&lt;h2 id="go-中的-nil-是一个预定义标识符">Go 中的 nil 是一个预定义标识符&lt;/h2>
+&lt;p>你可以使用 nil 而不用声明它.&lt;/p>
+&lt;h2 id="nil-可以表示很多类型的零值">nil 可以表示很多类型的零值&lt;/h2>
+&lt;p>在 Go 中, nil 可以表示以下类型的零值:&lt;/p>
+&lt;ul>
+&lt;li>pointer (包括类型不安全的)&lt;/li>
+&lt;li>map&lt;/li>
+&lt;li>slice&lt;/li>
+&lt;li>function&lt;/li>
+&lt;li>channel&lt;/li>
+&lt;li>interface&lt;/li>
+&lt;/ul>
+&lt;p>换句话说, 在 Go 中, nil 可能是许多不同类型的值.&lt;/p>
+&lt;h2 id="nil-不是默认类型">nil 不是默认类型&lt;/h2>
+&lt;p>Go 中的每个其他预定义标识符都有一个默认类型. 比如,&lt;/p>
+&lt;ul>
+&lt;li>true 和 false 的默认类型都是 bool 类型.&lt;/li>
+&lt;li>iota 的默认类型是 int.&lt;/li>
+&lt;/ul>
+&lt;p>但是 nil 没有默认类型, 尽管它有很多可能的类型. 编译器必须有足够的信息来从上下文中推导出 nil 的类型.&lt;/p></description></item><item><title>Go 中的内存泄漏</title><link>/post/memory-leaking/</link><pubDate>Mon, 02 Apr 2018 14:58:32 +0000</pubDate><guid>/post/memory-leaking/</guid><description>&lt;p>本文翻译自 &lt;a href="https://go101.org/article/memory-leaking.html">Memory Leaking&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>当使用带有垃圾回收器(GC)的语言编程时, 通常我们不需要关心内存泄漏问题, 因为语言运行时(runtime)会定期收集未使用的内存. 但是, 我们确实需要了解一些可能导致轻微的或者真正的内存泄漏的特殊场景. 本文剩下的部分将列出几个这样的情况.&lt;/p>
+&lt;h2 id="求子字符串substrings导致的轻微内存泄露">求子字符串(Substrings)导致的轻微内存泄露&lt;/h2>
+&lt;p>Go 规范没有指定在子字符串表达式中涉及的结果字符串和基本字符串是否应共享相同的底层内存块，该内存块托管两个字符串的底层字节序列. Go 标准编译器/运行时确实会让它们共享相同的底层内存块. 这是一个很好的设计, 这既是内存也是 CPU 消耗的明智之举. 但它可能会导致内存泄漏.&lt;/p>
+&lt;p>例如, 调用下面的函数 f 后, 将有 1M 字节的内存泄漏(轻微), 直到其他地方修改了包级(package-level)变量 s0.&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">var&lt;/span> &lt;span style="color:#a6e22e">s0&lt;/span> &lt;span style="color:#66d9ef">string&lt;/span> &lt;span style="color:#75715e">// package level variable&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">func&lt;/span> &lt;span style="color:#a6e22e">f&lt;/span>(&lt;span style="color:#a6e22e">s1&lt;/span> &lt;span style="color:#66d9ef">string&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// 假设 s1 是一个长度大于 50 的字符串.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#a6e22e">s0&lt;/span> = &lt;span style="color:#a6e22e">s1&lt;/span>[:&lt;span style="color:#ae81ff">50&lt;/span>]
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// 现在, s0 和 s1 共享相同的底层内存块.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// s1 现在不存活了, 但是 s0 依然存活.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// 尽管仅有 50 个字节在内存块中,&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#75715e">// s0 仍旧存活的事实阻止了这 1M 字节的内存块被回收.&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>为了避免这种轻微的内存泄漏, 我们可以将子字符串转换为一个 []byte 值, 然后将 []byte 值转换回 string.&lt;/p></description></item></channel></rss>

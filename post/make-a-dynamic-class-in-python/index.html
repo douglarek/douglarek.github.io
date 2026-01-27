@@ -1,0 +1,66 @@
+<!doctype html><html lang=zh><head><title>Python dynamic class &ndash; Code talks</title><meta name=viewport content="width=device-width,initial-scale=1"><meta charset=UTF-8><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin=anonymous referrerpolicy=no-referrer><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/academicons/1.9.4/css/academicons.min.css integrity="sha512-IW0nhlW5MgNydsXJO40En2EoCkTTjZhI3yuODrZIc8cQ4h1XcF53PsqDHa09NqnkXuIe0Oiyyj171BqZFwISBw==" crossorigin=anonymous referrerpolicy=no-referrer><link rel=stylesheet href=/css/palettes/base16-dark.css><link rel=stylesheet href=/css/risotto.css><link rel=stylesheet href=/css/custom.css><link rel=icon href=/favicon.ico><meta property="og:title" content="Python dynamic class &ndash; Code talks"><meta property="og:url" content="/post/make-a-dynamic-class-in-python/"><meta property="og:locale" content="zh-CN"><script async src="https://www.googletagmanager.com/gtag/js?id=G-4TVXFV2XZM%20"></script><script>var dnt,doNotTrack=!1;if(!1&&(dnt=navigator.doNotTrack||window.doNotTrack||navigator.msDoNotTrack,doNotTrack=dnt=="1"||dnt=="yes"),!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-4TVXFV2XZM ")}</script></head><body><div class=page><header class=page__header><nav class="page__nav main-nav"><ul><li class=nomarker><h1 class=page__logo><a href=/ class=page__logo-inner>Code talks</a></h1></li><li class=main-nav__item><a class=nav-main-item href=/post title>Posts</a></li><li class=main-nav__item><a class=nav-main-item href=/tags title>Tags</a></li><li class=main-nav__item><a class=nav-main-item href=https://github.com/douglarek title>GitHub</a></li></ul></nav></header><section class=page__body><header class=content__header><h1>Python dynamic class</h1><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6649330439620894" crossorigin=anonymous></script></header><div class=content__body><p>Sometimes, we hope a class can be dynamicly created in python runtime.</p><p>Take this scenario, we have two Django model classes:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> django.db <span style=color:#f92672>import</span> models
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Musician</span>(models<span style=color:#f92672>.</span>Model):
+</span></span><span style=display:flex><span>    first_name <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>CharField(max_length<span style=color:#f92672>=</span><span style=color:#ae81ff>50</span>)
+</span></span><span style=display:flex><span>    last_name <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>CharField(max_length<span style=color:#f92672>=</span><span style=color:#ae81ff>50</span>)
+</span></span><span style=display:flex><span>    sex <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>IntegerField()
+</span></span><span style=display:flex><span>    instrument <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>CharField(max_length<span style=color:#f92672>=</span><span style=color:#ae81ff>100</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>@classmethod</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>update_sex</span>(cls, id, sex):
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>if</span> cls<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>filter(pk<span style=color:#f92672>=</span>id)<span style=color:#f92672>.</span>update(sex<span style=color:#f92672>=</span>sex) <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>:
+</span></span><span style=display:flex><span>	    <span style=color:#75715e># update Redis</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Album</span>(models<span style=color:#f92672>.</span>Model):
+</span></span><span style=display:flex><span>    name <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>CharField(max_length<span style=color:#f92672>=</span><span style=color:#ae81ff>30</span>)
+</span></span><span style=display:flex><span>    release_date <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>DateField()
+</span></span><span style=display:flex><span>    num_stars <span style=color:#f92672>=</span> models<span style=color:#f92672>.</span>IntegerField()
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>@classmethod</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>update_name</span>(cls, id, name):
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>if</span> cls<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>filter(pk<span style=color:#f92672>=</span>id)<span style=color:#f92672>.</span>update(name<span style=color:#f92672>=</span>name) <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span>:
+</span></span><span style=display:flex><span>	    <span style=color:#75715e># update Redis</span>
+</span></span></code></pre></div><p>Ok, what if we just need Redis key-value cache, how can we design our Redis class ? Most of all, we think about two same like classes like this:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>RMusician</span>:
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>@classmethod</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>set_sex</span>(cls, key, sex):
+</span></span><span style=display:flex><span>	<span style=color:#f92672>...</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>@classmethod</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>get_sex</span>(cls, key):
+</span></span><span style=display:flex><span>	<span style=color:#f92672>...</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>RAlbum</span>:
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>@classmethod</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>set_sex</span>(cls, key, sex):
+</span></span><span style=display:flex><span>	<span style=color:#f92672>...</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>@classmethod</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>get_sex</span>(cls, key):
+</span></span><span style=display:flex><span>	<span style=color:#f92672>...</span>
+</span></span></code></pre></div><p>This may be very ugly ! But we can make things better in Python:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>make_class</span>(cls, <span style=color:#f92672>*</span>fields):
+</span></span><span style=display:flex><span>    RedisFactory <span style=color:#f92672>=</span> type(<span style=color:#e6db74>&#39;RedisFactory&#39;</span>, (), {<span style=color:#e6db74>&#39;r&#39;</span>: redis<span style=color:#f92672>.</span>Redis()})
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>set_x</span>(key, x):
+</span></span><span style=display:flex><span>	Redisfactory<span style=color:#f92672>.</span>r<span style=color:#f92672>.</span>set(key, x)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>def</span> <span style=color:#a6e22e>get_x</span>(field, key):
+</span></span><span style=display:flex><span>	x <span style=color:#f92672>=</span> Redisfactory<span style=color:#f92672>.</span>r<span style=color:#f92672>.</span>get(key)
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>if</span> <span style=color:#f92672>not</span> x:
+</span></span><span style=display:flex><span>	    obj <span style=color:#f92672>=</span> globals()[cls]<span style=color:#f92672>.</span>objects<span style=color:#f92672>.</span>filter(id<span style=color:#f92672>=</span>key)<span style=color:#f92672>.</span>first()
+</span></span><span style=display:flex><span>	    <span style=color:#66d9ef>if</span> obj:
+</span></span><span style=display:flex><span>		x <span style=color:#f92672>=</span> getattr(obj, field)
+</span></span><span style=display:flex><span>		set_x(key, x)
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>return</span> x
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> f <span style=color:#f92672>in</span> fields:
+</span></span><span style=display:flex><span>	<span style=color:#75715e># setattr(RedisFactory, &#39;get_{0}&#39;.format(f), classmethod(lambda kls, key: get_x(f, key)))</span>
+</span></span><span style=display:flex><span>	<span style=color:#75715e># setattr(Redisfactory, &#39;set_{0}&#39;.format(f), classmethod(lambda kls, key, x: set_x(key, x)))</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> RedisFactory
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>RMusician <span style=color:#f92672>=</span> make_class(<span style=color:#e6db74>&#39;Musician&#39;</span>, <span style=color:#e6db74>&#39;sex&#39;</span>)
+</span></span><span style=display:flex><span>RAlbum <span style=color:#f92672>=</span> make_class(<span style=color:#e6db74>&#39;Album&#39;</span>, <span style=color:#e6db74>&#39;name&#39;</span>)
+</span></span></code></pre></div><p>That&rsquo;s it.</p></div><div id=disqus_thread></div><script>window.disqus_config=function(){},function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById("disqus_thread").innerHTML="Disqus comments not available by default when the website is previewed locally.";return}var t=document,e=t.createElement("script");e.async=!0,e.src="//douglarek.disqus.com/embed.js",e.setAttribute("data-timestamp",+new Date),(t.head||t.body).appendChild(e)}()</script><noscript>Please enable JavaScript to view the <a href=https://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a><footer class=content__footer></footer></section><section class=page__aside><div class=aside__content><p>2015-05-14</p><hr>On this page:<nav id=TableOfContents></nav></div></section><footer class=page__footer><p></p><br><br><p class=copyright>Copyright © 2025 Leo Douglas</p></footer></div></body></html>

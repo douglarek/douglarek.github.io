@@ -1,0 +1,147 @@
+<!doctype html><html lang=zh><head><title>Go 语言中的 //go:nosplit 指令解析 &ndash; Code talks</title><meta name=viewport content="width=device-width,initial-scale=1"><meta charset=UTF-8><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin=anonymous referrerpolicy=no-referrer><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/academicons/1.9.4/css/academicons.min.css integrity="sha512-IW0nhlW5MgNydsXJO40En2EoCkTTjZhI3yuODrZIc8cQ4h1XcF53PsqDHa09NqnkXuIe0Oiyyj171BqZFwISBw==" crossorigin=anonymous referrerpolicy=no-referrer><link rel=stylesheet href=/css/palettes/base16-dark.css><link rel=stylesheet href=/css/risotto.css><link rel=stylesheet href=/css/custom.css><link rel=icon href=/favicon.ico><meta property="og:title" content="Go 语言中的 //go:nosplit 指令解析 &ndash; Code talks"><meta property="og:url" content="/post/go-nosplit-directive/"><meta property="og:locale" content="zh-CN"><script async src="https://www.googletagmanager.com/gtag/js?id=G-4TVXFV2XZM%20"></script><script>var dnt,doNotTrack=!1;if(!1&&(dnt=navigator.doNotTrack||window.doNotTrack||navigator.msDoNotTrack,doNotTrack=dnt=="1"||dnt=="yes"),!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-4TVXFV2XZM ")}</script></head><body><div class=page><header class=page__header><nav class="page__nav main-nav"><ul><li class=nomarker><h1 class=page__logo><a href=/ class=page__logo-inner>Code talks</a></h1></li><li class=main-nav__item><a class=nav-main-item href=/post title>Posts</a></li><li class=main-nav__item><a class=nav-main-item href=/tags title>Tags</a></li><li class=main-nav__item><a class=nav-main-item href=https://github.com/douglarek title>GitHub</a></li></ul></nav></header><section class=page__body><header class=content__header><h1>Go 语言中的 //go:nosplit 指令解析</h1><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6649330439620894" crossorigin=anonymous></script></header><div class=content__body><p>本文翻译自 <a href=https://mcyoung.xyz/2025/07/07/nosplit/>//go:nosplit</a>，版权归原作者所有。</p><p><code>//go:nosplit</code> 是什么？</p><p>大多数人不知道 Go 有特殊的指令语法。不幸的是，它不是真正的语法，它只是一个注释。例如，<code>//go:noinline</code> 会导致下一个函数声明永远不会被内联，这对于改变调用它的函数的内联成本很有用。指令有三种类型：</p><ul><li><a href=https://pkg.go.dev/cmd/compile#hdr-Function_Directives><code>gc</code> 的文档注释</a>中记录的指令。这包括 <code>//go:noinline</code> 和 <code>//line</code>。</li><li>在其他地方记录的指令，例如 <code>//go:build</code> 和 <code>//go:generate</code>。</li><li>在 <a href=https://cs.opensource.google/go/go/+/refs/tags/go1.24.4:src/runtime/HACKING.md><code>runtime/HACKING.md</code></a> 中记录的指令，只有在将 <code>-+</code> 标志传递给 <code>gc</code> 时才能使用。这包括 <code>//go:nowritebarrier</code>。</li><li>完全没有文档的指令，可以通过搜索编译器的测试来发现它们的存在。这包括 <code>//go:nocheckptr</code>、<code>//go:nointerface</code> 和 <code>//go:debug</code>。</li></ul><p>我们最感兴趣的是第一种类型的指令：<code>//go:nosplit</code>。根据文档：</p><blockquote><p><code>//go:nosplit</code> 指令必须紧跟函数声明。它指定函数必须省略其常规的栈溢出检查。这最常用于低级运行时代码，在调用协程被抢占不安全时调用。</p></blockquote><p>这到底是什么意思？普通程序代码可以使用此注解，但其行为定义不明确。让我们深入探讨。</p><h2 id=go-栈增长>Go 栈增长</h2><p>Go 为新的 goroutine 分配非常小的栈，这些栈会动态增长。这使得程序可以生成大量短生命周期的 goroutine，而无需在它们的栈上花费大量内存。这意味着栈溢出非常容易发生。每个函数都知道其栈的大小，<code>runtime.g</code>（goroutine 结构体）包含栈的结束位置；如果栈指针小于它（栈向上增长），控制权就会传递给 <code>runtime.morestack</code>，它会有效地抢占 goroutine，同时调整其栈的大小。实际上，每个 Go 函数周围都有以下代码：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#a6e22e>TEXT</span> .<span style=color:#a6e22e>f</span>(<span style=color:#a6e22e>SB</span>), <span style=color:#a6e22e>ABIInternal</span>, <span style=color:#960050;background-color:#1e0010>$</span><span style=color:#ae81ff>24</span><span style=color:#f92672>-</span><span style=color:#ae81ff>16</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>CMPQ</span> <span style=color:#a6e22e>SP</span>, <span style=color:#ae81ff>16</span>(<span style=color:#a6e22e>R14</span>)
+</span></span><span style=display:flex><span><span style=color:#a6e22e>JLS</span> <span style=color:#a6e22e>grow</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>PUSHQ</span> <span style=color:#a6e22e>BP</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>MOVQ</span> <span style=color:#a6e22e>SP</span>, <span style=color:#a6e22e>BP</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>SUBQ</span> <span style=color:#960050;background-color:#1e0010>$</span><span style=color:#ae81ff>16</span>, <span style=color:#a6e22e>SP</span>
+</span></span><span style=display:flex><span><span style=color:#75715e>// Function body...</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>ADDQ</span> <span style=color:#960050;background-color:#1e0010>$</span><span style=color:#ae81ff>16</span>, <span style=color:#a6e22e>SP</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>POPQ</span> <span style=color:#a6e22e>BP</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>RET</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>grow</span>:
+</span></span><span style=display:flex><span><span style=color:#a6e22e>MOVQ</span> <span style=color:#a6e22e>AX</span>, <span style=color:#ae81ff>8</span>(<span style=color:#a6e22e>SP</span>)
+</span></span><span style=display:flex><span><span style=color:#a6e22e>MOVQ</span> <span style=color:#a6e22e>BX</span>, <span style=color:#ae81ff>16</span>(<span style=color:#a6e22e>SP</span>)
+</span></span><span style=display:flex><span><span style=color:#a6e22e>CALL</span> <span style=color:#a6e22e>runtime</span>.<span style=color:#a6e22e>morestack_noctxt</span>(<span style=color:#a6e22e>SB</span>)
+</span></span><span style=display:flex><span><span style=color:#a6e22e>MOVQ</span> <span style=color:#ae81ff>8</span>(<span style=color:#a6e22e>SP</span>), <span style=color:#a6e22e>AX</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>MOVQ</span> <span style=color:#ae81ff>16</span>(<span style=color:#a6e22e>SP</span>), <span style=color:#a6e22e>BX</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>JMP</span> .<span style=color:#a6e22e>f</span>(<span style=color:#a6e22e>SB</span>)
+</span></span></code></pre></div><p>请注意，<code>r14</code> 持有指向当前 <code>runtime.g</code> 的指针，栈限制是该结构体中的第三个字大小的字段（<code>runtime.g.stackguard0</code>），因此偏移量为 16。如果栈即将耗尽，它会跳转到函数末尾的一个特殊块，该块会溢出所有参数寄存器，陷入运行时，一旦完成，就会取消溢出参数并重新启动函数。请注意，参数在调整 <code>rsp</code> 之前溢出，这意味着参数被写入调用者的栈帧。这是 Go ABI 的一部分；调用者必须在其栈帧顶部为它调用的任何函数分配空间，以便在必要时溢出所有寄存器以进行抢占。抢占是不可重入的，也就是说，在已经被抢占的 G 上下文中，或者根本没有 G 的情况下运行的函数，都不能被这个检查再次抢占。</p><h2 id=nosplit-函数>Nosplit 函数</h2><p><code>//go:nosplit</code> 指令将函数标记为“nosplit”，或“不可分割函数”。“分割”与此指令的作用无关。</p><blockquote><h3 id=分段栈>分段栈</h3><p>在过去，Go 的栈被分成多个段，每个段都以指向下一个段的指针结尾，有效地用这样的数组链表替换了栈的单个数组。分段栈非常糟糕。这些序言不是触发大小调整，而是负责通过遵循此指针来更新 <code>rsp</code> 到下一个（或上一个）块，每当当前段触底时。这意味着如果函数调用恰好在段边界上，它会比其他函数调用慢得多，因为正确更新 <code>rsp</code> 需要大量工作。这意味着栈帧大小的不幸选择意味着性能会突然下降。有趣！</p><p>Go 从那时起就发现分段栈是一个糟糕的主意。在实现正确的 GC 栈扫描算法（它在许多稳定版本中都没有）的过程中，它还获得了将栈内容从一个位置复制到另一个位置的能力，以这种方式更新指针，使用户代码不会注意到。这个栈分割代码就是“nosplit”这个名字的由来。</p></blockquote><p><code>nosplit</code> 函数不会加载并分支到 <code>runtime.g.stackguard0</code>，而是简单地假定它有足够的栈。这意味着 <code>nosplit</code> 函数不会自行抢占，因此，在热循环中调用时速度明显更快。不相信我？</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#75715e>//go:noinline</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>noinline</span>(<span style=color:#a6e22e>x</span> <span style=color:#66d9ef>int</span>) {}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>//go:nosplit</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>nosplit</span>(<span style=color:#a6e22e>x</span> <span style=color:#66d9ef>int</span>) {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>noinline</span>(<span style=color:#a6e22e>x</span>)
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>yessplit</span>(<span style=color:#a6e22e>x</span> <span style=color:#66d9ef>int</span>) {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>noinline</span>(<span style=color:#a6e22e>x</span>)
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>BenchmarkCall</span>(<span style=color:#a6e22e>b</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>testing</span>.<span style=color:#a6e22e>B</span>) {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>b</span>.<span style=color:#a6e22e>Run</span>(<span style=color:#e6db74>&#34;nosplit&#34;</span>, <span style=color:#66d9ef>func</span>(<span style=color:#a6e22e>b</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>testing</span>.<span style=color:#a6e22e>B</span>) {
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>for</span> <span style=color:#a6e22e>b</span>.<span style=color:#a6e22e>Loop</span>() {
+</span></span><span style=display:flex><span>			<span style=color:#a6e22e>nosplit</span>(<span style=color:#ae81ff>42</span>)
+</span></span><span style=display:flex><span>		}
+</span></span><span style=display:flex><span>	})
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>b</span>.<span style=color:#a6e22e>Run</span>(<span style=color:#e6db74>&#34;yessplit&#34;</span>, <span style=color:#66d9ef>func</span>(<span style=color:#a6e22e>b</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>testing</span>.<span style=color:#a6e22e>B</span>) {
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>for</span> <span style=color:#a6e22e>b</span>.<span style=color:#a6e22e>Loop</span>() {
+</span></span><span style=display:flex><span>			<span style=color:#a6e22e>yessplit</span>(<span style=color:#ae81ff>42</span>)
+</span></span><span style=display:flex><span>		}
+</span></span><span style=display:flex><span>	})
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>如果我们分析这个并查看每个函数的时间，我们会得到：</p><pre tabindex=0><code>390ms  390ms func nosplit(x int) { noinline(x) }
+ 60ms   60ms 51fd80: PUSHQ BP
+ 10ms   10ms 51fd81: MOVQ SP, BP
+  .      .
+ 51fd84: SUBQ $0x8, SP
+ 60ms   60ms 51fd88: CALL .noinline(SB)
+190ms  190ms 51fd8d: ADDQ $0x8, SP
+  .      .
+ 51fd91: POPQ BP
+ 70ms   70ms 51fd92: RET
+
+440ms  490ms func yessplit(x int) { noinline(x) }
+ 50ms   50ms 51fda0: CMPQ SP, 0x10(R14)
+ 20ms   20ms 51fda4: JBE 0x51fdb9
+  .      .
+ 51fda6: PUSHQ BP
+ 20ms   20ms 51fda7: MOVQ SP, BP
+  .      .
+ 51fdaa: SUBQ $0x8, SP
+ 10ms   60ms 51fdae: CALL .noinline(SB)
+200ms  200ms 51fdb3: ADDQ $0x8, SP
+  .      .
+ 51fdb7: POPQ BP
+140ms  140ms 51fdb8: RET
+  .      .
+ 51fdb9: MOVQ AX, 0x8(SP)
+  .      .
+ 51fdbe: NOPW
+  .      .
+ 51fdc0: CALL runtime.morestack_noctxt.abi0(SB)
+  .      .
+ 51fdc5: MOVQ 0x8(SP), AX
+  .      .
+ 51fdca: JMP .yessplit(SB)
+</code></pre><p>在这些函数共享的所有指令中，每个指令花费的时间（对于整个基准测试，我确保每个测试用例花费的时间相等，使用 <code>-benchtime Nx</code>）是可比的，但栈检查会额外产生约 2% 的成本。这是一个非常人为的设置，因为在 <code>yessplit</code> 基准测试中，<code>g</code> 结构体始终在 L1 中，因为循环中没有其他内存操作。然而，对于需要饱和缓存的非常热的代码，由于缓存未命中，这可能会产生巨大的影响。我们可以通过添加一个执行 <code>clflush [r14]</code> 的汇编函数来增强此基准测试，这会导致 <code>g</code> 结构体从所有缓存中弹出。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#a6e22e>TEXT</span> .<span style=color:#a6e22e>clflush</span>(<span style=color:#a6e22e>SB</span>)
+</span></span><span style=display:flex><span><span style=color:#a6e22e>CLFLUSH</span> (<span style=color:#a6e22e>R14</span>) <span style=color:#75715e>// Eject the pointee of r14 from all caches.</span>
+</span></span><span style=display:flex><span><span style=color:#a6e22e>RET</span>
+</span></span></code></pre></div><p>如果我们将对该函数的调用添加到两个基准测试循环中，我们会看到从 RAM 冷读取的惊人成本出现在每个函数调用中：<code>BenchmarkCall/nosplit</code> 为 120.1 纳秒，而 <code>BenchmarkCall/yessplit</code> 为 332.1 纳秒。200 纳秒的差异是从主内存中获取。L1 未命中的成本大约低 15 倍，因此如果 <code>g</code> 结构体设法从 L1 中被踢出，您将支付大约 15 纳秒左右，或者大约两次映射查找的成本！</p><p>尽管该语言抵制添加内联启发式，程序员会在不知道其作用的情况下将其放置在任何地方，但它们确实提供了一些更糟糕的东西，使代码明显更快：<code>nosplit</code>。</p><p><strong>但它无害吗？</strong></p><p>考虑以下程序：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#75715e>//go:nosplit</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>x</span>(<span style=color:#a6e22e>y</span> <span style=color:#66d9ef>int</span>) {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>x</span>(<span style=color:#a6e22e>y</span><span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>)
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>自然，这会立即导致栈溢出。相反，我们得到了一个非常可怕的链接器错误：</p><pre tabindex=0><code>x.x: nosplit stack over 792 byte limit
+x.x&lt;1&gt; grows 24 bytes, calls x.x&lt;1&gt; infinite cycle
+</code></pre><p>Go 链接器包含一个检查，用于验证任何调用 <code>nosplit</code> 函数的 <code>nosplit</code> 函数链不会溢出小的额外栈窗口，这是 <code>nosplit</code> 函数的栈帧在超出 <code>stackguard0</code> 时所在的位置。每个栈帧都会贡献一些栈使用（至少是返回地址），因此在出现此错误之前可以调用的函数数量是有限的。而且由于每个函数都需要为其所有被调用者分配空间以在必要时溢出其参数，如果这些函数中的每一个都使用所有可用的参数寄存器，您可能会很快达到此限制（问我怎么知道的）。此外，打开模糊测试会通过在分支周围的模糊测试运行时中插入 <code>nosplit</code> 调用来检测代码，这意味着打开模糊测试可能会导致以前正常的代码不再链接。栈使用量也因架构而异，这意味着在一个架构中构建的代码在其他架构中无法链接（在从 32 位到 64 位时最明显）。没有简单的方法可以使用构建标签控制指令（两个设计不佳的功能冲突），因此您也不能仅仅为了调试而“关闭”对性能敏感的 <code>nosplit</code>。因此，在使用 <code>nosplit</code> 进行性能优化时，您必须非常非常小心。</p><h2 id=虚拟-nosplit-函数>虚拟 Nosplit 函数</h2><p>令人兴奋的是，地址被获取的 <code>nosplit</code> 函数没有特殊的代码生成，这允许我们通过使用虚拟函数调用来规避链接器栈检查。考虑以下程序：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>main</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>var</span> <span style=color:#a6e22e>f</span> <span style=color:#66d9ef>func</span>(<span style=color:#66d9ef>int</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>//go:nosplit</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>x</span>(<span style=color:#a6e22e>y</span> <span style=color:#66d9ef>int</span>) {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>f</span>(<span style=color:#a6e22e>y</span><span style=color:#f92672>+</span><span style=color:#ae81ff>1</span>)
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>f</span> = <span style=color:#a6e22e>x</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>f</span>(<span style=color:#ae81ff>0</span>)
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>这会迅速耗尽主 G 的微小栈，并以最暴力的方式导致段错误，阻止运行时打印调试跟踪。此程序的所有输出都是 <code>signal: segmentation fault</code>。这可能是一个<a href=https://github.com/golang/go/issues/74478>错误</a>。</p><h2 id=其他副作用>其他副作用</h2><p>事实证明，<code>nosplit</code> 还有各种其他有趣的副作用，这些副作用都没有文档记录。它主要的作用是它有助于判断函数是否被运行时认为是“不安全的”。考虑以下程序：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>main</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> (
+</span></span><span style=display:flex><span>	<span style=color:#e6db74>&#34;fmt&#34;</span>
+</span></span><span style=display:flex><span>	<span style=color:#e6db74>&#34;os&#34;</span>
+</span></span><span style=display:flex><span>	<span style=color:#e6db74>&#34;runtime&#34;</span>
+</span></span><span style=display:flex><span>	<span style=color:#e6db74>&#34;time&#34;</span>
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>for</span> <span style=color:#66d9ef>range</span> <span style=color:#a6e22e>runtime</span>.<span style=color:#a6e22e>GOMAXPROCS</span>(<span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>go</span> <span style=color:#66d9ef>func</span>() {
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>for</span> {}
+</span></span><span style=display:flex><span>		}()
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Sleep</span>(<span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Second</span>) <span style=color:#75715e>// Wait for all the other Gs to start.</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#e6db74>&#34;Hello, world!&#34;</span>)
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>os</span>.<span style=color:#a6e22e>Exit</span>(<span style=color:#ae81ff>0</span>)
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>此程序将确保每个 P 都绑定到一个永远循环的 G，这意味着它们永远不会陷入运行时。因此，此程序将永远挂起，永远不会打印其结果并退出。但这不是会发生的事情。由于异步抢占，调度程序会检测运行时间过长的 G，并通过向其发送信号来抢占其 M（<a href="https://cs.opensource.google/go/go/+/master:src/runtime/signal_unix.go;l=43">碰巧，这是 <code>SIGURG</code></a>）。然而，异步抢占只有在 M 在安全点停止时才可能发生，由 <code>runtime.isAsyncSafePoint</code> 确定。它包含以下代码块：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#a6e22e>up</span>, <span style=color:#a6e22e>startpc</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>pcdatavalue2</span>(<span style=color:#a6e22e>f</span>, <span style=color:#a6e22e>abi</span>.<span style=color:#a6e22e>PCDATA_UnsafePoint</span>, <span style=color:#a6e22e>pc</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>if</span> <span style=color:#a6e22e>up</span> <span style=color:#f92672>==</span> <span style=color:#a6e22e>abi</span>.<span style=color:#a6e22e>UnsafePointUnsafe</span> {
+</span></span><span style=display:flex><span>	<span style=color:#75715e>// Unsafe-point marked by compiler. This includes</span>
+</span></span><span style=display:flex><span>	<span style=color:#75715e>// atomic sequences (e.g., write barrier) and nosplit</span>
+</span></span><span style=display:flex><span>	<span style=color:#75715e>// functions (except at calls).</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>return</span> <span style=color:#66d9ef>false</span>, <span style=color:#ae81ff>0</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>如果我们追溯这个值的设置位置，我们会发现它被明确地设置为写屏障序列、任何“属于运行时”的函数（通过使用 <code>-+</code> 标志构建来定义）以及任何 <code>nosplit</code> 函数。通过将 <code>go</code> 主体提升到 <code>nosplit</code> 函数中进行少量修改，以下程序将永远运行：它永远不会从 <code>time.Sleep</code> 中唤醒。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>main</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> (
+</span></span><span style=display:flex><span>	<span style=color:#e6db74>&#34;fmt&#34;</span>
+</span></span><span style=display:flex><span>	<span style=color:#e6db74>&#34;os&#34;</span>
+</span></span><span style=display:flex><span>	<span style=color:#e6db74>&#34;runtime&#34;</span>
+</span></span><span style=display:flex><span>	<span style=color:#e6db74>&#34;time&#34;</span>
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>//go:nosplit</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>forever</span>() {
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>for</span> {}
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>for</span> <span style=color:#66d9ef>range</span> <span style=color:#a6e22e>runtime</span>.<span style=color:#a6e22e>GOMAXPROCS</span>(<span style=color:#ae81ff>0</span>) {
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>go</span> <span style=color:#a6e22e>forever</span>()
+</span></span><span style=display:flex><span>	}
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Sleep</span>(<span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Second</span>) <span style=color:#75715e>// Wait for all the other Gs to start.</span>
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#e6db74>&#34;Hello, world!&#34;</span>)
+</span></span><span style=display:flex><span>	<span style=color:#a6e22e>os</span>.<span style=color:#a6e22e>Exit</span>(<span style=color:#ae81ff>0</span>)
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>尽管有工作要做，但每个 P 都绑定到一个永远不会到达安全点的 G，因此永远不会有可用的 P 来运行主 goroutine。这代表了使用 <code>nosplit</code> 函数的另一个潜在危险：那些不调用可抢占函数的函数必须迅速终止，否则有活锁整个运行时的风险。</p><h2 id=结论>结论</h2><p>我经常使用 <code>nosplit</code>，因为我编写高性能、低延迟的 Go 代码。这是一件非常疯狂的事情，这导致我每当遇到奇怪的边缘情况时都会慢慢生成错误报告。例如，在许多情况下，为从不使用它们的函数分配溢出区域，例如，只调用 <code>nosplit</code> 函数的函数会为它们分配空间以溢出其参数，而它们不会这样做。这是一个有文档记录的 Go 语言特性，它：</p><ul><li>文档不是很完善（异步抢占行为肯定不是）！</li><li>具有非常可怕的、依赖优化的构建失败。</li><li>可能导致活锁和神秘的段错误。</li><li>可以在不导入 <code>unsafe</code>（unsafe 包）的用户程序中使用！</li><li>它使代码更快！</li></ul><p>我很惊讶竟然存在如此巨大的“脚枪”，但它对我来说是一个可衡量的基准改进，所以无法判断它是好是坏。</p><p>细心的读者会发现，由于抢占是不可重入的，因此在 G 中一次只有一个溢出区域在使用。这是 ABI 中的一个已知错误，本质上是为了方便采用通过寄存器传递参数而打的补丁，而无需运行时中所有期望参数溢出到栈的部分，就像在 Go ABI 在每个平台上都是“i386-unknown-linux 但更糟”的缓慢旧时代一样，即参数进入栈并使 CPU 的存储队列感到悲伤。我最近提交了一个关于此的<a href=https://github.com/golang/go/issues/74413>错误报告</a>，归结为"向 <code>runtime.g</code> 添加一个字段以使用溢出空间"，这在我看来比 ABIInternal 规范中描述的替代方案更简单。</p><p>我写的几乎每个错误报告都以这四个词开头，这意味着你即将看到有史以来最糟糕的程序。</p><p>溢出区域也用于跨调用溢出参数，但在这种情况下，调用者不需要为 <code>nosplit</code> 函数分配它。</p></div><div id=disqus_thread></div><script>window.disqus_config=function(){},function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById("disqus_thread").innerHTML="Disqus comments not available by default when the website is previewed locally.";return}var t=document,e=t.createElement("script");e.async=!0,e.src="//douglarek.disqus.com/embed.js",e.setAttribute("data-timestamp",+new Date),(t.head||t.body).appendChild(e)}()</script><noscript>Please enable JavaScript to view the <a href=https://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a><footer class=content__footer></footer></section><section class=page__aside><div class=aside__content><p>2025-07-10</p><hr>On this page:<nav id=TableOfContents><ul><li><a href=#go-栈增长>Go 栈增长</a></li><li><a href=#nosplit-函数>Nosplit 函数</a><ul><li><a href=#分段栈>分段栈</a></li></ul></li><li><a href=#虚拟-nosplit-函数>虚拟 Nosplit 函数</a></li><li><a href=#其他副作用>其他副作用</a></li><li><a href=#结论>结论</a></li></ul></nav></div></section><footer class=page__footer><p></p><br><br><p class=copyright>Copyright © 2025 Leo Douglas</p></footer></div></body></html>

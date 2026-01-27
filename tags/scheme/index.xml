@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Scheme on Code talks</title><link>/tags/scheme/</link><description>Recent content in Scheme on Code talks</description><generator>Hugo</generator><language>zh-CN</language><copyright> Copyright © 2025 Leo Douglas</copyright><lastBuildDate>Fri, 06 Apr 2018 21:11:49 +0000</lastBuildDate><atom:link href="/tags/scheme/index.xml" rel="self" type="application/rss+xml"/><item><title>SICP 准备</title><link>/post/sicp-quickstart/</link><pubDate>Fri, 06 Apr 2018 21:11:49 +0000</pubDate><guid>/post/sicp-quickstart/</guid><description>&lt;p>买了很久的 SICP (英文: &lt;a href="https://mitpress.mit.edu/sites/default/files/sicp/full-text/book/book.html">Structure and Interpretation of Computer Programs&lt;/a>, 中文译作: 计算机程序的构造和解释)一直在吃灰, 趁着假期捡起来.&lt;/p>
+&lt;h2 id="一种-scheme-实现">一种 Scheme 实现&lt;/h2>
+&lt;p>刷 SICP 不局限于特定的 Scheme 实现, 虽然 MIT-Scheme 是 MIT 出的. 然而 MIT 自己都废掉了它而指定 DrScheme 为默认课程支持版本. 本文基于的 Scheme 实现是 &lt;a href="http://www.call-cc.org/">Chicken&lt;/a>.&lt;/p>
+&lt;p>macOS 下安装很简单:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ brew install chicken
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="一个编辑器">一个编辑器&lt;/h2>
+&lt;p>对于Scheme来说, 恐怕支持最好的就是 Emacs 了. 同样本文基于 Emacs 的定制配置版本 &lt;a href="https://github.com/syl20bnr/spacemacs">Spacemacs&lt;/a>.&lt;/p>
+&lt;p>Spacemacs 本身就有一个 Scheme 的 Layer 可供使用, 我使用了一个基于它, 自己定制的 Layer(&lt;a href="https://github.com/douglarek/.spacemacs.d/tree/master/layers/x-scheme">x-scheme&lt;/a>).&lt;/p>
+&lt;p>x-scheme 依赖于 &lt;a href="https://github.com/jaor/geiser">Geiser&lt;/a> 提供 REPL 等各种便利的功能, 它使用了 Chicken 的某些扩展, 可以通过以下命令安装:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ chicken-install chicken-doc apropos sicp &lt;span style="color:#75715e"># 包含 sicp 支持&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ cd &lt;span style="color:#e6db74">`&lt;/span>csi -p &lt;span style="color:#e6db74">&amp;#39;(chicken-home)&amp;#39;&lt;/span>&lt;span style="color:#e6db74">`&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ curl http://3e8.org/pub/chicken-doc/chicken-doc-repo.tgz | tar zx
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="一个例子">一个例子&lt;/h2>
+&lt;p>Chicken 通过 sicp 扩展对 SICP 提供某些便利的支持, 比如一些 SICP 默认已经有了的过程(average 等). 例如 SICP 练习第一章1.7:&lt;/p></description></item></channel></rss>

@@ -1,0 +1,97 @@
+<!doctype html><html lang=zh><head><title>可复制, 可验证, 已验证的构建 &ndash; Code talks</title><meta name=viewport content="width=device-width,initial-scale=1"><meta charset=UTF-8><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin=anonymous referrerpolicy=no-referrer><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/academicons/1.9.4/css/academicons.min.css integrity="sha512-IW0nhlW5MgNydsXJO40En2EoCkTTjZhI3yuODrZIc8cQ4h1XcF53PsqDHa09NqnkXuIe0Oiyyj171BqZFwISBw==" crossorigin=anonymous referrerpolicy=no-referrer><link rel=stylesheet href=/css/palettes/base16-dark.css><link rel=stylesheet href=/css/risotto.css><link rel=stylesheet href=/css/custom.css><link rel=icon href=/favicon.ico><meta property="og:title" content="可复制, 可验证, 已验证的构建 &ndash; Code talks"><meta property="og:url" content="/post/vgo-repro/"><meta property="og:locale" content="zh-CN"><script async src="https://www.googletagmanager.com/gtag/js?id=G-4TVXFV2XZM%20"></script><script>var dnt,doNotTrack=!1;if(!1&&(dnt=navigator.doNotTrack||window.doNotTrack||navigator.msDoNotTrack,doNotTrack=dnt=="1"||dnt=="yes"),!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-4TVXFV2XZM ")}</script></head><body><div class=page><header class=page__header><nav class="page__nav main-nav"><ul><li class=nomarker><h1 class=page__logo><a href=/ class=page__logo-inner>Code talks</a></h1></li><li class=main-nav__item><a class=nav-main-item href=/post title>Posts</a></li><li class=main-nav__item><a class=nav-main-item href=/tags title>Tags</a></li><li class=main-nav__item><a class=nav-main-item href=https://github.com/douglarek title>GitHub</a></li></ul></nav></header><section class=page__body><header class=content__header><h1>可复制, 可验证, 已验证的构建</h1><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6649330439620894" crossorigin=anonymous></script></header><div class=content__body><p>本文翻译自 <a href=https://research.swtch.com/vgo-repro>Reproducible, Verifiable, Verified Builds</a>，版权归原作者所有。</p><p>一旦 Go 开发人员和工具都共享了包版本控制的词汇表, 那么在工具链中添加可复制, 可验证以及已验证的构建就相对简单了. 事实上, 这基本上已经在 vgo 原型中了.</p><p>由于人们有时对这些术语的确切定义不一致，让我们来建立一些基本的术语. 针对这篇文章:</p><ul><li>一个可复制的构建, 当重复构建时, 会产生相同的结果.</li><li>一个可验证的构建, 记录足够的信息以精确地描述如何重复它.</li><li>一个已验证的构建, 可以检查是否使用了预期的源代码.</li></ul><p>Vgo 在默认情况下提供可复制的构建. 生成的二进制文件是可验证的, 因为它们记录了进入构建的确切源代码的版本. 并且可以配置你的代码库, 以便用户重新构建你的软件, 验证他们的构建与你的构建匹配, 使用加密的哈希, 无论它们如何获得依赖项.</p><h2 id=可复制重复的构建>可复制(重复)的构建</h2><p>至少, 我们希望确保在你构建我的程序时, 构建系统决定使用相同的代码版本. 最小版本选择在默认情况下交付该属性. 仅使用 go.mod 文件就足以确定应该使用哪个模块版本(假设依赖关系可用), 而且即使将模块的新版本引入到生态系统中, 这个决策也是稳定的. 这与大多数其他系统不同, 后者自动地采用新版本, 并且需要限制来生成可复制的构建. 我在 最小版本选择 文章中提到过这个, 但它是一个重要的, 微妙的细节, 所以我将尝试在这里简短地重复一下.</p><p>为了使这个具体化, 让我们看看来自 Rust的包管理器 Cargo 的几个真正的包. 很明显，我不是在挑剔 Cargo, 我认为 Cargo 是包管理当前艺术水平的一个例子, 并且有很多可以从中学习. 如果我们能让 Go 的包管理像 Cargo 一样平稳, 那么我很开心. 但我也认为, 在选择版本时, 我们是否会从选择不同的默认值中受益, 这是值得探讨的.</p><p>Cargo 更喜欢以下意义上的最大版本. 当我写这篇文章时, crates.io 上最新的 <a href=https://crates.io/crates/toml>toml</a> 版本是 0.4.5. 它列出了对 serde 1.0 或更高版本的依赖; 最新的 serde 是 1.0.27. 如果你启动一个新项目并添加对 toml 0.4.1 或更高版本的依赖, Cargo 可以作出选择. 根据约束, 0.4.1, 0.4.2, 0.4.3, 0.4.4 或 0.4.5 中的任何一个都是可接受的. 在所有其他条件相同的情况下, Cargo 倾向于使用<a href=https://research.swtch.com/cargo-newest.html>最新的可接受版本</a> 0.4.5. 同样, 从 1.0.0 到 1.0.27 的任何一个 serde 都是可以接受的, Cargo 选择 1.0.27. 这些选择随着新版本的推出而改变. 如果今晚发布了 serde 1.0.28, 并且明天我将 toml 0.4.5 添加到了项目中, 那么我将得到 1.0.28 而不是 1.0.27. 正如迄今为止所描述的, Cargo 的构建是不可复制的. Cargo 对这个问题的(完全合理的)答案是不仅有一个约束文件 (manifest, Cargo.toml), 而且还有一个在构建中使用的确切组件(artifacts)的列表(lock 文件 Cargo.lock). lock 文件阻止将来的升级; 一旦写入, 即使 1.0.28 发布, 你的构建仍然保留在 serde 1.0.27 上.</p><p>相比之下, 最小版本选择偏好允许的最小版本, 这是项目中某些 go.mod 所要求的确切版本. 这个答案不会随着新版本的添加而改变. 对比 Cargo 示例中给出的选择, vgo 会选择 toml 0.4.1 (你要求的), 然后选择 serde 1.0 (toml 要求的). 这些选择是稳定的, 没有 lock 文件. 这就是我说 vgo 的构建默认可复制的意思.</p><h2 id=可验证的构建>可验证的构建</h2><p>Go 的二进制文件一直包含一个字符串, 表示它们的 Go 版本. 去年, 我编写了一个工具 rsc.io/goversion, 它从给定的可执行文件或可执行文件树中获取这些信息. 例如, 在我的 Ubuntu Linux 笔记本电脑上, 我可以看看哪些系统实用程序是 Go 实现的:</p><pre tabindex=0><code>$ go get -u rsc.io/goversion
+$ goversion /usr/bin
+/usr/bin/containerd go1.8.3
+/usr/bin/containerd-shim go1.8.3
+/usr/bin/ctr go1.8.3
+/usr/bin/go go1.8.3
+/usr/bin/gofmt go1.8.3
+/usr/bin/kbfsfuse go1.8.3
+/usr/bin/kbnm go1.8.3
+/usr/bin/keybase go1.8.3
+/usr/bin/snap go1.8.3
+/usr/bin/snapctl go1.8.3
+$
+</code></pre><p>现在 vgo 原型可以理解模块版本, 它也将这些信息包含在最终的二进制文件中, 并且新的 goversion -m 标志将其打印出来. 使用我们来自 <a href=https://lingchao.xin/post/vgo-tour.html>tour</a> 的 &ldquo;hello, world&rdquo; 程序:</p><pre tabindex=0><code>$ go get -u rsc.io/goversion
+$ goversion ./hello
+./hello go1.10
+$ goversion -m hello
+./hello go1.10
+	path  github.com/you/hello
+	mod   github.com/you/hello  (devel)
+	dep   golang.org/x/text     v0.0.0-20170915032832-14c0d48ead0c
+	dep   rsc.io/quote          v1.5.2
+	dep   rsc.io/sampler        v1.3.0
+$
+</code></pre><p>主模块 github.com/you/hello, 没有版本信息, 因为它是本地开发副本, 而不是我们下载的特定版本. 但是如果我们直接从有版本的模块构建命令, 那么列表会报告所有模块的版本:</p><pre tabindex=0><code>$ vgo build -o hello2 rsc.io/hello
+vgo: resolving import &#34;rsc.io/hello&#34;
+vgo: finding rsc.io/hello (latest)
+vgo: adding rsc.io/hello v1.0.0
+vgo: finding rsc.io/hello v1.0.0
+vgo: finding rsc.io/quote v1.5.1
+vgo: downloading rsc.io/hello v1.0.0
+$ goversion -m ./hello2
+./hello2 go1.10
+	path  rsc.io/hello
+	mod   rsc.io/hello       v1.0.0
+	dep   golang.org/x/text  v0.0.0-20170915032832-14c0d48ead0c
+	dep   rsc.io/quote       v1.5.2
+	dep   rsc.io/sampler     v1.3.0
+$
+</code></pre><p>当我们集成版本进 Go 工具链时, 我们将添加 API 以从运行时库访问此信息, 就像 <a href=https://golang.org/pkg/runtime/#Version>runtime.Version</a> 提供了受限的 Go 版本信息访问.</p><p>为了尝试重构二进制文件, 通过 goversion -m 列出的信息就足够了: 将版本放入 go.mod 文件并构建在路径行上命名的目标. 但如果结果不是相同的二进制文件, 你可能想知道如何缩小不同的方法. 什么改变了 ?</p><p>当 vgo 下载每个模块时, 它会计算与该模块相对应的文件树的哈希值. 该哈希也包含在二进制文件中, 并附有版本信息, 而且 goversion -mh 也可以打印出它:</p><pre tabindex=0><code>$ goversion -mh ./hello
+hello go1.10
+	path  github.com/you/hello
+	mod   github.com/you/hello  (devel)
+	dep   golang.org/x/text     v0.0.0-20170915032832-14c0d48ead0c  h1:qgOY6WgZOaTkIIMiVjBQcw93ERBE4m30iBm00nkL0i8=
+	dep   rsc.io/quote          v1.5.2                              h1:w5fcysjrx7yqtD/aO+QwRjYZOKnaM9Uh2b40tElTs3Y=
+	dep   rsc.io/sampler        v1.3.1                              h1:F0c3J2nQCdk9ODsNhU3sElnvPIxM/xV1c/qZuAeZmac=
+$ goversion -mh ./hello2
+hello go1.10
+	path  rsc.io/hello
+	mod   rsc.io/hello       v1.0.0                              h1:CDmhdOARcor1WuRUvmE46PK91ahrSoEJqiCbf7FA56U=
+	dep   golang.org/x/text  v0.0.0-20170915032832-14c0d48ead0c  h1:qgOY6WgZOaTkIIMiVjBQcw93ERBE4m30iBm00nkL0i8=
+	dep   rsc.io/quote       v1.5.2                              h1:w5fcysjrx7yqtD/aO+QwRjYZOKnaM9Uh2b40tElTs3Y=
+	dep   rsc.io/sampler     v1.3.0                              h1:7uVkIFmeBqHfdjD+gZwtXXI+RODJ2Wc4O7MPEh/QiW4=
+$
+</code></pre><p>h1: 前缀指示正在报告哪个哈希. 今天, 只有 &ldquo;hash 1&rdquo;, 文件列表的 SHA-256 哈希及其内容的 SHA-256 哈希. 如果我们需要稍后更新一个新的哈希, 这个前缀将帮助我们从新的哈希中告诉旧的.</p><p>我必须强调这些哈希是由构建系统自我报告的. 如果某人在构建信息中为您提供了具有特定哈希值的二进制文件, 则无法保证其准确性. 它们是支持以后验证的非常有用的信息, 而不是自己可以信任的签名.</p><h2 id=已验证的构建>已验证的构建</h2><p>以源代码形式发布程序的作者可能希望让用户验证他们是否正在使用预期的依赖构建它. 我们知道 vgo 会做出与使用哪个版本的依赖 相同的决定, 但仍然存在将 v1.5.2 等版本映射到实际源码树的问题. 如果 v1.5.2 的作者将标签(tag)更改为指向不同的文件树, 该怎么办 ? 如果恶意中间件拦截下载请求并提供不同的 zip 文件会怎么样 ? 如果用户不小心编辑了 v1.5.2 的本地副本中的源文件, 该怎么办 ? vgo 原型也支持这种验证.</p><p>最终形式可能有所不同, 但如果你在 go.mod 旁边创建一个名为 go.modverify 的文件, 那么构建将使用特定版本的模块的已知哈希使该文件保持最新:</p><pre tabindex=0><code>$ echo &gt;go.modverify
+$ vgo build
+$ tcat go.modverify  # go get rsc.io/tcat, or use cat
+golang.org/x/text  v0.0.0-20170915032832-14c0d48ead0c  h1:qgOY6WgZOaTkIIMiVjBQcw93ERBE4m30iBm00nkL0i8=
+rsc.io/quote       v1.5.2                              h1:w5fcysjrx7yqtD/aO+QwRjYZOKnaM9Uh2b40tElTs3Y=
+rsc.io/sampler     v1.3.0                              h1:7uVkIFmeBqHfdjD+gZwtXXI+RODJ2Wc4O7MPEh/QiW4=
+$
+</code></pre><p>go.modverify 文件是所有有史以来遇到的版本的哈希日志: 只添加行, 不删除. 如果我们将 rsc.io/sampler 更新为 v1.3.1, 则日志现在将包含两个版本的哈希值:</p><pre tabindex=0><code>$ vgo get rsc.io/sampler@v1.3.1
+$ tcat go.modverify
+golang.org/x/text  v0.0.0-20170915032832-14c0d48ead0c  h1:qgOY6WgZOaTkIIMiVjBQcw93ERBE4m30iBm00nkL0i8=
+rsc.io/quote       v1.5.2                              h1:w5fcysjrx7yqtD/aO+QwRjYZOKnaM9Uh2b40tElTs3Y=
+rsc.io/sampler     v1.3.0                              h1:7uVkIFmeBqHfdjD+gZwtXXI+RODJ2Wc4O7MPEh/QiW4=
+rsc.io/sampler     v1.3.1                              h1:F0c3J2nQCdk9ODsNhU3sElnvPIxM/xV1c/qZuAeZmac=
+$
+</code></pre><p>当 go.modverify 存在时, vgo 将检查给定内部版本中使用的所有下载模块是否与文件中已有的条目一致. 例如, 如果我们将 rsc.io/quote 散列的第一个数字从 w 更改为 v:</p><pre tabindex=0><code>$ vgo build
+vgo: verifying rsc.io/quote v1.5.2: module hash mismatch
+	downloaded:   h1:w5fcysjrx7yqtD/aO+QwRjYZOKnaM9Uh2b40tElTs3Y=
+	go.modverify: h1:v5fcysjrx7yqtD/aO+QwRjYZOKnaM9Uh2b40tElTs3Y=
+$
+</code></pre><p>或者假设我们修复了那个, 但是修改了 v1.3.0 哈希. 现在我们的构建成功了, 因为构建版本没有使用 v1.3.0, 所以它的行被(正确地)忽略了. 但是, 如果我们尝试降级到 v1.3.0, 那么构建验证将失败:</p><pre tabindex=0><code>$ vgo build
+$ vgo get rsc.io/sampler@v1.3.0
+vgo: verifying rsc.io/sampler v1.3.0: module hash mismatch
+	downloaded:   h1:7uVkIFmeBqHfdjD+gZwtXXI+RODJ2Wc4O7MPEh/QiW4=
+	go.modverify: h1:8uVkIFmeBqHfdjD+gZwtXXI+RODJ2Wc4O7MPEh/QiW4=
+$
+</code></pre><p>希望确保其他人使用与他们完全相同的源重建其程序的开发人员可以将 go.modverify 存储在其代码库中. 然后其他构建使用相同的代码库会自动获得验证构建. 目前, 只有构建的顶级模块中的 go.modverify 适用. 但请注意, go.modverify 会列出所有依赖关系, 包括间接依赖关系, 因此整个构建都会被验证.</p><p>go.modverify 特性可帮助检测不同机器下载的依赖之间的不匹配情况. 它比较 go.modverify 中的哈希值和模块下载时计算和保存的哈希值. 还可以检查下载的模块是否在本地机器上有没有发生更改. 这不是关于安全性的攻击, 更多的是关于避免错误. 例如, 因为源文件路径出现在堆栈跟踪中, 所以在调试时打开这些文件是很常见的. 如果你在调试过程中意外地(或者我认为是故意地)修改文件, 那么稍后能够检测到它将是很好的. vgo verify 命令执行此操作:</p><pre tabindex=0><code>$ go get -u golang.org/x/vgo  # fixed a bug, sorry! :-)
+$ vgo verify
+all modules verified
+$
+</code></pre><p>如果源文件更改, vgo verify 会通知:</p><pre tabindex=0><code>$ echo &gt;&gt;$GOPATH/src/v/rsc.io/quote@v1.5.2/quote.go
+$ vgo verify
+rsc.io/quote v1.5.2: dir has been modified (/Users/rsc/src/v/rsc.io/quote@v1.5.2)
+$
+</code></pre><p>如果我们恢复文件, 一切都很好:</p><pre tabindex=0><code>$ gofmt -w $GOPATH/src/v/rsc.io/quote@v1.5.2/quote.go
+$ vgo verify
+all modules verified
+$
+</code></pre><p>如果下载后修改了缓存的 zip 文件, vgo verify 也会通知, 尽管我无法合理解释可能发生的情况:</p><pre tabindex=0><code>$ zip $GOPATH/src/v/cache/rsc.io/quote/@v/v1.5.2.zip /etc/resolv.conf
+  adding: etc/resolv.conf (deflated 36%)
+$ vgo verify
+rsc.io/quote v1.5.2: zip has been modified (/Users/rsc/src/v/cache/rsc.io/quote/@v/v1.5.2.zip)
+$
+</code></pre><p>由于 vgo 在解压缩后会保留原始 zip 文件, 因此如果 vgo verify 确定只有 zip 文件和目录树中的一个已被修改, 则甚至可以打印这两者的差异.</p><h2 id=接下来呢->接下来呢 ?</h2><p>这已经在 vgo 中实现. 你可以尝试一下并使用它. 与 vgo 的其他部分一样, 对于哪些工作不正常(或工作出色)的反馈表示感激.</p><p>这里展示的功能更多的是一些东西的开始, 而不是一个完成的功能. 文件树的加密哈希是一个构建块. 建立在它之上的 go.modverify 检查开发人员是否都使用完全相同的依赖构建特定的模块, 但是在下载新版本的模块时没有验证(除非其他人已经将其添加到 go.modverify), 模块之间也没有共享预期的哈希值.</p><p>如何解决这两个缺点的确切细节并不明显. 允许某种类型的文件树的加密签名是有意义的, 并且要验证升级发现的版本与上一个版本的密钥相同. 或者, 在更新框架(<a href=https://theupdateframework.github.io/>TUF</a>)中采用一种方法是有意义的, 尽管直接使用它们的网络协议是不实际的. 或者, 不要使用每个代码库 go.modverify 日志, 建立某种共享的全局日志可能有意义, 有点像<a href=https://www.certificate-transparency.org/>证书透明度</a>, 或者使用一个类似 <a href=https://upspin.io/>Upspin</a> 的公共身份服务器. 我们可能会探索很多途径, 但这些都有点超前了. 目前, 我们的重点是成功地将版本控制集成到 go 命令中.</p></div><div id=disqus_thread></div><script>window.disqus_config=function(){},function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById("disqus_thread").innerHTML="Disqus comments not available by default when the website is previewed locally.";return}var t=document,e=t.createElement("script");e.async=!0,e.src="//douglarek.disqus.com/embed.js",e.setAttribute("data-timestamp",+new Date),(t.head||t.body).appendChild(e)}()</script><noscript>Please enable JavaScript to view the <a href=https://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a><footer class=content__footer></footer></section><section class=page__aside><div class=aside__content><p>2018-02-24</p><hr>On this page:<nav id=TableOfContents><ul><li><a href=#可复制重复的构建>可复制(重复)的构建</a></li><li><a href=#可验证的构建>可验证的构建</a></li><li><a href=#已验证的构建>已验证的构建</a></li><li><a href=#接下来呢->接下来呢 ?</a></li></ul></nav></div></section><footer class=page__footer><p></p><br><br><p class=copyright>Copyright © 2025 Leo Douglas</p></footer></div></body></html>

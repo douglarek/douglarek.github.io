@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Concurrency on Code talks</title><link>/tags/concurrency/</link><description>Recent content in Concurrency on Code talks</description><generator>Hugo</generator><language>zh-CN</language><copyright> Copyright © 2025 Leo Douglas</copyright><lastBuildDate>Thu, 11 Dec 2025 14:00:00 +0000</lastBuildDate><atom:link href="/tags/concurrency/index.xml" rel="self" type="application/rss+xml"/><item><title>Java 并行流</title><link>/post/parallel-streams/</link><pubDate>Thu, 11 Dec 2025 14:00:00 +0000</pubDate><guid>/post/parallel-streams/</guid><description>&lt;p>本文翻译自 &lt;a href="https://dev.java/learn/api/streams/parallel-streams/">Parallelizing Streams&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;h2 id="优化流计算">优化流计算&lt;/h2>
+&lt;p>Stream API 的一个非常令人兴奋的特性是流能够并行处理数据。使用 Stream API 并行处理数据非常简单，只需在任何现有流上调用 &lt;code>parallel()&lt;/code> 方法即可。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">int&lt;/span> parallelSum &lt;span style="color:#f92672">=&lt;/span> IntStream.&lt;span style="color:#a6e22e">range&lt;/span>(0, 10)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .&lt;span style="color:#a6e22e">parallel&lt;/span>()
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> .&lt;span style="color:#a6e22e">sum&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>IO.&lt;span style="color:#a6e22e">println&lt;/span>(&lt;span style="color:#e6db74">&amp;#34;Sum = &amp;#34;&lt;/span> &lt;span style="color:#f92672">+&lt;/span> parallelSum);
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>运行此代码会得到以下结果。&lt;/p>
+&lt;pre tabindex="0">&lt;code>Sum = 45
+&lt;/code>&lt;/pre>&lt;p>这个求和实际上是并行计算的。不过在这么小的示例中，你可能不会注意到任何性能提升。&lt;/p>
+&lt;p>为什么要并行计算数据？可能是为了更快地得到计算结果。并行流会比顺序流更快地给出结果吗？这个问题的答案并不像听起来那么简单。在某些情况下是的，但在其他一些情况下，不幸的是，不会。尽管听起来令人失望，但并行流并不总是比顺序流快。&lt;/p>
+&lt;p>考虑到这一点，你应该谨慎：选择使用并行流不是一个可以轻易做出的决定。在考虑并行化之前，你需要问自己几个问题。&lt;/p>
+&lt;p>首先，问问自己，你需要它吗？你的应用程序中是否有未满足的性能要求？你确定性能问题来自你正在考虑并行计算的流处理吗？你计划如何衡量性能提升，以确保对这个特定计算并行化确实改善了应用程序的性能？&lt;/p>
+&lt;p>并行化会消耗更多的计算能力。你是否有空闲的 CPU 或 CPU 核心可以分配给这个计算？你能否在不减慢应用程序其余部分的情况下为计算分配更多 CPU 周期？&lt;/p>
+&lt;p>并行化会消耗线程。你是否有空闲线程可以分配给计算？如果你在 Web 服务器中运行的应用程序上工作，那么你的线程用于处理 HTTP 请求。你愿意将它们用于其他事情吗？&lt;/p>
+&lt;p>一旦你选择了并行化，那么你需要确保流计算的性能确实得到了改善。你应该在尽可能接近生产环境的上下文中测量这种性能提升。&lt;/p>
+&lt;p>在本教程中，我们涵盖了几个关键要素，这些要素将帮助你评估并行化可能带来的收益，以及一些应该让你对并行化保持警惕的其他要素。但归根结底，唯一能告诉你并行化是否值得的是测试和测量执行时间。&lt;/p>
+&lt;h2 id="并行化实现">并行化实现&lt;/h2>
+&lt;p>Stream API 中的并行化是通过递归分解流正在处理的数据来实现的。它构建在 JDK 7 中添加的 Fork/Join 框架之上。&lt;/p>
+&lt;p>分解包括将流正在处理的数据分成两部分。然后每个部分由自己的 CPU 核心处理，该核心可能决定再次递归分割它。&lt;/p>
+&lt;p>在某个时刻，框架将决定给定部分中的数据量足够小，可以正常处理。然后将处理这个数据子集，并计算部分结果。然后将这个部分结果与其他 CPU 核心上从其他部分计算的其他部分结果合并。&lt;/p>
+&lt;p>并行化确实会带来开销。与在多个 CPU 核心上分配计算的收益相比，这种开销必须很小。否则，并行化将恶化计算性能而不是改善它们。&lt;/p>
+&lt;p>让我们逐一检查所有这些步骤，看看什么可能阻止你获得更好的性能提升。&lt;/p>
+&lt;h2 id="理解数据局部性">理解数据局部性&lt;/h2>
+&lt;p>数据局部性会影响数据处理的速度，无论是顺序处理还是并行处理。局部性越好，计算就越快。&lt;/p>
+&lt;p>为了让 CPU 可用，你的数据必须从计算机的主内存传输到 CPU 的缓存。从物理上讲，主内存是计算机的一个特定组件，与 CPU 分离。另一方面，缓存与 CPU 的核心计算元素共享同一硅片。它们通过主板和不同的通信总线连接在一起。与 CPU 核心从其缓存访问数据的速度相比，将数据从主内存传输到 CPU 缓存非常慢。&lt;/p></description></item><item><title>Java 虚拟线程</title><link>/post/java-virtual-threads/</link><pubDate>Thu, 11 Dec 2025 00:00:00 +0000</pubDate><guid>/post/java-virtual-threads/</guid><description>&lt;p>本文翻译自 &lt;a href="https://dev.java/learn/new-features/virtual-threads/">Virtual Threads&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;h2 id="为什么需要虚拟线程">为什么需要虚拟线程？&lt;/h2>
+&lt;p>Java 1.0 于 1995 年发布时，其 API 中包含约一百个类，其中就有 &lt;code>java.lang.Thread&lt;/code>。Java 是第一个直接支持并发编程的主流编程语言。&lt;/p>
+&lt;p>从 Java 1.2 开始，每个 Java 线程都运行在底层操作系统提供的&lt;strong>平台线程&lt;/strong>上。（在 Java 1.1 及之前的版本中，在某些平台上，所有 Java 线程由单个平台线程执行。）&lt;/p>
+&lt;p>平台线程的成本不低。启动一个平台线程需要数千条 CPU 指令，并且会消耗几兆字节的内存。服务器应用程序可能需要处理大量并发请求，为每个请求分配一个独立的平台线程变得不可行。在典型的服务器应用中，这些请求大部分时间都处于&lt;strong>阻塞&lt;/strong>状态，等待数据库或其他服务返回结果。&lt;/p>
+&lt;p>提高吞吐量的传统方法是使用非阻塞 API。程序员不是等待结果，而是指定当结果可用时应调用哪个方法，以及在失败时调用另一个方法。这种方式很快就会变得令人不快，因为回调会不断嵌套。&lt;/p>
+&lt;p>JEP 425 在 Java 19 中引入了&lt;strong>虚拟线程&lt;/strong>。多个虚拟线程运行在一个平台线程上。每当虚拟线程阻塞时，它就会被&lt;strong>卸载&lt;/strong>，平台线程随即运行另一个虚拟线程。（&amp;ldquo;虚拟线程&amp;quot;这个名称类似于虚拟内存映射到实际 RAM。）虚拟线程在 Java 20 中成为预览特性（JEP 436），并在 Java 21 中正式发布。&lt;/p>
+&lt;p>有了虚拟线程，阻塞的成本变得很低。当结果不能立即获得时，你只需在虚拟线程中阻塞即可。你可以使用熟悉的编程结构——分支、循环、try 块——而不是一系列回调。&lt;/p>
+&lt;p>虚拟线程在并发任务数量庞大且任务主要阻塞在网络 I/O 上时非常有用。对于 CPU 密集型任务，它们没有任何优势。对于此类任务，可以考虑使用&lt;a href="https://dev.java/learn/api/streams/parallel-streams/">并行流&lt;/a>或&lt;a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/RecursiveTask.html">递归 fork-join 任务&lt;/a>。&lt;/p>
+&lt;h2 id="创建虚拟线程">创建虚拟线程&lt;/h2>
+&lt;p>工厂方法 &lt;code>Executors.newVirtualThreadPerTaskExecutor()&lt;/code> 返回一个 &lt;code>ExecutorService&lt;/code>，它会在单独的虚拟线程中运行每个任务。例如：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-java" data-lang="java">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">import&lt;/span> java.util.concurrent.*;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">public&lt;/span> &lt;span style="color:#66d9ef">class&lt;/span> &lt;span style="color:#a6e22e">VirtualThreadDemo&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">public&lt;/span> &lt;span style="color:#66d9ef">static&lt;/span> &lt;span style="color:#66d9ef">void&lt;/span> &lt;span style="color:#a6e22e">main&lt;/span>(String&lt;span style="color:#f92672">[]&lt;/span> args) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">final&lt;/span> &lt;span style="color:#66d9ef">int&lt;/span> NTASKS &lt;span style="color:#f92672">=&lt;/span> 100;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> ExecutorService service &lt;span style="color:#f92672">=&lt;/span> Executors.&lt;span style="color:#a6e22e">newVirtualThreadPerTaskExecutor&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">for&lt;/span> (&lt;span style="color:#66d9ef">int&lt;/span> i &lt;span style="color:#f92672">=&lt;/span> 0; i &lt;span style="color:#f92672">&amp;lt;&lt;/span> NTASKS; i&lt;span style="color:#f92672">++&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> service.&lt;span style="color:#a6e22e">submit&lt;/span>(() &lt;span style="color:#f92672">-&amp;gt;&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">long&lt;/span> id &lt;span style="color:#f92672">=&lt;/span> Thread.&lt;span style="color:#a6e22e">currentThread&lt;/span>().&lt;span style="color:#a6e22e">threadId&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> LockSupport.&lt;span style="color:#a6e22e">parkNanos&lt;/span>(1_000_000_000);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> IO.&lt;span style="color:#a6e22e">println&lt;/span>(id);
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> });
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> service.&lt;span style="color:#a6e22e">close&lt;/span>();
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> }
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>顺便说一下，这段代码使用 &lt;code>LockSupport.parkNanos&lt;/code> 而不是 &lt;code>Thread.sleep&lt;/code>，这样我们就不必捕获麻烦的 &lt;code>InterruptedException&lt;/code>。&lt;/p></description></item></channel></rss>

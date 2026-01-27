@@ -1,0 +1,232 @@
+<!doctype html><html lang=zh><head><title>Go 中的同步队列 &ndash; Code talks</title><meta name=viewport content="width=device-width,initial-scale=1"><meta charset=UTF-8><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin=anonymous referrerpolicy=no-referrer><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/academicons/1.9.4/css/academicons.min.css integrity="sha512-IW0nhlW5MgNydsXJO40En2EoCkTTjZhI3yuODrZIc8cQ4h1XcF53PsqDHa09NqnkXuIe0Oiyyj171BqZFwISBw==" crossorigin=anonymous referrerpolicy=no-referrer><link rel=stylesheet href=/css/palettes/base16-dark.css><link rel=stylesheet href=/css/risotto.css><link rel=stylesheet href=/css/custom.css><link rel=icon href=/favicon.ico><meta property="og:title" content="Go 中的同步队列 &ndash; Code talks"><meta property="og:url" content="/post/synchronization-queues-in-golang/"><meta property="og:locale" content="zh-CN"><script async src="https://www.googletagmanager.com/gtag/js?id=G-4TVXFV2XZM%20"></script><script>var dnt,doNotTrack=!1;if(!1&&(dnt=navigator.doNotTrack||window.doNotTrack||navigator.msDoNotTrack,doNotTrack=dnt=="1"||dnt=="yes"),!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-4TVXFV2XZM ")}</script></head><body><div class=page><header class=page__header><nav class="page__nav main-nav"><ul><li class=nomarker><h1 class=page__logo><a href=/ class=page__logo-inner>Code talks</a></h1></li><li class=main-nav__item><a class=nav-main-item href=/post title>Posts</a></li><li class=main-nav__item><a class=nav-main-item href=/tags title>Tags</a></li><li class=main-nav__item><a class=nav-main-item href=https://github.com/douglarek title>GitHub</a></li></ul></nav></header><section class=page__body><header class=content__header><h1>Go 中的同步队列</h1><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6649330439620894" crossorigin=anonymous></script></header><div class=content__body><p>本文翻译自 <a href=https://medium.com/golangspec/synchronization-queues-in-golang-554f8e3a31a4>Synchronization queues in Golang</a>，版权归原作者所有。</p><h2 id=问题>问题</h2><p>假设我们正在运作一家雇佣程序员和测试人员的 IT 公司. 为了让人们有机会认识对方并放松一下, 我们买了一张乒乓桌, 并制定了以下规则:</p><ul><li>正好两个人可以同时玩,</li><li>下一对只能在前一个完成时才能开始他们的比赛, 所以不允许切换一个球员,</li><li>测试人员只能与程序员一起工作, 反之亦然(不能两个测试人员或两个程序员一起). 如果程序员或测试人员想玩游戏, 那么需要分别等待测试人员或程序员建立有效的配对.</li></ul><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>:=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>i</span> &lt; <span style=color:#ae81ff>10</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span> {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>go</span> <span style=color:#a6e22e>programmer</span>()
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>:=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>i</span> &lt; <span style=color:#ae81ff>5</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span> {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>go</span> <span style=color:#a6e22e>tester</span>()
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>select</span> {} <span style=color:#75715e>// long day at work...</span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>programmer</span>() {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>code</span>()
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>pingPong</span>()
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>tester</span>() {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>test</span>()
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>pingPong</span>()
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>我们将通过 time.Sleep 模拟测试, 编码, 以及打乒乓球.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>test</span>() {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>work</span>()
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>code</span>() {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>work</span>()
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>work</span>() {
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// Sleep up to 10 seconds.</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Sleep</span>(<span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Duration</span>(<span style=color:#a6e22e>rand</span>.<span style=color:#a6e22e>Intn</span>(<span style=color:#ae81ff>10000</span>)) <span style=color:#f92672>*</span> <span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Millisecond</span>)
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>pingPong</span>() {
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// Sleep up to 2 seconds.</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Sleep</span>(<span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Duration</span>(<span style=color:#a6e22e>rand</span>.<span style=color:#a6e22e>Intn</span>(<span style=color:#ae81ff>2000</span>)) <span style=color:#f92672>*</span> <span style=color:#a6e22e>time</span>.<span style=color:#a6e22e>Millisecond</span>)
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>programmer</span>() {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>code</span>()
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#e6db74>&#34;Programmer starts&#34;</span>)
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>pingPong</span>()
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#e6db74>&#34;Programmer ends&#34;</span>)
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>tester</span>() {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>test</span>()
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#e6db74>&#34;Tester starts&#34;</span>)
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>pingPong</span>()
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#e6db74>&#34;Tester ends&#34;</span>)
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>这样的程序发出如下消息流:</p><pre tabindex=0><code>&gt; go run pingpong.go
+Tester starts
+Programmer starts
+Programmer starts
+Tester ends
+Programmer ends
+Programmer starts
+Programmer ends
+Programmer ends
+</code></pre><p>但是按照规则打乒乓球, 我们的信息流可以只包含这样的 4 行长的序列(以任何顺序和重复的任意次数):</p><pre tabindex=0><code>Tester starts
+Programmer starts
+Tester ends
+Programmer ends
+Tester starts
+Programmer starts
+Programmer ends
+Tester ends
+Programmer starts
+Tester starts
+Tester ends
+Programmer ends
+Programmer starts
+Tester starts
+Programmer ends
+Tester ends
+</code></pre><p>所以, 无论是测试人员还是程序员都要接近桌子. 之后合作伙伴加入(相应的程序员或测试人员). 在离开游戏时, 他们可以以任何顺序进行. 这就是我们有 4 个有效序列的原因.</p><p>以下是两种解决方案. 一个是基于互斥量的, 第二个是使用独立的 worker 协调整个过程, 确保所有事情都按照政策进行.</p><h2 id=方案-1>方案 #1</h2><p>两种方案都使用在接近桌子之前排队的数据结构. 当至少有一个有效对(Dev + QA)时, 允许该对玩乒乓球.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>tester</span>(<span style=color:#a6e22e>q</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>queue</span>.<span style=color:#a6e22e>Queue</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>test</span>()
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>StartT</span>()
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#e6db74>&#34;Tester starts&#34;</span>)
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>pingPong</span>()
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#e6db74>&#34;Tester ends&#34;</span>)
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>EndT</span>()
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>programmer</span>(<span style=color:#a6e22e>q</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>queue</span>.<span style=color:#a6e22e>Queue</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>code</span>()
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>StartP</span>()
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#e6db74>&#34;Programmer starts&#34;</span>)
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>pingPong</span>()
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>fmt</span>.<span style=color:#a6e22e>Println</span>(<span style=color:#e6db74>&#34;Programmer ends&#34;</span>)
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>EndP</span>()
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>main</span>() {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>q</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>queue</span>.<span style=color:#a6e22e>New</span>()
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>:=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>i</span> &lt; <span style=color:#ae81ff>10</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span> {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>go</span> <span style=color:#a6e22e>programmer</span>(<span style=color:#a6e22e>q</span>)
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> <span style=color:#a6e22e>i</span> <span style=color:#f92672>:=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>i</span> &lt; <span style=color:#ae81ff>5</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span> {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>go</span> <span style=color:#a6e22e>tester</span>(<span style=color:#a6e22e>q</span>)
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>select</span> {}
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>queue 包定义如下:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>queue</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>import</span> <span style=color:#e6db74>&#34;sync&#34;</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>type</span> <span style=color:#a6e22e>Queue</span> <span style=color:#66d9ef>struct</span> {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>mut</span>                   <span style=color:#a6e22e>sync</span>.<span style=color:#a6e22e>Mutex</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>numP</span>, <span style=color:#a6e22e>numT</span>            <span style=color:#66d9ef>int</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>queueP</span>, <span style=color:#a6e22e>queueT</span>, <span style=color:#a6e22e>doneP</span> <span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>int</span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>New</span>() <span style=color:#f92672>*</span><span style=color:#a6e22e>Queue</span> {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>q</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>Queue</span>{
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>queueP</span>: make(<span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>int</span>),
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>queueT</span>: make(<span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>int</span>),
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>doneP</span>:  make(<span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>int</span>),
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#f92672>&amp;</span><span style=color:#a6e22e>q</span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> (<span style=color:#a6e22e>q</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>Queue</span>) <span style=color:#a6e22e>StartT</span>() {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>mut</span>.<span style=color:#a6e22e>Lock</span>()
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>numP</span> &gt; <span style=color:#ae81ff>0</span> {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>numP</span> <span style=color:#f92672>-=</span> <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>queueP</span> <span style=color:#f92672>&lt;-</span> <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>    } <span style=color:#66d9ef>else</span> {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>numT</span> <span style=color:#f92672>+=</span> <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>mut</span>.<span style=color:#a6e22e>Unlock</span>()
+</span></span><span style=display:flex><span>        <span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>queueT</span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> (<span style=color:#a6e22e>q</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>Queue</span>) <span style=color:#a6e22e>EndT</span>() {
+</span></span><span style=display:flex><span>    <span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>doneP</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>mut</span>.<span style=color:#a6e22e>Unlock</span>()
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> (<span style=color:#a6e22e>q</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>Queue</span>) <span style=color:#a6e22e>StartP</span>() {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>mut</span>.<span style=color:#a6e22e>Lock</span>()
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>numT</span> &gt; <span style=color:#ae81ff>0</span> {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>numT</span> <span style=color:#f92672>-=</span> <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>queueT</span> <span style=color:#f92672>&lt;-</span> <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>    } <span style=color:#66d9ef>else</span> {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>numP</span> <span style=color:#f92672>+=</span> <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>mut</span>.<span style=color:#a6e22e>Unlock</span>()
+</span></span><span style=display:flex><span>        <span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>queueP</span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> (<span style=color:#a6e22e>q</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>Queue</span>) <span style=color:#a6e22e>EndP</span>() {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>doneP</span> <span style=color:#f92672>&lt;-</span> <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>Queue 包含互斥量 mut 有两个目的:</p><ul><li>同步对共享计数器(numT 和 numP)的访问</li><li>扮演游戏中的雇员阻止其他人加入乒乓桌的令牌</li></ul><p>程序员和测试人员正在使用无缓冲 channels 来等待他们的乒乓伙伴.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>queueP</span>
+</span></span></code></pre></div><p>或者</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>queueT</span>
+</span></span></code></pre></div><p>如果没有伙伴可用, 从这些 channels 读取将会阻塞 goroutine.</p><p>我们来分析一下由测试人员执行的 StartT :</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#66d9ef>func</span> (<span style=color:#a6e22e>q</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>Queue</span>) <span style=color:#a6e22e>StartT</span>() {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>mut</span>.<span style=color:#a6e22e>Lock</span>()
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>numP</span> &gt; <span style=color:#ae81ff>0</span> {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>numP</span> <span style=color:#f92672>-=</span> <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>queueP</span> <span style=color:#f92672>&lt;-</span> <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>    } <span style=color:#66d9ef>else</span> {
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>numT</span> <span style=color:#f92672>+=</span> <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>mut</span>.<span style=color:#a6e22e>Unlock</span>()
+</span></span><span style=display:flex><span>        <span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>queueT</span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>如果 numP 大于 0 (至少有一个程序员在等待游戏), 那么等待的程序员的数量减少一个, 等待的程序员中的一个将被允许加入该乒乓桌(q.queueP &lt;-1). 有趣的是, 在这个过程中, 互斥量不会被释放, 所以它将作为一个令牌独占访问乒乓球桌.</p><p>如果没有等待的程序员, 则 numT (等待测试者的数量)增加并且 goroutine 在 &lt;-q.queueT 上阻塞.</p><p>StartP 基本上是相同的, 但由程序员执行.</p><p>在游戏过程中, 互斥量将被锁定, 因此需要由程序员或测试人员释放. 只有当双方完成游戏时才释放互斥量, 则会使用屏障 doneP:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#66d9ef>func</span> (<span style=color:#a6e22e>q</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>Queue</span>) <span style=color:#a6e22e>EndT</span>() {
+</span></span><span style=display:flex><span>    <span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>doneP</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>mut</span>.<span style=color:#a6e22e>Unlock</span>()
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> (<span style=color:#a6e22e>q</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>Queue</span>) <span style=color:#a6e22e>EndP</span>() {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>doneP</span> <span style=color:#f92672>&lt;-</span> <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>如果程序员仍在玩并且测试人员已完成, 那么测试人员将阻塞在 &lt;-q.doneP. 一旦程序员到达 q.doneP &lt;- 1, 屏障将打开, 互斥量将被释放, 以允许这些员工重新开始工作.</p><p>如果测试者仍在游戏, 那么程序员将在 q.doneP &lt;- 1 上阻塞. 当测试者完成时, 它从屏障 &lt;-q.doneP 中读取, 这将解除对程序员的阻塞, 并且将释放互斥量以释放该乒乓桌.</p><p>这里有趣的是, 不管测试人员还是程序员都可能锁定互斥量, 测试人员总是会释放互斥量. 这也是该解决方案初看起来可能不那么明显的原因之一.</p><h2 id=方案-2>方案 #2</h2><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#f92672>package</span> <span style=color:#a6e22e>queue</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> (
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>msgPStart</span> = <span style=color:#66d9ef>iota</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>msgTStart</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>msgPEnd</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>msgTEnd</span>
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>type</span> <span style=color:#a6e22e>Queue</span> <span style=color:#66d9ef>struct</span> {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>waitP</span>, <span style=color:#a6e22e>waitT</span>   <span style=color:#66d9ef>int</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>playP</span>, <span style=color:#a6e22e>playT</span>   <span style=color:#66d9ef>bool</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>queueP</span>, <span style=color:#a6e22e>queueT</span> <span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>int</span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>msg</span>            <span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>int</span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> <span style=color:#a6e22e>New</span>() <span style=color:#f92672>*</span><span style=color:#a6e22e>Queue</span> {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>q</span> <span style=color:#f92672>:=</span> <span style=color:#a6e22e>Queue</span>{
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>msg</span>:    make(<span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>int</span>),
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>queueP</span>: make(<span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>int</span>),
+</span></span><span style=display:flex><span>        <span style=color:#a6e22e>queueT</span>: make(<span style=color:#66d9ef>chan</span> <span style=color:#66d9ef>int</span>),
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>go</span> <span style=color:#66d9ef>func</span>() {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>for</span> {
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>select</span> {
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>case</span> <span style=color:#a6e22e>n</span> <span style=color:#f92672>:=</span> <span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>msg</span>:
+</span></span><span style=display:flex><span>                <span style=color:#66d9ef>switch</span> <span style=color:#a6e22e>n</span> {
+</span></span><span style=display:flex><span>                <span style=color:#66d9ef>case</span> <span style=color:#a6e22e>msgPStart</span>:
+</span></span><span style=display:flex><span>                    <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>waitP</span><span style=color:#f92672>++</span>
+</span></span><span style=display:flex><span>                <span style=color:#66d9ef>case</span> <span style=color:#a6e22e>msgPEnd</span>:
+</span></span><span style=display:flex><span>                    <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>playP</span> = <span style=color:#66d9ef>false</span>
+</span></span><span style=display:flex><span>                <span style=color:#66d9ef>case</span> <span style=color:#a6e22e>msgTStart</span>:
+</span></span><span style=display:flex><span>                    <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>waitT</span><span style=color:#f92672>++</span>
+</span></span><span style=display:flex><span>                <span style=color:#66d9ef>case</span> <span style=color:#a6e22e>msgTEnd</span>:
+</span></span><span style=display:flex><span>                    <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>playT</span> = <span style=color:#66d9ef>false</span>
+</span></span><span style=display:flex><span>                }
+</span></span><span style=display:flex><span>                <span style=color:#66d9ef>if</span> <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>waitP</span> &gt; <span style=color:#ae81ff>0</span> <span style=color:#f92672>&amp;&amp;</span> <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>waitT</span> &gt; <span style=color:#ae81ff>0</span> <span style=color:#f92672>&amp;&amp;</span> !<span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>playP</span> <span style=color:#f92672>&amp;&amp;</span> !<span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>playT</span> {
+</span></span><span style=display:flex><span>                    <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>playP</span> = <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>                    <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>playT</span> = <span style=color:#66d9ef>true</span>
+</span></span><span style=display:flex><span>                    <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>waitT</span><span style=color:#f92672>--</span>
+</span></span><span style=display:flex><span>                    <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>waitP</span><span style=color:#f92672>--</span>
+</span></span><span style=display:flex><span>                    <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>queueP</span> <span style=color:#f92672>&lt;-</span> <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>                    <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>queueT</span> <span style=color:#f92672>&lt;-</span> <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>                }
+</span></span><span style=display:flex><span>            }
+</span></span><span style=display:flex><span>        }
+</span></span><span style=display:flex><span>    }()
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#f92672>&amp;</span><span style=color:#a6e22e>q</span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> (<span style=color:#a6e22e>q</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>Queue</span>) <span style=color:#a6e22e>StartT</span>() {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>msg</span> <span style=color:#f92672>&lt;-</span> <span style=color:#a6e22e>msgTStart</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>queueT</span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> (<span style=color:#a6e22e>q</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>Queue</span>) <span style=color:#a6e22e>EndT</span>() {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>msg</span> <span style=color:#f92672>&lt;-</span> <span style=color:#a6e22e>msgTEnd</span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> (<span style=color:#a6e22e>q</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>Queue</span>) <span style=color:#a6e22e>StartP</span>() {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>msg</span> <span style=color:#f92672>&lt;-</span> <span style=color:#a6e22e>msgPStart</span>
+</span></span><span style=display:flex><span>    <span style=color:#f92672>&lt;-</span><span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>queueP</span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span><span style=color:#66d9ef>func</span> (<span style=color:#a6e22e>q</span> <span style=color:#f92672>*</span><span style=color:#a6e22e>Queue</span>) <span style=color:#a6e22e>EndP</span>() {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>msg</span> <span style=color:#f92672>&lt;-</span> <span style=color:#a6e22e>msgPEnd</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>我们有一个中央协调员在独立的 goroutine 内部运行, 它协调整个过程. 调度器获取想要放松的新员工的信息, 或者是否有人通过 msg channel 打乒乓球. 接收调度器的任何消息状态时都会更新:</p><ul><li>等待的 Devs 或 QAs 的数量会增加</li><li>关于游戏员工的信息会更新</li></ul><p>在接收到任何已定义的消息之后, 调度器将检查是否允许另一对开始游戏:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=display:flex><span><span style=color:#66d9ef>if</span> <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>waitP</span> &gt; <span style=color:#ae81ff>0</span> <span style=color:#f92672>&amp;&amp;</span> <span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>waitT</span> &gt; <span style=color:#ae81ff>0</span> <span style=color:#f92672>&amp;&amp;</span> !<span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>playP</span> <span style=color:#f92672>&amp;&amp;</span> !<span style=color:#a6e22e>q</span>.<span style=color:#a6e22e>playT</span> {
+</span></span></code></pre></div><p>如果是这样, 则相应地更新状态, 并且一个测试人员和一个程序员被解锁.</p><p>我们现在不再使用互斥量(如解决方案 1 中的方法)来管理对共享数据的访问, 而是通过单独的 goroutine 与外部世界进行通信. 这将使我们编写更多的惯用的 Go 程序.</p><blockquote><p>不要通过共享内存进行通信, 通过通信共享内存.</p></blockquote><h2 id=资源>资源</h2><ul><li>Allen B. Downey &ldquo;The Little Book of Semaphores&rdquo;</li><li><a href=https://medium.com/golangspec/reusable-barriers-in-golang-156db1f75d0b>Reusable barriers in Golang</a></li><li><a href=https://blog.golang.org/share-memory-by-communicating>Share Memory By Communicating</a></li></ul></div><div id=disqus_thread></div><script>window.disqus_config=function(){},function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById("disqus_thread").innerHTML="Disqus comments not available by default when the website is previewed locally.";return}var t=document,e=t.createElement("script");e.async=!0,e.src="//douglarek.disqus.com/embed.js",e.setAttribute("data-timestamp",+new Date),(t.head||t.body).appendChild(e)}()</script><noscript>Please enable JavaScript to view the <a href=https://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a><footer class=content__footer></footer></section><section class=page__aside><div class=aside__content><p>2018-03-27</p><hr>On this page:<nav id=TableOfContents><ul><li><a href=#问题>问题</a></li><li><a href=#方案-1>方案 #1</a></li><li><a href=#方案-2>方案 #2</a></li><li><a href=#资源>资源</a></li></ul></nav></div></section><footer class=page__footer><p></p><br><br><p class=copyright>Copyright © 2025 Leo Douglas</p></footer></div></body></html>
