@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Best-Practices on Code talks</title><link>/tags/best-practices/</link><description>Recent content in Best-Practices on Code talks</description><generator>Hugo</generator><language>zh-CN</language><copyright> Copyright © 2025 Leo Douglas</copyright><lastBuildDate>Mon, 23 Mar 2026 00:00:00 +0800</lastBuildDate><atom:link href="/tags/best-practices/index.xml" rel="self" type="application/rss+xml"/><item><title>Rob Pike 的编程五原则</title><link>/post/2026-03-23-rob-pikes-5-rules-of-programming/</link><pubDate>Mon, 23 Mar 2026 00:00:00 +0800</pubDate><guid>/post/2026-03-23-rob-pikes-5-rules-of-programming/</guid><description>&lt;p>本文翻译自 &lt;a href="https://www.cs.unc.edu/~stotts/COMP590-059-f24/robsrules.html">Rob Pike&amp;rsquo;s 5 Rules of Programming&lt;/a>。&lt;/p>
+&lt;hr>
+&lt;h2 id="rob-pike-的编程五原则">Rob Pike 的编程五原则&lt;/h2>
+&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>原则 1.&lt;/strong> 你无法预知程序会把时间花在哪里。瓶颈出现在令人惊讶的地方，所以不要试图猜测并过早地加入性能优化，直到你证明那里确实是瓶颈所在。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>原则 2.&lt;/strong> 测量。在测量之前不要为了速度而优化，即使测量之后，也不要优化，除非某部分代码的执行时间远远超过其他部分。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>原则 3.&lt;/strong> 当 n 较小时，复杂的算法效率低下，而 n 通常都很小。复杂算法有很大的常数开销。在你确定 n 经常很大之前，不要使用复杂的算法。（即使 n 确实变得很大，也要先应用原则 2。）&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>原则 4.&lt;/strong> 复杂算法比简单算法更容易出错，而且更难实现。使用简单的算法以及简单的数据结构。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>原则 5.&lt;/strong> 数据为主导。如果你选择了正确的数据结构并且组织得当，算法几乎总是显而易见的。数据结构，而非算法，才是编程的核心。&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;hr>
+&lt;h3 id="相关说明">相关说明&lt;/h3>
+&lt;p>Pike 的原则 1 和原则 2 重申了 Tony Hoare 的名言：&lt;/p>
+&lt;blockquote>
+&lt;p>&amp;ldquo;过早优化是万恶之源。&amp;rdquo;&lt;/p>&lt;/blockquote>
+&lt;p>Ken Thompson 将 Pike 的原则 3 和原则 4 重新表述为：&lt;/p>
+&lt;blockquote>
+&lt;p>&amp;ldquo;如有疑问，使用暴力方法。&amp;rdquo;&lt;/p>&lt;/blockquote>
+&lt;p>原则 3 和原则 4 是 KISS（Keep It Simple, Stupid）设计哲学的具体体现。&lt;/p>
+&lt;p>原则 5 此前由 Fred Brooks 在《人月神话》（The Mythical Man-Month）中提出。原则 5 常被简化为：&lt;/p></description></item></channel></rss>

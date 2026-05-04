@@ -1,0 +1,166 @@
+<!doctype html><html lang=zh><head><title>Java 很快，但你的代码可能不然 &ndash; Code talks</title><meta name=viewport content="width=device-width,initial-scale=1"><meta charset=UTF-8><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin=anonymous referrerpolicy=no-referrer><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/academicons/1.9.4/css/academicons.min.css integrity="sha512-IW0nhlW5MgNydsXJO40En2EoCkTTjZhI3yuODrZIc8cQ4h1XcF53PsqDHa09NqnkXuIe0Oiyyj171BqZFwISBw==" crossorigin=anonymous referrerpolicy=no-referrer><link rel=stylesheet href=/css/palettes/base16-dark.css><link rel=stylesheet href=/css/risotto.css><link rel=stylesheet href=/css/custom.css><link rel=icon href=/favicon.ico><meta property="og:title" content="Java 很快，但你的代码可能不然 &ndash; Code talks"><meta property="og:url" content="/post/java-performance-optimization-antipatterns/"><meta property="og:locale" content="zh-CN"><script async src="https://www.googletagmanager.com/gtag/js?id=G-4TVXFV2XZM%20"></script><script>var dnt,doNotTrack=!1;if(!1&&(dnt=navigator.doNotTrack||window.doNotTrack||navigator.msDoNotTrack,doNotTrack=dnt=="1"||dnt=="yes"),!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-4TVXFV2XZM ")}</script></head><body><div class=page><header class=page__header><nav class="page__nav main-nav"><ul><li class=nomarker><h1 class=page__logo><a href=/ class=page__logo-inner>Code talks</a></h1></li><li class=main-nav__item><a class=nav-main-item href=/post title>Posts</a></li><li class=main-nav__item><a class=nav-main-item href=/tags title>Tags</a></li><li class=main-nav__item><a class=nav-main-item href=https://github.com/douglarek title>GitHub</a></li></ul></nav></header><section class=page__body><header class=content__header><h1>Java 很快，但你的代码可能不然</h1><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6649330439620894" crossorigin=anonymous></script></header><div class=content__body><p>本文翻译自 <a href=https://jvogel.me/posts/2026/java-is-fast-your-code-might-not-be/>Java Is Fast. Your Code Might Not Be.</a>，版权归原作者所有。</p><p><img src=/images/java-performance-optimization-hero.jpg alt="Java 性能优化系列封面"></p><p>Java 性能优化系列文章第一部分。第二部分和第三部分即将推出。</p><p>几周前，我为在 DevNexus 的一次演讲构建了一个 Java 订单处理应用。应用能运行，测试通过。我运行了负载测试并收集了 Java Flight Recording (JFR) 数据。</p><p><strong>优化前：</strong> 1,198ms 耗时，每秒 85,000 订单，堆内存峰值略超 1GB，19 次 GC 停顿。</p><p><strong>优化后：</strong> 239ms。每秒 419,000 订单。139MB 堆内存。4 次 GC 停顿。</p><p>同一个应用。同样的测试。同样的 JDK。没有架构变更。当考虑到这类代码在生产环境中并非运行在单机上，而是部署在整个集群时，这些数据就更有意义了。</p><p>在第二部分，我将逐步讲解这些数据背后的性能剖析信息：火焰图、哪些方法真正消耗 CPU，以及修复后发生了什么变化。在此之前，你需要了解我们实际修复了哪些问题。</p><p>这些问题是真实代码库中常见的模式。它们编译通过，能混过代码审查，而且如果没有性能剖析数据指引，很容易被忽略。以下是其中八个问题。</p><hr><h2 id=tldr>TL;DR</h2><p>修复这类反模式将一个耗时 1,198ms 的 Java 应用优化到 239ms。以下是一些需要查找并修复的问题：</p><ol><li><strong>循环中的字符串拼接</strong> —— 不可变性导致的 O(n²) 复制</li><li><strong>循环内的 O(n²) Stream 迭代</strong> —— 每个元素都遍历整个列表</li><li><strong>热点路径中的 String.format()</strong> —— 最慢的字符串构建方式，每次调用都解析格式</li><li><strong>热点路径中的自动装箱</strong> —— 数百万个临时包装对象</li><li><strong>用异常控制流程</strong> —— fillInStackTrace() 遍历整个调用栈</li><li><strong>过宽的同步范围</strong> —— 单个锁成为瓶颈</li><li><strong>重复创建可复用对象</strong> —— 每次调用都创建 ObjectMapper、DateTimeFormatter、Gson</li><li><strong>虚拟线程钉住（JDK 21–23）</strong> —— synchronized 加阻塞 I/O 钉住载体线程</li></ol><p>修复后：吞吐量提升 5 倍，堆内存减少 87%，GC 停顿减少 79%。同一个应用，同样的测试，同样的 JDK。</p><hr><h2 id=1-循环中的字符串拼接>1. 循环中的字符串拼接</h2><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span>String report <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;&#34;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>for</span> (String line : logLines) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    report <span style=color:#f92672>=</span> report <span style=color:#f92672>+</span> line <span style=color:#f92672>+</span> <span style=color:#e6db74>&#34;\n&#34;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>这段代码看起来没问题，对吧？问题在于 <code>String</code> 不可变性在实际中意味着什么。</p><p>每次使用 <code>+</code> 时，Java 都会创建一个全新的 <code>String</code> 对象，完整复制所有之前的内容并附加新内容。旧对象被丢弃。每次迭代都会发生这种情况。</p><p>被复制的字符数量按 O(n²) 增长。如果你有 10,000 行，第 1 次迭代几乎不复制内容，第 5,000 次迭代复制 5,000 个字符的累积内容，第 10,000 次迭代复制所有内容。BellSoft 对此运行了 JMH 基准测试，结果显示当 n 增长 4 倍时，循环拼接版本的耗时增加超过 7 倍，远差于线性增长。</p><p><strong>修复方法：</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span>StringBuilder sb <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> StringBuilder();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>for</span> (String line : logLines) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    sb.<span style=color:#a6e22e>append</span>(line).<span style=color:#a6e22e>append</span>(<span style=color:#e6db74>&#34;\n&#34;</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>String report <span style=color:#f92672>=</span> sb.<span style=color:#a6e22e>toString</span>();
+</span></span></code></pre></div><p><code>StringBuilder</code> 基于单个可变字符缓冲区工作。一次分配。每次 <code>append</code> 写入该缓冲区。最后调用一次 <code>toString()</code>。</p><p>注意：从 JDK 9 开始，编译器足够智能，可以优化单行中的 <code>"Order: " + id + " total: " + amount</code>。但该优化不适用于循环内部。在循环内，你仍然会在每次迭代时创建并丢弃一个新的 <code>StringBuilder</code>。你必须像上面的修复方法那样，在循环之前声明它。</p><hr><h2 id=2-循环内的-stream-导致意外的-on>2. 循环内的 Stream 导致意外的 O(n²)</h2><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#66d9ef>for</span> (Order order : orders) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>int</span> hour <span style=color:#f92672>=</span> order.<span style=color:#a6e22e>timestamp</span>().<span style=color:#a6e22e>atZone</span>(ZoneId.<span style=color:#a6e22e>systemDefault</span>()).<span style=color:#a6e22e>getHour</span>();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>long</span> countForHour <span style=color:#f92672>=</span> orders.<span style=color:#a6e22e>stream</span>()
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        .<span style=color:#a6e22e>filter</span>(o <span style=color:#f92672>-&gt;</span> o.<span style=color:#a6e22e>timestamp</span>().<span style=color:#a6e22e>atZone</span>(ZoneId.<span style=color:#a6e22e>systemDefault</span>()).<span style=color:#a6e22e>getHour</span>() <span style=color:#f92672>==</span> hour)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        .<span style=color:#a6e22e>count</span>();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    ordersByHour.<span style=color:#a6e22e>put</span>(hour, countForHour);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>这看起来很合理。你在按小时分组订单。但看看发生了什么：<strong>对每个订单</strong>，你都遍历<strong>整个</strong>列表来统计有多少订单属于该小时。如果你有 10,000 个订单，那就是 10,000 次迭代 × 10,000 个流元素。本该单次遍历的工作，现在需要 1 亿次比较。</p><p>在我的演示应用中，这个确切模式是单个最大的 CPU 热点。它占 JFR 录制中近 71% 的 CPU 栈采样。</p><p><strong>修复方法：</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#66d9ef>for</span> (Order order : orders) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>int</span> hour <span style=color:#f92672>=</span> order.<span style=color:#a6e22e>timestamp</span>().<span style=color:#a6e22e>atZone</span>(ZoneId.<span style=color:#a6e22e>systemDefault</span>()).<span style=color:#a6e22e>getHour</span>();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    ordersByHour.<span style=color:#a6e22e>merge</span>(hour, 1L, Long::sum);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>单次遍历。O(n)。每个订单直接增加其小时的计数。你也可以使用 <code>Collectors.groupingBy(... Collectors.counting())</code> 在单个流管道中完成，但 <code>merge</code> 方法更清晰，而且避免了创建流的开销。</p><p>如果你在循环体内看到 <code>.stream()</code> 调用，这是一个信号，应该停下来检查是否在做冗余工作。</p><hr><h2 id=3-热点路径中的-stringformat>3. 热点路径中的 String.format()</h2><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#66d9ef>public</span> String <span style=color:#a6e22e>buildOrderSummary</span>(String orderId, String customer, <span style=color:#66d9ef>double</span> amount) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> String.<span style=color:#a6e22e>format</span>(<span style=color:#e6db74>&#34;Order %s for %s: $%.2f&#34;</span>, orderId, customer, amount);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p><code>String.format()</code> 常被推荐为构建字符串的简洁、可读方式。是的，它可读，但在频繁调用时，它也是 Java 中最慢的字符串构建选项。</p><p>Baeldung 对 Java 中每种字符串拼接方法运行了 JMH 基准测试。<code>String.format()</code> 在每个类别中都垫底。它每次调用都要解析格式字符串，运行基于正则的令牌匹配，并通过完整的 <code>java.util.Formatter</code> 机制分发。<code>StringBuilder</code> 始终是最快的。</p><p><strong>修复方法：</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#66d9ef>return</span> <span style=color:#e6db74>&#34;Order &#34;</span> <span style=color:#f92672>+</span> orderId <span style=color:#f92672>+</span> <span style=color:#e6db74>&#34; for &#34;</span> <span style=color:#f92672>+</span> customer <span style=color:#f92672>+</span> <span style=color:#e6db74>&#34;: $&#34;</span> <span style=color:#f92672>+</span> String.<span style=color:#a6e22e>format</span>(<span style=color:#e6db74>&#34;%.2f&#34;</span>, amount);
+</span></span></code></pre></div><p>在需要数值格式化的地方使用 <code>String.format()</code>，让编译器优化其余部分。或者如果需要完全控制，就使用 <code>StringBuilder</code>。</p><p><code>String.format()</code> 用于配置加载、启动代码、错误消息等不频繁运行的地方没问题。只要把它从性能剖析工具标记为热点的任何地方移出来即可。</p><hr><h2 id=4-热点路径中的自动装箱>4. 热点路径中的自动装箱</h2><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span>Long sum <span style=color:#f92672>=</span> 0L;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>for</span> (Long value : values) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    sum <span style=color:#f92672>+=</span> value;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>在 JVM 层面实际发生的是什么：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span>Long sum <span style=color:#f92672>=</span> Long.<span style=color:#a6e22e>valueOf</span>(0L);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>for</span> (Long value : values) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    sum <span style=color:#f92672>=</span> Long.<span style=color:#a6e22e>valueOf</span>(sum.<span style=color:#a6e22e>longValue</span>() <span style=color:#f92672>+</span> value.<span style=color:#a6e22e>longValue</span>());
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>每次迭代都会将 <code>sum</code> 拆箱获取 <code>long</code>，相加，然后将结果装箱回新的 <code>Long</code> 对象。对于一百万个元素，你创建了一百万个 <code>Long</code> 对象供 GC 清理。在 64 位 JVM 上，每个 <code>Long</code> 在堆上约占 16 字节。对于一个本该简单的加法循环，这产生了 16MB 的堆内存周转。</p><p><strong>修复方法：</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#66d9ef>long</span> sum <span style=color:#f92672>=</span> 0L;  <span style=color:#75715e>// 基本类型，不是包装类</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>long</span> value : values) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    sum <span style=color:#f92672>+=</span> value;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>这通常悄悄潜入的地方：聚合和处理循环。求和指标、累加计数器、构建统计信息。包装类型混入是因为有人在上游某个集合签名中使用了 <code>Long</code>，而没人想到它在下游循环中的代价。这确实容易忽略。</p><p>注意 <code>Integer</code>、<code>Long</code> 或 <code>Double</code> 用作局部循环变量或累加器的情况。还要注意热点代码中的 <code>List&lt;Long></code> 和 <code>Map&lt;String, Integer></code>。每次 <code>.get()</code> 和 <code>.put()</code> 都涉及你默默付出的装箱/拆箱往返。</p><hr><h2 id=5-用异常控制流程>5. 用异常控制流程</h2><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>parseOrDefault</span>(String value, <span style=color:#66d9ef>int</span> defaultValue) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>try</span> {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> Integer.<span style=color:#a6e22e>parseInt</span>(value);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    } <span style=color:#66d9ef>catch</span> (NumberFormatException e) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> defaultValue;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>如果这个方法在紧密循环中被调用，且有相当比例的输入是非数字的，你就有一个可能看起来不像性能问题的性能问题。</p><p>昂贵的部分是 <code>Throwable.fillInStackTrace()</code>，它在每次创建异常时于 <code>Throwable</code> 构造函数内部运行。它通过本地方法遍历整个调用栈，并将其物化为 <code>StackTraceElement</code> 对象。调用栈越深，代价越高。想象一下在像 Spring 这样的框架中，调用栈可能非常深。Netty 项目的 Norman Maurer 对此进行了基准测试，差异显著。Baeldung 的 JMH 结果显示，抛出异常会使方法运行速度比正常返回路径慢数百倍。</p><p>这不是理论。有一个 Scala/JVM 模板系统的真实生产案例，在发现每个模板渲染的每个字段都会抛出 <code>NumberFormatException</code> 后，响应时间减少了 3 倍。每次测试字段名是否为数字索引时，它都会抛出异常。</p><p><strong>修复方法：</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>parseOrDefault</span>(String value, <span style=color:#66d9ef>int</span> defaultValue) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>if</span> (value <span style=color:#f92672>==</span> <span style=color:#66d9ef>null</span> <span style=color:#f92672>||</span> value.<span style=color:#a6e22e>isBlank</span>()) <span style=color:#66d9ef>return</span> defaultValue;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> 0; i <span style=color:#f92672>&lt;</span> value.<span style=color:#a6e22e>length</span>(); i<span style=color:#f92672>++</span>) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>char</span> c <span style=color:#f92672>=</span> value.<span style=color:#a6e22e>charAt</span>(i);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> (i <span style=color:#f92672>==</span> 0 <span style=color:#f92672>&amp;&amp;</span> c <span style=color:#f92672>==</span> <span style=color:#e6db74>&#39;-&#39;</span>) <span style=color:#66d9ef>continue</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> (<span style=color:#f92672>!</span>Character.<span style=color:#a6e22e>isDigit</span>(c)) <span style=color:#66d9ef>return</span> defaultValue;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>try</span> {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> Integer.<span style=color:#a6e22e>parseInt</span>(value);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    } <span style=color:#66d9ef>catch</span> (NumberFormatException e) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> defaultValue;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>或者如果类路径上已有 Apache Commons Lang，可以使用 <code>NumberUtils.isParsable()</code>。</p><p><strong>更新：</strong> 几位 HN 评论者正确指出，上面的修复最初没有包含 try-catch，这意味着溢出值和像单独 &ldquo;-&rdquo; 这样的边界情况会抛出未处理的异常。已更新为在最终的 <code>parseInt</code> 周围保留 try-catch 作为安全网。预验证仍然避免了绝大多数无效输入的昂贵异常路径，这才是重点。</p><p>原则：如果无效输入是你应用中的常规情况（用户提供的数据、外部数据源、任何你不完全控制的内容），请显式预验证。异常用于真正意外的情况，而不是"这可能格式不对"。</p><hr><h2 id=6-过宽的同步范围>6. 过宽的同步范围</h2><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>MetricsCollector</span> {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>private</span> <span style=color:#66d9ef>final</span> Map<span style=color:#f92672>&lt;</span>String, Long<span style=color:#f92672>&gt;</span> counts <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> HashMap<span style=color:#f92672>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>synchronized</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>increment</span>(String key) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        counts.<span style=color:#a6e22e>merge</span>(key, 1L, Long::sum);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>synchronized</span> <span style=color:#66d9ef>long</span> <span style=color:#a6e22e>getCount</span>(String key) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> counts.<span style=color:#a6e22e>getOrDefault</span>(key, 0L);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>共享可变状态需要保护。但整个方法的 <code>synchronized</code> 意味着任何时候只能有一个线程调用任一方法。在处理真实并发的服务中，每个调用 <code>increment()</code> 的线程都会排队等待其他线程完成。锁本身成为瓶颈。</p><p><strong>修复方法：</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#66d9ef>private</span> <span style=color:#66d9ef>final</span> ConcurrentHashMap<span style=color:#f92672>&lt;</span>String, LongAdder<span style=color:#f92672>&gt;</span> counts <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> ConcurrentHashMap<span style=color:#f92672>&lt;&gt;</span>();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>increment</span>(String key) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    counts.<span style=color:#a6e22e>computeIfAbsent</span>(key, k <span style=color:#f92672>-&gt;</span> <span style=color:#66d9ef>new</span> LongAdder()).<span style=color:#a6e22e>increment</span>();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>long</span> <span style=color:#a6e22e>getCount</span>(String key) {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    LongAdder adder <span style=color:#f92672>=</span> counts.<span style=color:#a6e22e>get</span>(key);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> adder <span style=color:#f92672>==</span> <span style=color:#66d9ef>null</span> <span style=color:#f92672>?</span> 0L : adder.<span style=color:#a6e22e>sum</span>();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p><code>ConcurrentHashMap</code> 处理并发读写而无需锁定整个结构。<code>LongAdder</code> 专为高并发递增设计。它将计数器分布在内部单元上，在竞争下优于 <code>AtomicLong</code>。</p><p>值得单独指出：<code>Collections.synchronizedMap()</code> 包装器有同样的粗粒度锁问题，整个 Map 只有一个锁。<code>ConcurrentHashMap</code> 几乎总是正确的替代方案。</p><hr><h2 id=7-重复创建可复用对象>7. 重复创建"可复用"对象</h2><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#66d9ef>public</span> String <span style=color:#a6e22e>serializeOrder</span>(Order order) <span style=color:#66d9ef>throws</span> JsonProcessingException {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>new</span> ObjectMapper().<span style=color:#a6e22e>writeValueAsString</span>(order);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p><code>ObjectMapper</code> 是最常见的看起来创建成本低但实际不低的对象示例。创建一个涉及模块发现、序列化器缓存初始化和配置加载。这里每次调用都在做实际工作。</p><p><code>DateTimeFormatter.ofPattern("...")</code>、<code>new Gson()</code>、<code>new XmlMapper()</code> 也是同样的模式。它们都被设计为创建一次并复用。在热点方法中创建它们意味着每次调用都要支付设置成本。</p><p><strong>修复方法：</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#66d9ef>private</span> <span style=color:#66d9ef>static</span> <span style=color:#66d9ef>final</span> ObjectMapper MAPPER <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> ObjectMapper();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>public</span> String <span style=color:#a6e22e>serializeOrder</span>(Order order) <span style=color:#66d9ef>throws</span> JsonProcessingException {
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> MAPPER.<span style=color:#a6e22e>writeValueAsString</span>(order);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p><code>ObjectMapper</code> 配置完成后是线程安全的，所以共享 <code>static final</code> 实例没问题。<code>DateTimeFormatter</code> 内置常量如 <code>DateTimeFormatter.ISO_LOCAL_DATE</code> 已经是单例。如果你在热点方法中调用 <code>DateTimeFormatter.ofPattern("...")</code>，把它移到常量中。</p><p>经验法则：如果对象的构造函数做了大量设置工作，且对象在构造后是无状态的（或可安全共享的），它应该是字段或常量，而不是局部变量。</p><hr><h2 id=8-虚拟线程钉住如果你在使用-jdk-2123>8. 虚拟线程钉住（如果你在使用 JDK 21–23）</h2><p>如果你开始使用虚拟线程，这一点值得了解，它作为生产功能在 Java 21 中引入。</p><p>虚拟线程的工作原理是挂载到称为载体线程的小池平台（OS）线程上。当虚拟线程阻塞（例如等待 I/O）时，调度器将其从载体上卸载，释放该载体运行其他内容。这就是虚拟线程可扩展性的全部故事。</p><p>但有个陷阱。当虚拟线程进入 <code>synchronized</code> 块并在其中遇到阻塞操作时，它无法被卸载。它会钉住载体线程。该平台线程现在卡住等待，无法服务其他虚拟线程，持续时间与阻塞操作一样长。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#75715e>// 这个模式在 JDK 21 上可能钉住载体线程</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>synchronized</span> String <span style=color:#a6e22e>fetchData</span>(String key) <span style=color:#66d9ef>throws</span> IOException {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> Files.<span style=color:#a6e22e>readString</span>(Path.<span style=color:#a6e22e>of</span>(<span style=color:#e6db74>&#34;/data/&#34;</span> <span style=color:#f92672>+</span> key)); <span style=color:#75715e>// synchronized 内的阻塞 I/O</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>如果这种情况频繁发生，所有载体线程都会被钉住，应用会停滞，即使有数千个虚拟线程等待工作。Netflix 在生产环境中遇到了完全相同的问题，并写了一篇关于调试它的文章。</p><p>JFR 实际上会告诉你何时发生这种情况。<code>jdk.VirtualThreadPinned</code> 事件在虚拟线程被钉住时阻塞时触发，默认情况下仅在操作超过 20ms 时触发，所以它已经过滤到真正重要的情况。</p><p><strong>JDK 21–23 的修复方法：</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#66d9ef>private</span> <span style=color:#66d9ef>final</span> ReentrantLock lock <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> ReentrantLock();
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>public</span> String <span style=color:#a6e22e>fetchData</span>(String key) <span style=color:#66d9ef>throws</span> IOException {
+</span></span><span style=display:flex><span>    lock.<span style=color:#a6e22e>lock</span>();
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>try</span> {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> Files.<span style=color:#a6e22e>readString</span>(Path.<span style=color:#a6e22e>of</span>(<span style=color:#e6db74>&#34;/data/&#34;</span> <span style=color:#f92672>+</span> key));
+</span></span><span style=display:flex><span>    } <span style=color:#66d9ef>finally</span> {
+</span></span><span style=display:flex><span>        lock.<span style=color:#a6e22e>unlock</span>();
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p><code>ReentrantLock</code> 不使用 OS 级对象监视器，所以 JVM 可以在虚拟线程阻塞时正常卸载它，而不是将其钉住在载体上。</p><p><strong>JDK 24 说明：</strong> JEP 491 随 Java 24 发布，很大程度上解决了这个问题。在 JDK 24+ 上，<code>synchronized</code> 在大多数情况下不再导致钉住。如果你仍在使用 21、22 或 23，这仍然相关，值得用 JFR 检查。如果你在 24 上，对于 <code>synchronized</code> 你大多不必担心，尽管本地方法调用仍可能导致钉住。</p><hr><h2 id=累积效应>累积效应</h2><p>这些模式中的任何一个都不会让你的应用崩溃。它们不会抛出异常或产生错误答案。它们只是让一切变慢一点，消耗更多内存，扩展性比应有的差。</p><p>让它们在没有性能剖析的情况下难以发现的是，其中任何一个在你的代码库中可能完全无害。启动时运行一次的循环中的字符串拼接不会让你付出任何代价。每天调用两次的工具类中的 <code>String.format()</code> 没问题。问题是当这些模式出现在热点路径上时——每个请求、每个事件、主处理循环每次迭代都运行的代码。</p><p>在我的演示应用中，这些模式和其他模式将一个 239ms 的操作变成了 1,198ms，并将堆使用量从 139MB 推高到超过 1GB。没有任何单一模式在孤立情况下是灾难性的。但修复堆压力后，GC 停顿从 19 次降到 4 次。修复竞争后，之前被噪音掩盖的新热点变得可见。性能剖析的形状发生了变化。</p><p>这些改进的累积效应还超越了单个应用。当你查看单个实例或在测试套件运行时间中看到小幅改进时，某些优化可能看起来微不足道。但通常现实世界的 Java 代码不在一台机器上运行。在生产环境中，应用运行在整个集群上，处理大量真实客户请求。在一个主机上节省几毫秒或减少堆压力的改进，同时在数千个主机上发生。在那种规模下，总体差异是惊人的。考虑到吞吐量改进和整个集群可能的实例降级，成本影响可能很显著。</p><p>这种连锁效应是我想在第二部分直接在 JDK Mission Control 中展示的。你将看到任何更改之前的火焰图，然后是第一轮修复后的样子，以及图片如何不断变化。在第三部分，我们将探讨自动化识别和实施性能改进的过程。</p><hr><p><em>如果这些看起来熟悉，等着看火焰图的样子吧。我在 LinkedIn 上。第二部分即将推出：一个方法使用了 71% 的 CPU。这是火焰图。</em></p></div><div id=disqus_thread></div><script>window.disqus_config=function(){},function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById("disqus_thread").innerHTML="Disqus comments not available by default when the website is previewed locally.";return}var t=document,e=t.createElement("script");e.async=!0,e.src="//douglarek.disqus.com/embed.js",e.setAttribute("data-timestamp",+new Date),(t.head||t.body).appendChild(e)}()</script><noscript>Please enable JavaScript to view the <a href=https://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a><footer class=content__footer></footer></section><section class=page__aside><div class=aside__content><p>2026-03-29</p><hr>On this page:<nav id=TableOfContents><ul><li><a href=#tldr>TL;DR</a></li><li><a href=#1-循环中的字符串拼接>1. 循环中的字符串拼接</a></li><li><a href=#2-循环内的-stream-导致意外的-on>2. 循环内的 Stream 导致意外的 O(n²)</a></li><li><a href=#3-热点路径中的-stringformat>3. 热点路径中的 String.format()</a></li><li><a href=#4-热点路径中的自动装箱>4. 热点路径中的自动装箱</a></li><li><a href=#5-用异常控制流程>5. 用异常控制流程</a></li><li><a href=#6-过宽的同步范围>6. 过宽的同步范围</a></li><li><a href=#7-重复创建可复用对象>7. 重复创建"可复用"对象</a></li><li><a href=#8-虚拟线程钉住如果你在使用-jdk-2123>8. 虚拟线程钉住（如果你在使用 JDK 21–23）</a></li><li><a href=#累积效应>累积效应</a></li></ul></nav></div></section><footer class=page__footer><p></p><br><br><p class=copyright>Copyright © 2025 Leo Douglas</p></footer></div></body></html>

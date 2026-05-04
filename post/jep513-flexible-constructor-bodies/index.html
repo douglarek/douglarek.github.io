@@ -1,0 +1,74 @@
+<!doctype html><html lang=zh><head><title>Java 25 的构造函数变灵活了 &ndash; Code talks</title><meta name=viewport content="width=device-width,initial-scale=1"><meta charset=UTF-8><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin=anonymous referrerpolicy=no-referrer><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/academicons/1.9.4/css/academicons.min.css integrity="sha512-IW0nhlW5MgNydsXJO40En2EoCkTTjZhI3yuODrZIc8cQ4h1XcF53PsqDHa09NqnkXuIe0Oiyyj171BqZFwISBw==" crossorigin=anonymous referrerpolicy=no-referrer><link rel=stylesheet href=/css/palettes/base16-dark.css><link rel=stylesheet href=/css/risotto.css><link rel=stylesheet href=/css/custom.css><link rel=icon href=/favicon.ico><meta property="og:title" content="Java 25 的构造函数变灵活了 &ndash; Code talks"><meta property="og:url" content="/post/jep513-flexible-constructor-bodies/"><meta property="og:locale" content="zh-CN"><script async src="https://www.googletagmanager.com/gtag/js?id=G-4TVXFV2XZM%20"></script><script>var dnt,doNotTrack=!1;if(!1&&(dnt=navigator.doNotTrack||window.doNotTrack||navigator.msDoNotTrack,doNotTrack=dnt=="1"||dnt=="yes"),!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-4TVXFV2XZM ")}</script></head><body><div class=page><header class=page__header><nav class="page__nav main-nav"><ul><li class=nomarker><h1 class=page__logo><a href=/ class=page__logo-inner>Code talks</a></h1></li><li class=main-nav__item><a class=nav-main-item href=/post title>Posts</a></li><li class=main-nav__item><a class=nav-main-item href=/tags title>Tags</a></li><li class=main-nav__item><a class=nav-main-item href=https://github.com/douglarek title>GitHub</a></li></ul></nav></header><section class=page__body><header class=content__header><h1>Java 25 的构造函数变灵活了</h1><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6649330439620894" crossorigin=anonymous></script></header><div class=content__body><p>Java 构造函数有一条规则，从 1.0 开始就没变过：<strong><code>super()</code> 或 <code>this()</code> 必须是构造方法体的第一条语句</strong>。不是建议，是强制。不遵守编译器直接报错。</p><p>这个限制存在了近 30 年，大家早就习惯了，顶多抽个 <code>static</code> 辅助方法绕过去，很少去想它到底有没有道理。实际上 JVM 那边早就支持在 <code>super()</code> 前写代码了——当年为了适配内部类的编译器生成代码，JVM 规范被放宽过，但 Java 语言规范一直没跟着改。直到 JEP 513 在 Java 25 里正式定稿，这个缺口才终于补上。</p><h2 id=别扭在哪>别扭在哪</h2><p>先说最常见的一种情况。子类想先校验参数，再传给父类构造函数。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Employee</span> <span style=color:#66d9ef>extends</span> Person {
+</span></span><span style=display:flex><span>    Employee(..., <span style=color:#66d9ef>int</span> age) {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>super</span>(..., age);        <span style=color:#75715e>// 必须第一行</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> (age <span style=color:#f92672>&lt;</span> 18 <span style=color:#f92672>||</span> age <span style=color:#f92672>&gt;</span> 67)
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>throw</span> <span style=color:#66d9ef>new</span> IllegalArgumentException(...);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>先 <code>super()</code> 了才校验，如果 <code>age</code> 不合法，父类构造函数已经白跑了一遍。</p><p>以往的标准解法是抽一个 <code>static</code> 辅助方法，把校验逻辑内联到 <code>super()</code> 参数里：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Employee</span> <span style=color:#66d9ef>extends</span> Person {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>private</span> <span style=color:#66d9ef>static</span> <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>verifyAge</span>(<span style=color:#66d9ef>int</span> value) {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> (value <span style=color:#f92672>&lt;</span> 18 <span style=color:#f92672>||</span> value <span style=color:#f92672>&gt;</span> 67)
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>throw</span> <span style=color:#66d9ef>new</span> IllegalArgumentException(...);
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> value;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    Employee(..., <span style=color:#66d9ef>int</span> age) {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>super</span>(..., verifyAge(age));
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>一个简单的边界检查要多包一层方法，读代码时还需跳转查看。</p><h2 id=更隐蔽的问题子类字段还没初始化就被访问了>更隐蔽的问题：子类字段还没初始化就被访问了</h2><p>Java 构造函数是从父类往下跑的：父类构造函数执行的时候，子类的字段还是默认值。如果父类构造函数间接访问了子类字段 —— 比如调了一个被子类覆盖的方法 —— 那看到的就是 <code>null</code> 或者 <code>0</code>。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Person</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>int</span> age;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>show</span>() {
+</span></span><span style=display:flex><span>        System.<span style=color:#a6e22e>out</span>.<span style=color:#a6e22e>println</span>(<span style=color:#e6db74>&#34;Age: &#34;</span> <span style=color:#f92672>+</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>age</span>);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    Person(..., <span style=color:#66d9ef>int</span> age) {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>age</span> <span style=color:#f92672>=</span> age;
+</span></span><span style=display:flex><span>        show();      <span style=color:#75715e>// 这里调用的是子类的 show</span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Employee</span> <span style=color:#66d9ef>extends</span> Person {
+</span></span><span style=display:flex><span>    String officeID;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>@Override</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>show</span>() {
+</span></span><span style=display:flex><span>        System.<span style=color:#a6e22e>out</span>.<span style=color:#a6e22e>println</span>(<span style=color:#e6db74>&#34;Age: &#34;</span> <span style=color:#f92672>+</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>age</span>);
+</span></span><span style=display:flex><span>        System.<span style=color:#a6e22e>out</span>.<span style=color:#a6e22e>println</span>(<span style=color:#e6db74>&#34;Office: &#34;</span> <span style=color:#f92672>+</span> <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>officeID</span>);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    Employee(..., <span style=color:#66d9ef>int</span> age, String officeID) {
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>super</span>(..., age);
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>officeID</span> <span style=color:#f92672>=</span> officeID;
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p><code>new Employee(42, "CAM-FORA")</code> 的实际输出是：</p><pre tabindex=0><code>Age: 42
+Office: null
+</code></pre><p><code>officeID</code> 为 <code>null</code>，因为 <code>Person</code> 构造函数调用 <code>show()</code> 时，<code>Employee</code> 构造函数尚未执行到 <code>this.officeID = officeID</code>。即使声明为 <code>final</code>，字段也会被观察到两次 —— 第一次是默认值，第二次才是真正的赋值。Effective Java 第 19 条对此的建议是 &ldquo;构造函数不能调用可覆盖的方法&rdquo;。</p><h2 id=java-25-的解法>Java 25 的解法</h2><p>JEP 513 做了什么？就是把那条 &ldquo;<code>super()</code> 必须第一行&rdquo; 的规则给删了。仅此而已。效果是你可以这样写：</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=display:flex><span><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Employee</span> <span style=color:#66d9ef>extends</span> Person {
+</span></span><span style=display:flex><span>    String officeID;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    Employee(..., <span style=color:#66d9ef>int</span> age, String officeID) {
+</span></span><span style=display:flex><span>        <span style=color:#75715e>// 先校验</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> (age <span style=color:#f92672>&lt;</span> 18 <span style=color:#f92672>||</span> age <span style=color:#f92672>&gt;</span> 67)
+</span></span><span style=display:flex><span>            <span style=color:#66d9ef>throw</span> <span style=color:#66d9ef>new</span> IllegalArgumentException(...);
+</span></span><span style=display:flex><span>        
+</span></span><span style=display:flex><span>        <span style=color:#75715e>// 先初始化子类字段</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>this</span>.<span style=color:#a6e22e>officeID</span> <span style=color:#f92672>=</span> officeID;
+</span></span><span style=display:flex><span>        
+</span></span><span style=display:flex><span>        <span style=color:#75715e>// 再调用父类构造函数</span>
+</span></span><span style=display:flex><span>        <span style=color:#66d9ef>super</span>(..., age);
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p><code>new Employee(42, "CAM-FORA")</code> 现在打印：</p><pre tabindex=0><code>Age: 42
+Office: CAM-FORA
+</code></pre><p>参数校验在 <code>super()</code> 之前完成，子类字段在父类构造函数执行前就已处于有效状态。</p><h2 id=prologue-和-epilogue>Prologue 和 Epilogue</h2><p>构造函数体现在分成两个阶段：</p><p><code>super()</code> 之前的代码叫 <strong>prologue（序言）</strong>，之后的叫 <strong>epilogue（尾声）</strong>。执行顺序变成了：</p><pre tabindex=0><code>D 的 prologue
+  → C 的 prologue
+    → B 的 prologue
+      → A 的 prologue
+        → Object 构造函数体
+      → A 的 epilogue
+    → B 的 epilogue
+  → C 的 epilogue
+→ D 的 epilogue
+</code></pre><p>Prologue 从最底层的子类往父类方向执行（自底向上），把各层字段初始化好，父类构造函数执行时所有字段均已就绪。Epilogue 再按传统方式从父类到子类（自顶向下）执行，此时可安全访问实例的任意状态。</p><h2 id=不是完全没有限制>不是完全没有限制</h2><p>Prologue 里虽然能写代码，但不能乱来。这块代码处于 <strong>early construction context（早期构造上下文）</strong>，核心限制就一条：<strong>不能用 <code>this</code></strong>。</p><p>具体来说：</p><ul><li><strong>不能读任何实例字段</strong>，也不能调任何实例方法 —— 不管显式 <code>this.xxx</code> 还是隐式 <code>xxx</code></li><li><strong>可以给字段赋值</strong>，但只能是那些声明时没有初始化器的字段（比如 <code>int i;</code> 可以，<code>String s = "hello";</code> 不行）</li><li><strong>不能用 <code>return</code></strong></li><li><strong>不能用 <code>super</code> 访问父类的字段或方法</strong></li></ul><p>对象尚未构造完成时，读取到的值不可靠，因此禁止读取而只允许写入刚赋值的字段。</p><p>嵌套类有一个例外：内部类在 prologue 里可以访问<strong>外部类</strong>的实例和成员，因为外部类实例在此前已创建完成。</p><h2 id=jvm-其实早就准备好了一切>JVM 其实早就准备好了一切</h2><p>JVM 规范在很多年前就已被放宽 —— 当时是为了让编译器能生成内部类相关的一些特殊代码。构造函数体的验证规则从一开始的 &ldquo;<code>super()</code> 必须是第一条指令&rdquo; 改成了 &ldquo;允许前面有任意指令，只要不访问未初始化的实例就行&rdquo;。</p><p>但那次改 JVM 的时候，没人顺手把 Java 语言规范也改了。于是产生了这样一个局面：JVM 能跑灵活的构造函数体，javac 却不让写。编译器自己生成的那些特殊代码用到了这个灵活性，但用户写不出来。</p><p>直到 JDK 25，这个缺口才终于补上。</p><h2 id=从-preview-到定稿>从 Preview 到定稿</h2><p>JEP 513 没有引入新关键字或语法糖，只是撤掉了一条历史限制。该特性在 JDK 22、23、24 上连续 preview 了三版，期间几乎没有改动，最终在 JDK 25 定稿。</p><p>Project Valhalla 的 value class（JEP 401）将在此基础之上进一步演进 —— 当 value class 的构造函数没有显式 <code>super()</code> 调用时，隐式调用会被放置在构造函数体<strong>末尾</strong>而非开头，即整个构造函数体都是 prologue。这意味着 value class 的初始化模型与普通类有根本性不同。</p><hr><blockquote><p>本文内容来源于 <a href=https://openjdk.org/jeps/513>JEP 513: Flexible Constructor Bodies</a>。</p></blockquote></div><div id=disqus_thread></div><script>window.disqus_config=function(){},function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById("disqus_thread").innerHTML="Disqus comments not available by default when the website is previewed locally.";return}var t=document,e=t.createElement("script");e.async=!0,e.src="//douglarek.disqus.com/embed.js",e.setAttribute("data-timestamp",+new Date),(t.head||t.body).appendChild(e)}()</script><noscript>Please enable JavaScript to view the <a href=https://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a><footer class=content__footer></footer></section><section class=page__aside><div class=aside__content><p>2026-05-02</p><hr>On this page:<nav id=TableOfContents><ul><li><a href=#别扭在哪>别扭在哪</a></li><li><a href=#更隐蔽的问题子类字段还没初始化就被访问了>更隐蔽的问题：子类字段还没初始化就被访问了</a></li><li><a href=#java-25-的解法>Java 25 的解法</a></li><li><a href=#prologue-和-epilogue>Prologue 和 Epilogue</a></li><li><a href=#不是完全没有限制>不是完全没有限制</a></li><li><a href=#jvm-其实早就准备好了一切>JVM 其实早就准备好了一切</a></li><li><a href=#从-preview-到定稿>从 Preview 到定稿</a></li></ul></nav></div></section><footer class=page__footer><p></p><br><br><p class=copyright>Copyright © 2025 Leo Douglas</p></footer></div></body></html>

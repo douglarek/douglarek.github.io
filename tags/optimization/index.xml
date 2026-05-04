@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Optimization on Code talks</title><link>/tags/optimization/</link><description>Recent content in Optimization on Code talks</description><generator>Hugo</generator><language>zh-CN</language><copyright> Copyright © 2025 Leo Douglas</copyright><lastBuildDate>Sat, 07 Mar 2026 00:00:00 +0000</lastBuildDate><atom:link href="/tags/optimization/index.xml" rel="self" type="application/rss+xml"/><item><title>堆栈分配优化</title><link>/post/allocation-optimizations/</link><pubDate>Sat, 07 Mar 2026 00:00:00 +0000</pubDate><guid>/post/allocation-optimizations/</guid><description>&lt;p>本文翻译自 &lt;a href="https://go.dev/blog/allocation-optimizations">Allocating on the Stack - The Go Programming Language&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>我们一直在寻找让 Go 程序更快运行的方法。在过去的两次发布中，我们专注于缓解一个特定的性能瓶颈来源——堆分配。每次 Go 程序从堆上分配内存时，都需要运行相当大一段代码来满足该分配请求。此外，堆分配还会给垃圾回收器带来额外负担。即使有了像 &lt;a href="https://go.dev/blog/greenteagc">Green Tea&lt;/a> 这样的近期改进，垃圾回收器仍然会产生相当可观的开销。&lt;/p>
+&lt;p>因此，我们一直在研究如何将更多分配操作放在堆栈上而非堆上执行。堆栈分配的开销要小得多（有时甚至完全免费）。此外，它们不会给垃圾回收器带来任何负担，因为堆栈分配可以连同堆栈帧本身一起自动回收。堆栈分配还能实现快速的内存重用，这对缓存非常友好。&lt;/p>
+&lt;h2 id="固定大小切片的堆栈分配">固定大小切片的堆栈分配&lt;/h2>
+&lt;p>考虑构建一个待处理任务切片的场景：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">func&lt;/span> &lt;span style="color:#a6e22e">process&lt;/span>(&lt;span style="color:#a6e22e">c&lt;/span> &lt;span style="color:#66d9ef">chan&lt;/span> &lt;span style="color:#a6e22e">task&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#66d9ef">var&lt;/span> &lt;span style="color:#a6e22e">tasks&lt;/span> []&lt;span style="color:#a6e22e">task&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#66d9ef">for&lt;/span> &lt;span style="color:#a6e22e">t&lt;/span> &lt;span style="color:#f92672">:=&lt;/span> &lt;span style="color:#66d9ef">range&lt;/span> &lt;span style="color:#a6e22e">c&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		&lt;span style="color:#a6e22e">tasks&lt;/span> = append(&lt;span style="color:#a6e22e">tasks&lt;/span>, &lt;span style="color:#a6e22e">t&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#a6e22e">processAll&lt;/span>(&lt;span style="color:#a6e22e">tasks&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>让我们逐步分析从通道 &lt;code>c&lt;/code> 拉取任务并添加到切片 &lt;code>tasks&lt;/code> 时，运行时发生了什么。&lt;/p>
+&lt;p>在第一次循环迭代时，&lt;code>tasks&lt;/code> 没有底层存储，因此 &lt;code>append&lt;/code> 必须分配一个。由于它不知道切片最终会多大，所以不能过于激进。当前，它分配一个大小为 1 的底层存储。&lt;/p>
+&lt;p>在第二次循环迭代时，底层存储已存在，但已满。&lt;code>append&lt;/code> 再次需要分配新的底层存储，这次大小为 2。大小为 1 的旧底层存储现在变成了垃圾。&lt;/p>
+&lt;p>在第三次循环迭代时，大小为 2 的底层存储已满。&lt;code>append&lt;/code> &lt;strong>再次&lt;/strong>需要分配新的底层存储，这次大小为 4。大小为 2 的旧底层存储现在变成了垃圾。&lt;/p>
+&lt;p>在第四次循环迭代时，大小为 4 的底层存储中只有 3 个元素。&lt;code>append&lt;/code> 只需将元素放入现有的底层存储并增加切片长度即可。太好了！这次迭代无需调用分配器。&lt;/p>
+&lt;p>在第五次循环迭代时，大小为 4 的底层存储已满，&lt;code>append&lt;/code> 再次需要分配新的底层存储，这次大小为 8。&lt;/p>
+&lt;p>依此类推。我们通常在每次底层存储填满时将分配大小翻倍，这样最终可以在不分配的情况下将大多数新任务追加到切片中。但在切片较小时，&amp;ldquo;启动&amp;quot;阶段存在相当多的开销。在这个启动阶段，我们花费大量时间在分配器上，并产生一堆垃圾，这看起来相当浪费。而在你的程序中，切片可能永远不会真正变大。启动阶段可能是你唯一会遇到的情况。&lt;/p>
+&lt;p>如果这段代码是你程序中非常热的部分，你可能会想从更大的大小开始初始化切片，以避免所有这些分配。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">func&lt;/span> &lt;span style="color:#a6e22e">process2&lt;/span>(&lt;span style="color:#a6e22e">c&lt;/span> &lt;span style="color:#66d9ef">chan&lt;/span> &lt;span style="color:#a6e22e">task&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#a6e22e">tasks&lt;/span> &lt;span style="color:#f92672">:=&lt;/span> make([]&lt;span style="color:#a6e22e">task&lt;/span>, &lt;span style="color:#ae81ff">0&lt;/span>, &lt;span style="color:#ae81ff">10&lt;/span>) &lt;span style="color:#75715e">// 可能最多 10 个任务&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#66d9ef">for&lt;/span> &lt;span style="color:#a6e22e">t&lt;/span> &lt;span style="color:#f92672">:=&lt;/span> &lt;span style="color:#66d9ef">range&lt;/span> &lt;span style="color:#a6e22e">c&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		&lt;span style="color:#a6e22e">tasks&lt;/span> = append(&lt;span style="color:#a6e22e">tasks&lt;/span>, &lt;span style="color:#a6e22e">t&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#a6e22e">processAll&lt;/span>(&lt;span style="color:#a6e22e">tasks&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这是一个合理的优化。它永远不会出错；你的程序仍然能正确运行。如果估计太小，你会像以前一样从 &lt;code>append&lt;/code> 获得分配。如果估计太大，你会浪费一些内存。&lt;/p></description></item></channel></rss>

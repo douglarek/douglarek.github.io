@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Jspecify on Code talks</title><link>/tags/jspecify/</link><description>Recent content in Jspecify on Code talks</description><generator>Hugo</generator><language>zh-CN</language><copyright> Copyright © 2025 Leo Douglas</copyright><lastBuildDate>Wed, 31 Dec 2025 00:00:00 +0000</lastBuildDate><atom:link href="/tags/jspecify/index.xml" rel="self" type="application/rss+xml"/><item><title>JSpecify 空值用户指南</title><link>/post/jspecify-nullness-user-guide/</link><pubDate>Wed, 31 Dec 2025 00:00:00 +0000</pubDate><guid>/post/jspecify-nullness-user-guide/</guid><description>&lt;p>本文翻译自 &lt;a href="https://jspecify.dev/docs/user-guide/">Nullness User Guide&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>在 Java 代码中，表达式是否可能求值为 &lt;code>null&lt;/code> 通常只在自然语言中记录，甚至根本没有记录。JSpecify 的空值注解让程序员能够以一致且定义良好的方式表达 Java 代码的空值性。&lt;/p>
+&lt;p>JSpecify 定义了描述 Java 类型是否包含 &lt;code>null&lt;/code> 值的注解。这些注解对以下方面很有用（例如）:&lt;/p>
+&lt;ul>
+&lt;li>阅读代码的程序员,&lt;/li>
+&lt;li>帮助开发人员避免 &lt;code>NullPointerException&lt;/code> 的工具,&lt;/li>
+&lt;li>执行运行时检查和测试生成的工具,以及&lt;/li>
+&lt;li>文档系统。&lt;/li>
+&lt;/ul>
+&lt;h2 id="java-变量是引用">Java 变量是引用&lt;/h2>
+&lt;p>在 Java 中，所有非基本类型变量要么是 &lt;code>null&lt;/code>，要么是对对象的引用。我们经常认为像 &lt;code>String x&lt;/code> 这样的声明意味着 &lt;code>x&lt;/code> 是一个 &lt;code>String&lt;/code>，但它实际上意味着 &lt;code>x&lt;/code> &lt;em>要么&lt;/em>是 &lt;code>null&lt;/code> &lt;em>要么&lt;/em>是对实际 &lt;code>String&lt;/code> 对象的引用。JSpecify 为您提供了一种明确表达您真正含义的方法，即您是真的这样认为，还是您真的认为 &lt;code>x&lt;/code> 绝对是对 &lt;code>String&lt;/code> 对象的引用而不是 &lt;code>null&lt;/code>。&lt;/p>
+&lt;h2 id="类型和空值性">类型和空值性&lt;/h2>
+&lt;p>JSpecify 为您提供了规则，用于确定每种类型用法具有四种空值性中的哪一种:&lt;/p>
+&lt;ul>
+&lt;li>它可以包含 &lt;code>null&lt;/code>（它是&amp;quot;可空的&amp;quot;）。&lt;/li>
+&lt;li>它不会包含 &lt;code>null&lt;/code>（它是&amp;quot;非空的&amp;quot;）。&lt;/li>
+&lt;li>仅对类型变量：如果替换它的类型参数包含 &lt;code>null&lt;/code>，则它包含 &lt;code>null&lt;/code>（它具有&amp;quot;参数化空值性&amp;quot;）。&lt;/li>
+&lt;li>我们不知道它是否可以包含 &lt;code>null&lt;/code>（它具有&amp;quot;未指定的空值性&amp;quot;）。这相当于没有 JSpecify 注解的世界状态。&lt;/li>
+&lt;/ul>
+&lt;p>对于给定的变量 &lt;code>x&lt;/code>，如果 &lt;code>x&lt;/code> 可以是 &lt;code>null&lt;/code>，那么 &lt;code>x.getClass()&lt;/code> 是不安全的，因为它可能产生 &lt;code>NullPointerException&lt;/code>。如果 &lt;code>x&lt;/code> 不能是 &lt;code>null&lt;/code>，&lt;code>x.getClass()&lt;/code> 永远不会产生 &lt;code>NullPointerException&lt;/code>。如果我们不知道 &lt;code>x&lt;/code> 是否可以是 &lt;code>null&lt;/code>，我们就不知道 &lt;code>x.getClass()&lt;/code> 是否安全（至少就 JSpecify 而言）。&lt;/p></description></item></channel></rss>

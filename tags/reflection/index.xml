@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Reflection on Code talks</title><link>/tags/reflection/</link><description>Recent content in Reflection on Code talks</description><generator>Hugo</generator><language>zh-CN</language><copyright> Copyright © 2025 Leo Douglas</copyright><lastBuildDate>Tue, 28 Apr 2026 23:06:45 +0800</lastBuildDate><atom:link href="/tags/reflection/index.xml" rel="self" type="application/rss+xml"/><item><title>避免 final 字段被修改</title><link>/post/avoiding-final-field-mutation/</link><pubDate>Tue, 28 Apr 2026 23:06:45 +0800</pubDate><guid>/post/avoiding-final-field-mutation/</guid><description>&lt;p>本文翻译自 &lt;a href="https://inside.java/2026/04/27/avoiding-final-field-mutation/">Avoiding Final Field Mutation&lt;/a>，版权归原作者所有，作者 &lt;a href="https://inside.java/u/NicolaiParlog">Nicolai Parlog&lt;/a>。&lt;/p>
+&lt;hr>
+&lt;p>Java 语言要求 final 字段必须在对象构造期间完成赋值，并且禁止后续重新赋值，但 JDK 仍然提供了一些机制允许这样做。JDK 26 迈出了让 final 字段真正不可变的第一步——当通过反射 API 修改 final 字段时发出警告。&lt;a href="https://openjdk.org/jeps/500">JEP 500&lt;/a> 详细解释了这一举措的原理和影响，以及如何使用新的命令行参数 &lt;code>--enable-final-field-mutation&lt;/code> 和 &lt;code>--illegal-final-field-mutation&lt;/code>。虽然这些参数允许修改 final 字段，但这应被视为最后的手段，项目应该逐步摆脱这种做法。&lt;/p>
+&lt;p>本文讨论了通过反射修改 final 字段的常见场景，以及每种场景对应的替代方案。这些场景可能出现在框架、库和应用程序中，因此本文面向所有这些类型的开发者。&lt;/p>
+&lt;p>我们的指导原则来自&lt;a href="https://openjdk.org/jeps/8305968">默认完整性 JEP&lt;/a> 中的以下陈述，该原则不仅适用于序列化：&lt;/p>
+&lt;blockquote>
+&lt;p>一般来说，库在没有对象所属类的配合下对对象进行序列化和反序列化是一种错误。&lt;/p>&lt;/blockquote>
+&lt;p>&lt;strong>注意&lt;/strong>：本文使用&lt;em>序列化&lt;/em>作为通用术语，泛指能够将 Java 实例转换为外部格式（如 JSON、YAML 或 protobuf）以及反向转换的机制。对于 Java 内置的围绕 &lt;code>Serializable&lt;/code> 接口以及 &lt;code>ObjectInputStream&lt;/code> 和 &lt;code>ObjectOutputStream&lt;/code> 类运行的机制，本文使用&lt;em>平台序列化&lt;/em>这一术语。&lt;/p>
+&lt;h2 id="实例初始化">实例初始化&lt;/h2>
+&lt;p>final 字段最常被非法修改的情况是在构造完成后立即初始化实例（而非在实例生命周期后期重新赋值）。这可能发生在依赖注入、反序列化、克隆或其他需要在将实例交给用户之前创建可用实例的初始化过程中。其中一些用例与字段值的来源（例如来自 JSON 字符串或其他序列化形式）紧密相关，我们将在后面的章节中讨论这些联系。尽管如此，这些解决方案之间存在一些共性，因此值得单独讨论实例初始化问题。&lt;/p>
+&lt;h3 id="绕过构造函数">绕过构造函数&lt;/h3>
+&lt;p>一些初始化机制通常的做法是先构造所有字段为 &lt;code>null&lt;/code> 的&amp;quot;空&amp;quot;对象，然后在构造完成后再赋值。Java 自身的平台反序列化就是这样工作的（底层如此，如果实现了 &lt;code>readObject&lt;/code> 方法则更是显式如此），Java Bean 普遍遵循这种模式，依赖注入也曾如此。&lt;/p>
+&lt;p>然而，这种&amp;quot;先构造后赋值&amp;quot;的方式与 final 字段直接冲突，因为 Java 语言承诺 final 字段在构造期间恰好赋值一次（无论是在字段初始化器、构造函数还是初始化块中），之后绝不会被修改。因此，这些过程不得不诉诸强制赋值，无论是通过反射调用 &lt;code>setAccessible&lt;/code>、使用 &lt;code>Unsafe&lt;/code> 还是 JNI，从而破坏了 &lt;code>final&lt;/code> 关键字的完整性，带来了 JEP 500 中列出的所有系统性弊端。&lt;/p></description></item></channel></rss>

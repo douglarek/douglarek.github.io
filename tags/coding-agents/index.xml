@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Coding-Agents on Code talks</title><link>/tags/coding-agents/</link><description>Recent content in Coding-Agents on Code talks</description><generator>Hugo</generator><language>zh-CN</language><copyright> Copyright © 2025 Leo Douglas</copyright><lastBuildDate>Sun, 29 Mar 2026 20:12:55 +0800</lastBuildDate><atom:link href="/tags/coding-agents/index.xml" rel="self" type="application/rss+xml"/><item><title>关于慢下来的思考</title><link>/post/thoughts-on-slowing-the-fuck-down/</link><pubDate>Sun, 29 Mar 2026 20:12:55 +0800</pubDate><guid>/post/thoughts-on-slowing-the-fuck-down/</guid><description>&lt;p>本文翻译自 &lt;a href="https://mariozechner.at/posts/2026-03-25-thoughts-on-slowing-the-fuck-down/">Thoughts on slowing the fuck down&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;div style="text-align: center;">
+ &lt;img src="/images/slowing-down-header.png" alt="乌龟的脸，就是我审视我们行业时的表情" style="max-width: 100%; width: auto; height: auto;" />
+ &lt;p style="font-size: 0.85em; color: var(--dimmed-text-color); margin-top: 0.5rem;">&lt;em>乌龟的脸，就是我审视我们行业时的表情&lt;/em>&lt;/p>
+&lt;/div>
+&lt;p>AI 编码代理出现已经一年多了，这一代工具真的能帮你构建完整的项目了。虽然之前也有 Aider 和早期的 Cursor 这样的先驱，但它们更像是助手而不是代理。新一代的工具令人着迷，很多人把业余时间都用来构建那些一直想做却没时间做的项目。&lt;/p>
+&lt;p>我觉得这样挺好。在业余时间折腾项目很有趣，而且很多时候你确实不必太在意代码质量和可维护性。如果你想学习新的技术栈，这也是个不错的途径。&lt;/p>
+&lt;p>圣诞节假期期间，Anthropic 和 OpenAI 都给了一些免费额度，让人体验他们那种令人上瘾的老虎机。对很多人来说，这是第一次体验到 AI 代理编程的魔力。参与进来的人越来越多了。&lt;/p>
+&lt;p>现在编码代理也被引入到生产代码库中。经过 12 个月的发展，我们开始看到所有这些&amp;quot;进步&amp;quot;带来的影响。这是我目前的看法。&lt;/p>
+&lt;h2 id="一切都很糟糕">一切都很糟糕&lt;/h2>
+&lt;p>虽然这些都是个案性的观察，但感觉上软件变得脆弱不堪，98% 的正常运行时间成了常态而非例外，即使是大型服务也是如此。用户界面出现了各种最他妈奇怪的缺陷，按说质量保证团队应该能够发现这些问题的。当然这在代理出现之前就存在了。但我们似乎正在加速这个问题。&lt;/p>
+&lt;p>我们看不到公司的内部情况，但偶尔会有一些消息流到记者耳朵里。比如最近有报道说 &lt;a href="https://www.ft.com/content/00c282de-ed14-4acd-a948-bc8d6bdb339d">AWS 的 AI 导致了停机事件&lt;/a>。AWS 立即&lt;a href="https://www.aboutamazon.com/news/aws/aws-service-outage-ai-bot-kiro">予以纠正&lt;/a>，随后又内部发布了一份 &lt;a href="https://www.businessinsider.com/amazon-tightens-code-controls-after-outages-including-one-ai-2026-3">90 天重置计划&lt;/a>。&lt;/p>
+&lt;p>微软 CEO Satya Nadella 一直在谈论 &lt;a href="https://techcrunch.com/2025/04/29/microsoft-ceo-says-up-to-30-of-the-companys-code-was-written-by-ai/">微软有多少代码是由 AI 生成的&lt;/a>。虽然没有直接证据，但有种感觉是 Windows 正在变差。从 Microsoft 自己发布的这篇博文来看，似乎也认同这种观点 &lt;a href="https://blogs.windows.com/windows-insider/2026/03/20/our-commitment-to-windows-quality/">Windows 质量承诺&lt;/a>。&lt;/p>
+&lt;p>声称产品 100% 代码都由 AI 编写的公司，一贯产出的都是你能想象到的最糟糕的垃圾。不点名，但内存泄漏几个 G、界面故障、损坏的功能、崩溃：这可不是他们认为的质量保证，也不是宣传让代理为你完成所有工作的最佳方式。&lt;/p>
+&lt;p>通过行业八卦网，我听到越来越多的人，从小型到大型的软件公司，都说他们用代理把自己困住了。没有代码审查，设计决策交给代理，一大堆没人要求的功能。这就够了。&lt;/p>
+&lt;h2 id="我们应该如何与代理协作以及为什么不该这样做">我们应该如何与代理协作（以及为什么不该这样做）&lt;/h2>
+&lt;p>我们基本上放弃了所有的纪律和自主性，陷入了一种上瘾状态，最高目标就是用最短的时间产出最大量的代码。后果？管他呢。&lt;/p>
+&lt;p>你在构建一个编排层来指挥一大群自主代理。你安装了 Beads，完全没意识到它基本上是没法卸载的恶意软件。互联网告诉你要这样做，否则你就没戏了。你是在盲目跟风。看，Anthropic 用代理群构建了一个 C 编译器。它有点问题，但也许下一代大语言模型能修复它。哦天哪，Cursor 用一群代理构建了一个浏览器。没错，当然它还不完全好用，每隔一段时间需要人来帮忙转转轮子。但也许下一代大语言模型会修复它。发誓！分发，分而治之，自主权，黑暗工厂，软件在 6 个月内就搞定了。SaaS 已死，我奶奶只是让 Claw 帮她建了一个自己的 Shopify！&lt;/p></description></item></channel></rss>

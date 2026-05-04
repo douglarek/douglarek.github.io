@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Runtime on Code talks</title><link>/tags/runtime/</link><description>Recent content in Runtime on Code talks</description><generator>Hugo</generator><language>zh-CN</language><copyright> Copyright © 2025 Leo Douglas</copyright><lastBuildDate>Sat, 14 Mar 2026 15:24:50 +0800</lastBuildDate><atom:link href="/tags/runtime/index.xml" rel="self" type="application/rss+xml"/><item><title>Go Runtime 调度器详解</title><link>/post/go-runtime-scheduler/</link><pubDate>Sat, 14 Mar 2026 15:24:50 +0800</pubDate><guid>/post/go-runtime-scheduler/</guid><description>&lt;p>本文翻译自 &lt;a href="https://internals-for-interns.com/posts/go-runtime-scheduler/">The Scheduler&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;hr>
+&lt;p>在 &lt;a href="/post/go-memory-allocator/">上一篇文章&lt;/a> 中，我们探索了 Go 的内存分配器如何管理堆内存——从 OS 获取大块 arena，将它们分成 span 和 size class，并使用三级层次结构（mcache、mcentral、mheap）使大多数分配无锁。一个关键细节是每个 &lt;strong>P&lt;/strong>（处理器）都有自己的内存缓存。但我们从未真正解释 P 是什么，或者 runtime 如何决定哪个 goroutine 在哪个线程上运行。这是调度器的工作，也是我们今天探索的内容。&lt;/p>
+&lt;p>调度器是 runtime 中回答一个看似简单问题的部分：&lt;strong>哪个 goroutine 接下来运行？&lt;/strong> 你的程序中可能有数百、数千，甚至数百万个 goroutine，但你只有少数几个 CPU 核心。调度器的工作是将所有这些 goroutine 多路复用到少数 OS 线程上，保持每个核心忙碌，同时确保没有 goroutine 被饿死。&lt;/p>
+&lt;p>如果你曾经使用过 goroutine 和 channel，你已经从调度器中受益而不自知。每个 &lt;code>go&lt;/code> 语句、每个 channel 发送和接收、每个 &lt;code>time.Sleep&lt;/code>——它们都与调度器交互。让我们看看它是如何工作的。&lt;/p>
+&lt;p>让我们从基本构建块开始——整个调度器围绕的三个结构。&lt;/p>
+&lt;h2 id="gmp-模型">GMP 模型&lt;/h2>
+&lt;p>调度器围绕三个概念构建，通常称为 &lt;strong>GMP 模型&lt;/strong>：&lt;strong>G&lt;/strong>（goroutine）、&lt;strong>M&lt;/strong>（machine/OS 线程）和 &lt;strong>P&lt;/strong>（processor）。我们在 bootstrap 文章中提到了这些，但现在让我们正式看看它们。&lt;/p>
+&lt;p>让我们逐一查看。&lt;/p>
+&lt;h3 id="g--goroutine">G — Goroutine&lt;/h3>
+&lt;p>&lt;strong>G&lt;/strong> 是 goroutine——Go runtime 对并发工作片段的表示。每次你写 &lt;code>go f()&lt;/code>，runtime 创建（或重用）一个 G 来跟踪该函数的执行。&lt;/p>
+&lt;p>G 实际携带什么？结构体有很多字段，但对我理解其工作原理最有用的是：一个小 &lt;strong>栈&lt;/strong>（从仅 2KB 开始），一些 &lt;strong>保存的寄存器&lt;/strong>（栈指针、程序计数器等），以便调度器可以暂停它并在稍后恢复它，一个 &lt;strong>状态&lt;/strong> 字段跟踪 goroutine 在做什么（运行、等待、准备运行），以及一个指向当前运行它的 &lt;strong>M&lt;/strong> 的指针。&lt;a href="https://github.com/golang/go/blob/go1.26.0/src/runtime/runtime2.go#L473">&lt;code>src/runtime/runtime2.go&lt;/code>&lt;/a> 中的完整结构体还有更多——用于 panic 和 defer 处理的字段、GC 辅助跟踪、分析标签、定时器等。&lt;/p></description></item><item><title>Go 内存分配器</title><link>/post/go-memory-allocator/</link><pubDate>Sat, 14 Mar 2026 15:15:00 +0800</pubDate><guid>/post/go-memory-allocator/</guid><description>&lt;p>本文翻译自 &lt;a href="https://internals-for-interns.com/posts/go-memory-allocator/">The Memory Allocator&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;hr>
+&lt;p>在 &lt;a href="/post/understanding-go-runtime/">上一篇文章&lt;/a> 中，我们探索了 Go runtime 如何引导启动自己——一个 Go 二进制文件如何从操作系统移交控制权到你的 &lt;code>func main()&lt;/code> 运行。在那个 bootstrap 过程中，runtime 设置的第一件事之一就是 &lt;strong>内存分配器&lt;/strong>。这也是我们今天将要探讨的内容。&lt;/p>
+&lt;p>把内存分配器想象成一个仓库管理员。你的程序不断需要不同大小的盒子——有时很小，有时很大——而且需要 &lt;strong>很快&lt;/strong>。分配器的工作是尽可能快地分发这些盒子，保持仓库井井有条以免浪费，并与垃圾回收器合作回收不再使用的盒子。&lt;/p>
+&lt;p>但在进入仓库本身之前，让我们先谈谈东西什么时候会真正放到那里。&lt;/p>
+&lt;h2 id="内存分配何时发生">内存分配何时发生？&lt;/h2>
+&lt;p>并非你程序中的每个变量都会经过内存分配器。Go 有两个放置数据的地方：&lt;strong>栈&lt;/strong> 和 &lt;strong>堆&lt;/strong>。&lt;/p>
+&lt;p>栈比较简单。每个函数调用在栈上获得自己的小块临时空间，当函数返回时，该空间自动消失。它快速且简单——无需记账。&lt;/p>
+&lt;p>但有时数据需要在创建它的函数结束后继续存在。也许你要返回一个指向某物的指针，或者存储一个程序其他部分稍后要使用的值。这些数据不能活在栈上——函数返回时它会消失。所以它们去 &lt;strong>堆&lt;/strong>，这是一个寿命更长的内存区域。&lt;/p>
+&lt;p>Go 编译器在这方面其实很聪明。它在编译时分析你的代码，决定什么可以留在栈上，什么需要去堆上——这称为 &lt;strong>逃逸分析&lt;/strong>（我们在 &lt;a href="https://internals-for-interns.com/posts/the-go-ir/">IR 文章&lt;/a> 中详细讨论过）。&lt;/p>
+&lt;p>每当有东西最终落在堆上，内存分配器就开始发挥作用。它是负责在堆上找到空闲空间并移交的系统。本文其余部分就是关于这个的。&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;strong>一个小简化&lt;/strong>：上面的图不是完整的故事。在 Go 中，goroutine 栈实际上是从堆分配的——所以内存分配器提供栈存在的空间。但一旦栈被分配，上面的变量管理方式与堆对象非常不同：它们只是栈帧内的偏移量，每个变量没有分配器参与。所以虽然分配器负责栈 &lt;strong>内存&lt;/strong>，但它不参与将单个变量放置在栈上。对于本文，我们将关注堆方面。&lt;/p>&lt;/blockquote>
+&lt;p>所以分配器管理堆内存。但这些内存最初从哪里来？&lt;/p>
+&lt;h2 id="为什么不直接向-os-请求">为什么不直接向 OS 请求？&lt;/h2>
+&lt;p>当你的程序需要内存时，必须有人提供。最终，那个人是操作系统。OS 管理你机器上的所有物理 RAM，任何想要内存的进程都必须通过系统调用向 OS 请求，比如 Linux/macOS 上的 &lt;code>mmap&lt;/code> 或 Windows 上的 &lt;code>VirtualAlloc&lt;/code>。&lt;/p>
+&lt;p>问题是系统调用很慢。它们涉及从用户空间切换到内核空间，OS 进行自己的记账，然后再切换回来。如果 Go 每次你写 &lt;code>make([]byte, 100)&lt;/code> 或 &lt;code>&amp;amp;MyStruct{}&lt;/code> 时都进行系统调用，性能会很糟糕——尤其是在一种为高并发设计的语言中，可能有成千上万个 goroutine 同时在分配内存。&lt;/p>
+&lt;p>所以 Go runtime 采用不同的方法：它向 OS &lt;strong>预先请求大块内存&lt;/strong>（稍后我们会看到在大多数 64 位系统上是 64MB），然后在内部管理分配。当你的代码需要 100 字节时，分配器不去 OS——它从已有的内存中切出 100 字节。只有当用完时才会回到 OS。&lt;/p></description></item><item><title>Go Runtime 引导启动过程详解</title><link>/post/understanding-go-runtime/</link><pubDate>Sat, 14 Mar 2026 15:10:00 +0800</pubDate><guid>/post/understanding-go-runtime/</guid><description>&lt;p>本文翻译自 &lt;a href="https://internals-for-interns.com/posts/understanding-go-runtime/">Understanding the Go Runtime: The Bootstrap&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;hr>
+&lt;p>当你编写 Go 代码时，幕后发生了很多事情。Goroutine 轻量级，channel 开箱即用，内存由系统管理，你无需关心线程池。所有这些都由 &lt;strong>Go runtime&lt;/strong> 驱动——这是一套复杂的基础设施，被编译到每个 Go 二进制文件中。&lt;/p>
+&lt;p>这是系列文章的第一篇，我们将深入探索 Go runtime。我们将了解 &lt;strong>scheduler&lt;/strong> 如何将 goroutine 多路复用到 OS 线程上，&lt;strong>memory allocator&lt;/strong> 如何实现无锁的快速路径分配，&lt;strong>garbage collector&lt;/strong> 如何并发运行同时将 stop-the-world 暂停时间降至最低，以及 &lt;strong>system monitor&lt;/strong> 如何保持一切正常运行。每个主题都会有单独的深入文章。&lt;/p>
+&lt;p>但在所有这些机制开始工作之前，必须先进行设置。这就是 &lt;strong>bootstrap&lt;/strong>——在 OS 启动你的二进制文件和你的 &lt;code>func main()&lt;/code> 获得控制权之间运行的过程。这也是我们今天探讨的内容。&lt;/p>
+&lt;p>让我们从一个问题开始：Go 什么都不做时有多快？&lt;/p>
+&lt;p>这是一个什么都不做的 C 程序：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-c" data-lang="c">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">int&lt;/span> &lt;span style="color:#a6e22e">main&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> &lt;span style="color:#66d9ef">return&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span>;
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这是 Go 的等价版本：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#f92672">package&lt;/span> &lt;span style="color:#a6e22e">main&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">func&lt;/span> &lt;span style="color:#a6e22e">main&lt;/span>() {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>让我们编译两者并比较：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ gcc -o nothing_c nothing.c
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ go build -o nothing_go nothing.go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ ls -lh nothing_c nothing_go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>-rwxrwxr-x &lt;span style="color:#ae81ff">1&lt;/span> user user 16K Feb &lt;span style="color:#ae81ff">7&lt;/span> 12:05 nothing_c
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>-rwxrwxr-x &lt;span style="color:#ae81ff">1&lt;/span> user user 1.5M Feb &lt;span style="color:#ae81ff">7&lt;/span> 12:05 nothing_go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ time ./nothing_c
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>real 0m0.001s
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>$ time ./nothing_go
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>real 0m0.002s
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Go 二进制文件几乎大了 &lt;strong>100 倍&lt;/strong>，运行时间大约 &lt;strong>长两倍&lt;/strong>。而我们 &lt;strong>什么都没做&lt;/strong>。发生了什么？&lt;/p></description></item></channel></rss>

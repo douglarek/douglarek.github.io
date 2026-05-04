@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Systemd on Code talks</title><link>/tags/systemd/</link><description>Recent content in Systemd on Code talks</description><generator>Hugo</generator><language>zh-CN</language><copyright> Copyright © 2025 Leo Douglas</copyright><lastBuildDate>Sat, 02 Aug 2025 00:00:00 +0000</lastBuildDate><atom:link href="/tags/systemd/index.xml" rel="self" type="application/rss+xml"/><item><title>关于 systemd 的最大误解</title><link>/post/the-biggest-myths/</link><pubDate>Sat, 02 Aug 2025 00:00:00 +0000</pubDate><guid>/post/the-biggest-myths/</guid><description>&lt;p>本文翻译自 &lt;a href="https://0pointer.de/blog/projects/the-biggest-myths.html">The Biggest Myths&lt;/a>，版权归原作者所有。这是 systemd 作者 2013 年 1 月的文章。&lt;/p>
+&lt;p>自我们首次提议将 systemd 纳入发行版以来，它在许多论坛、邮件列表和会议中被频繁讨论。在这些讨论中，人们经常听到一些关于 systemd 的误解，这些误解被一遍又一遍地重复，但不断的重复并不能增加其真实性。让我们花点时间来揭穿其中的一些：&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>&lt;strong>误解：systemd 是单体的。&lt;/strong>&lt;/p>
+&lt;p>如果您在启用所有配置选项的情况下构建 systemd，您将构建 69 个独立的二进制文件。这些二进制文件都用于不同的任务，并且由于多种原因被清晰地分离开来。例如，我们设计 systemd 时考虑到了安全性，因此大多数守护进程以最低权限运行（例如，使用内核功能），并且只负责非常具体的任务，以最小化其安全表面和影响。此外，systemd 比任何先前的解决方案都更能并行化引导。这种并行化是通过并行运行更多进程来实现的。因此，将 systemd 很好地分解为许多二进制文件和进程至关重要。事实上，其中许多二进制文件&lt;sup id="fnref:1">&lt;a href="#fn:1" class="footnote-ref" role="doc-noteref">1&lt;/a>&lt;/sup> 被分离得如此之好，以至于它们在 systemd 之外也非常有用。&lt;/p>
+&lt;p>一个包含 69 个独立二进制文件的软件包很难被称为&lt;em>单体的&lt;/em>。然而，与以前的解决方案不同的是，我们将更多的组件放在一个 tarball 中发布，并在一个具有统一发布周期的单一存储库中进行上游维护。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>误解：systemd 只关乎速度。&lt;/strong>&lt;/p>
+&lt;p>是的，systemd 很快（&lt;a href="https://plus.google.com/108087225644395745666/posts/LyPQgKdntgA">有人要在约 900 毫秒内完成一个相当完整的用户空间启动吗？&lt;/a>），但这主要只是做对事情的副作用。事实上，我们从未真正坐下来从 systemd 中榨取最后一点性能。相反，我们实际上经常故意选择稍慢的代码路径，以保持代码更具可读性。这并不意味着速度对我们来说无关紧要，但将 systemd 归结为速度肯定是一个相当大的误解，因为这肯定不在我们目标列表的前列。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>误解：systemd 的快速启动与服务器无关。&lt;/strong>&lt;/p>
+&lt;p>这完全是错误的。许多管理员实际上热衷于在维护窗口期间减少停机时间。在高可用性设置中，如果发生故障的机器能够非常快地恢复，那就太好了。在具有大量虚拟机或容器的云设置中，慢速启动的代价会随着实例数量的增加而倍增。在数百个虚拟机或容器的非常慢的启动上花费数分钟的 CPU 和 IO 会大大降低系统的密度，哎呀，它甚至会花费您更多的能源。缓慢的启动在经济上可能相当昂贵。然后，容器的快速启动允许您实现诸如&lt;a href="http://0pointer.de/blog/projects/socket-activated-containers.html">套接字激活容器&lt;/a>之类的逻辑，从而使您能够大幅提高云系统的密度。&lt;/p>
+&lt;p>当然，在许多服务器设置中，启动确实无关紧要，但 systemd 应该涵盖整个范围。是的，我知道通常是服务器固件在启动时花费的时间最多，而操作系统无论如何都比它快，但是，systemd 仍然应该涵盖整个范围（见上文……），而且，并非所有服务器都有这么糟糕的固件，当然也不是虚拟机和容器，它们也是一种服务器。&lt;sup id="fnref:2">&lt;a href="#fn:2" class="footnote-ref" role="doc-noteref">2&lt;/a>&lt;/sup>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>误解：systemd 与 shell 脚本不兼容。&lt;/strong>&lt;/p>
+&lt;p>这完全是胡说八道。我们只是不将它们用于引导过程，因为我们相信它们不是该特定用途的最佳工具，但这并不意味着 systemd 与它们不兼容。您可以轻松地将 shell 脚本作为 systemd 服务运行，哎呀，您可以将用&lt;em>任何&lt;/em>语言编写的脚本作为 systemd 服务运行，systemd 丝毫不在乎您的可执行文件里面是什么。此外，我们为自己的目的大量使用 shell 脚本，用于安装、构建、测试 systemd。您可以将脚本放在早期引导过程中，将它们用于普通服务，可以在最终关闭时运行它们，几乎没有限制。&lt;/p></description></item><item><title>重新思考 PID 1</title><link>/post/rethinking-pid-1/</link><pubDate>Tue, 29 Jul 2025 00:00:00 +0000</pubDate><guid>/post/rethinking-pid-1/</guid><description>&lt;p>本文翻译自 &lt;a href="https://0pointer.de/blog/projects/systemd.html">Rethinking PID 1&lt;/a>，版权归原作者所有。这是 systemd 作者发表于 2010 年的一篇文章，至今读来仍熠熠生辉。&lt;/p>
+&lt;hr>
+&lt;p>如果你消息灵通，或者善于读懂言外之意，你可能已经知道这篇博文要讲什么了。但即便如此，你可能还是会觉得这个故事很有趣。所以，端起一杯咖啡，坐下来，读读接下来的内容吧。&lt;/p>
+&lt;p>这篇博文很长，所以虽然我只能推荐你读完整个故事，但这里有一句话总结：我们正在试验一个新的 init 系统，而且很有趣。&lt;/p>
+&lt;p>&lt;a href="http://git.0pointer.de/?p=systemd.git">这是代码&lt;/a> 故事是这样的：&lt;/p>
+&lt;h2 id="进程标识符-1">进程标识符 1&lt;/h2>
+&lt;p>在每个 Unix 系统上，都有一个进程拥有特殊的进程标识符 1。它在所有其他进程之前由内核启动，并且是所有那些没有其他父进程的进程的父进程。因此，它可以做很多其他进程不能做的事情。它也负责一些其他进程不负责的事情，比如在启动期间启动和维护用户空间。&lt;/p>
+&lt;p>从历史上看，在 Linux 上充当 PID 1 的软件是古老的 sysvinit 软件包，尽管它已经相当老旧了。人们提出了许多替代品，但只有一个真正流行起来：&lt;a href="http://upstart.ubuntu.com/">Upstart&lt;/a>，它现在已经进入了所有主流发行版。&lt;/p>
+&lt;p>如前所述，init 系统的核心职责是启动用户空间。一个好的 init 系统会很快地完成这项工作。不幸的是，传统的 SysV init 系统并不是特别快。&lt;/p>
+&lt;p>为了实现快速高效的启动，有两件事至关重要：&lt;/p>
+&lt;ul>
+&lt;li>启动更少的服务。&lt;/li>
+&lt;li>并且并行启动更多的服务。&lt;/li>
+&lt;/ul>
+&lt;p>这是什么意思？启动更少意味着启动更少的服务，或者将服务的启动推迟到实际需要时。有些服务我们知道迟早会需要（syslog、D-Bus 系统总线等），但对于许多其他服务来说，情况并非如此。例如，除非实际插入了蓝牙适配器或者应用程序想要与其 D-Bus 接口通信，否则 bluetoothd 不需要运行。打印系统也是如此：除非机器物理连接到打印机，或者应用程序想要打印某些东西，否则没有必要运行像 CUPS 这样的打印守护进程。Avahi：如果机器没有连接到网络，就没有必要运行 &lt;a href="http://avahi.org">Avahi&lt;/a>，除非某个应用程序想要使用其 API。甚至 SSH 也是如此：只要没有人想连接你的机器，就没有必要运行它，只要它在第一次连接时启动即可。（承认吧，在大多数可能正在监听 sshd 的机器上，有人可能每隔一两个月才连接一次。）&lt;/p>
+&lt;p>并行启动更多意味着，如果必须运行某些东西，我们不应该序列化它的启动（就像 sysvinit 那样），而是应该同时运行所有东西，这样可以最大限度地利用可用的 CPU 和磁盘 IO 带宽，从而最大限度地减少整体启动时间。&lt;/p>
+&lt;h2 id="硬件和软件的动态变化">硬件和软件的动态变化&lt;/h2>
+&lt;p>现代系统（尤其是通用操作系统）的配置和使用都具有高度的动态性：它们是移动的，不同的应用程序会启动和停止，不同的硬件会添加和移除。负责维护服务的 init 系统需要监听硬件和软件的变化。它需要根据运行程序或启用某些硬件的需要动态地启动（有时是停止）服务。&lt;/p>
+&lt;p>大多数试图并行化启动的当前系统仍然会同步所涉及的各种守护进程的启动：由于 Avahi 需要 D-Bus，因此首先启动 D-Bus，只有当 D-Bus 发出就绪信号时，Avahi 才会启动。其他服务也类似：livirtd 和 X11 需要 HAL（好吧，我这里考虑的是 Fedora 13 的服务，忽略 HAL 已经过时了），因此 HAL 首先启动，然后才启动 livirtd 和 X11。而 libvirtd 也需要 Avahi，所以它也等待 Avahi。它们都需要 syslog，所以它们都等待 Syslog 完全启动和初始化。等等。&lt;/p></description></item></channel></rss>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Coding-Agent on Code talks</title><link>/tags/coding-agent/</link><description>Recent content in Coding-Agent on Code talks</description><generator>Hugo</generator><language>zh-CN</language><copyright> Copyright © 2025 Leo Douglas</copyright><lastBuildDate>Fri, 13 Mar 2026 00:00:00 +0000</lastBuildDate><atom:link href="/tags/coding-agent/index.xml" rel="self" type="application/rss+xml"/><item><title>构建有主见且极简编程代理的经验与教训</title><link>/post/2025-11-30-pi-coding-agent/</link><pubDate>Fri, 13 Mar 2026 00:00:00 +0000</pubDate><guid>/post/2025-11-30-pi-coding-agent/</guid><description>&lt;p>本文翻译自 &lt;a href="https://mariozechner.at/posts/2025-11-30-pi-coding-agent/">What I learned building an opinionated and minimal coding agent&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;!-- 本文由 qwen3.5-27b 贡献 -->
+&lt;hr>
+&lt;p>&lt;img src="/images/pi-coding-agent/header.png" alt="">&lt;/p>
+&lt;p style="text-align: center; color: #888; font-size: 0.85em; margin-top: 8px; margin-bottom: 24px;">虽然微不足道，但却是我的作品&lt;/p>
+&lt;p>过去三年里，我一直使用大语言模型辅助编程。如果你在读这篇文章，你可能经历了同样的演变：从将代码复制粘贴到 &lt;a href="https://chatgpt.com/">ChatGPT&lt;/a>，到 &lt;a href="https://github.com/features/copilot">Copilot&lt;/a> 自动补全（这对我从来没用），再到 &lt;a href="https://cursor.com/">Cursor&lt;/a>，最后是 2025 年成为我们日常驱动的新一代编程代理框架，如 &lt;a href="https://claude.ai/code">Claude Code&lt;/a>、&lt;a href="https://github.com/openai/codex">Codex&lt;/a>、&lt;a href="https://ampcode.com/">Amp&lt;/a>、&lt;a href="https://factory.ai/">Droid&lt;/a> 和 &lt;a href="https://opencode.ai/">opencode&lt;/a>。&lt;/p>
+&lt;p>我大部分工作都偏爱 Claude Code。早在四月份，在使用 Cursor 一年半后，我就第一次尝试了它。当时它要简单得多。这完美契合我的工作流，因为我就是个喜欢简单、可预测工具的简单人。在过去的几个月里，Claude Code 变成了一艘飞船，其中 80% 的功能我根本用不上。&lt;a href="https://mariozechner.at/posts/2025-08-03-cchistory/">系统提示词和工具每次发布都会变化&lt;/a>，这会破坏我的工作流并改变模型行为。我讨厌这样。而且，它还会闪烁。&lt;/p>
+&lt;p>多年来，我也构建过各种复杂程度的代理。例如，&lt;a href="https://sitegeist.ai/">Sitegeist&lt;/a>，我的小浏览器使用代理，本质上是一个生活在浏览器内的编程代理。在所有这些工作中，我学到了上下文工程至关重要。精确控制进入模型上下文的内容会产生更好的输出，尤其是在编写代码时。现有的框架通过在背后注入甚至未在 UI 中显示的内容，使得这一点极其困难或不可能。&lt;/p>
+&lt;p>说到暴露内容，我想检查与模型交互的方方面面。基本上没有框架允许这样做。我还想要一个清晰记录的会话格式，可以自动后处理，以及一种在代理核心之上构建替代 UI 的简单方法。虽然其中一些在现有框架中是可能的，但这些 API 闻起来像是有机演化的产物。这些解决方案在过程中积累了包袱，这在开发者体验中体现出来。我不是在责怪任何人。如果成千上万的人使用你的东西，你需要某种向后兼容性，这就是你要付出的代价。&lt;/p>
+&lt;p>我还尝试过自托管，无论是在本地还是在 &lt;a href="https://datacrunch.io/">DataCrunch&lt;/a>。虽然像 opencode 这样的框架支持自托管模型，但通常效果不佳。主要是因为它们依赖于像 &lt;a href="https://sdk.vercel.ai/">Vercel AI SDK&lt;/a> 这样的库，出于某种原因，它与自托管模型不太兼容，特别是在工具调用方面。&lt;/p>
+&lt;p>那么，一个对 Claude 大喊大叫的老家伙会怎么做呢？他会编写自己的编程代理框架，并给它起一个完全无法在 Google 上搜索到的名字，这样就不会有任何用户。这意味着 GitHub 问题跟踪器上也永远不会有任何问题。这能有多难呢？&lt;/p>
+&lt;p>为了让这一切奏效，我需要构建：&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>&lt;a href="https://github.com/badlogic/pi-mono/tree/main/packages/ai">pi-ai&lt;/a>&lt;/strong>: 一个统一的 LLM API，支持多提供者（Anthropic、OpenAI、Google、xAI、Groq、Cerebras、OpenRouter 和任何 OpenAI 兼容端点）、流式传输、带 TypeBox 架构的工具调用、思考/推理支持、无缝跨提供者上下文交接，以及令牌和成本跟踪。&lt;/li>
+&lt;li>&lt;strong>&lt;a href="https://github.com/badlogic/pi-mono/tree/main/packages/agent">pi-agent-core&lt;/a>&lt;/strong>: 一个代理循环，处理工具执行、验证和事件流式传输。&lt;/li>
+&lt;li>&lt;strong>&lt;a href="https://github.com/badlogic/pi-mono/tree/main/packages/tui">pi-tui&lt;/a>&lt;/strong>: 一个极简的终端 UI 框架，具有差异渲染、同步输出以实现（几乎）无闪烁更新，以及带自动补全和 Markdown 渲染的编辑器等组件。&lt;/li>
+&lt;li>&lt;strong>&lt;a href="https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent">pi-coding-agent&lt;/a>&lt;/strong>: 实际的 CLI，将所有内容串联在一起，具有会话管理、自定义工具、主题和项目上下文文件。&lt;/li>
+&lt;/ul>
+&lt;p>我在所有这些方面的哲学是：如果我不需要它，就不会构建它。而我需要的东西不多。&lt;/p></description></item></channel></rss>

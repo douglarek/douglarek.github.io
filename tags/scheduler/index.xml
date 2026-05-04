@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Scheduler on Code talks</title><link>/tags/scheduler/</link><description>Recent content in Scheduler on Code talks</description><generator>Hugo</generator><language>zh-CN</language><copyright> Copyright © 2025 Leo Douglas</copyright><lastBuildDate>Sat, 14 Mar 2026 15:24:50 +0800</lastBuildDate><atom:link href="/tags/scheduler/index.xml" rel="self" type="application/rss+xml"/><item><title>Go Runtime 调度器详解</title><link>/post/go-runtime-scheduler/</link><pubDate>Sat, 14 Mar 2026 15:24:50 +0800</pubDate><guid>/post/go-runtime-scheduler/</guid><description>&lt;p>本文翻译自 &lt;a href="https://internals-for-interns.com/posts/go-runtime-scheduler/">The Scheduler&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;hr>
+&lt;p>在 &lt;a href="/post/go-memory-allocator/">上一篇文章&lt;/a> 中，我们探索了 Go 的内存分配器如何管理堆内存——从 OS 获取大块 arena，将它们分成 span 和 size class，并使用三级层次结构（mcache、mcentral、mheap）使大多数分配无锁。一个关键细节是每个 &lt;strong>P&lt;/strong>（处理器）都有自己的内存缓存。但我们从未真正解释 P 是什么，或者 runtime 如何决定哪个 goroutine 在哪个线程上运行。这是调度器的工作，也是我们今天探索的内容。&lt;/p>
+&lt;p>调度器是 runtime 中回答一个看似简单问题的部分：&lt;strong>哪个 goroutine 接下来运行？&lt;/strong> 你的程序中可能有数百、数千，甚至数百万个 goroutine，但你只有少数几个 CPU 核心。调度器的工作是将所有这些 goroutine 多路复用到少数 OS 线程上，保持每个核心忙碌，同时确保没有 goroutine 被饿死。&lt;/p>
+&lt;p>如果你曾经使用过 goroutine 和 channel，你已经从调度器中受益而不自知。每个 &lt;code>go&lt;/code> 语句、每个 channel 发送和接收、每个 &lt;code>time.Sleep&lt;/code>——它们都与调度器交互。让我们看看它是如何工作的。&lt;/p>
+&lt;p>让我们从基本构建块开始——整个调度器围绕的三个结构。&lt;/p>
+&lt;h2 id="gmp-模型">GMP 模型&lt;/h2>
+&lt;p>调度器围绕三个概念构建，通常称为 &lt;strong>GMP 模型&lt;/strong>：&lt;strong>G&lt;/strong>（goroutine）、&lt;strong>M&lt;/strong>（machine/OS 线程）和 &lt;strong>P&lt;/strong>（processor）。我们在 bootstrap 文章中提到了这些，但现在让我们正式看看它们。&lt;/p>
+&lt;p>让我们逐一查看。&lt;/p>
+&lt;h3 id="g--goroutine">G — Goroutine&lt;/h3>
+&lt;p>&lt;strong>G&lt;/strong> 是 goroutine——Go runtime 对并发工作片段的表示。每次你写 &lt;code>go f()&lt;/code>，runtime 创建（或重用）一个 G 来跟踪该函数的执行。&lt;/p>
+&lt;p>G 实际携带什么？结构体有很多字段，但对我理解其工作原理最有用的是：一个小 &lt;strong>栈&lt;/strong>（从仅 2KB 开始），一些 &lt;strong>保存的寄存器&lt;/strong>（栈指针、程序计数器等），以便调度器可以暂停它并在稍后恢复它，一个 &lt;strong>状态&lt;/strong> 字段跟踪 goroutine 在做什么（运行、等待、准备运行），以及一个指向当前运行它的 &lt;strong>M&lt;/strong> 的指针。&lt;a href="https://github.com/golang/go/blob/go1.26.0/src/runtime/runtime2.go#L473">&lt;code>src/runtime/runtime2.go&lt;/code>&lt;/a> 中的完整结构体还有更多——用于 panic 和 defer 处理的字段、GC 辅助跟踪、分析标签、定时器等。&lt;/p></description></item></channel></rss>

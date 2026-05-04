@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Performance on Code talks</title><link>/tags/performance/</link><description>Recent content in Performance on Code talks</description><generator>Hugo</generator><language>zh-CN</language><copyright> Copyright © 2025 Leo Douglas</copyright><lastBuildDate>Sun, 29 Mar 2026 10:00:00 +0800</lastBuildDate><atom:link href="/tags/performance/index.xml" rel="self" type="application/rss+xml"/><item><title>Java 很快，但你的代码可能不然</title><link>/post/java-performance-optimization-antipatterns/</link><pubDate>Sun, 29 Mar 2026 10:00:00 +0800</pubDate><guid>/post/java-performance-optimization-antipatterns/</guid><description>&lt;p>本文翻译自 &lt;a href="https://jvogel.me/posts/2026/java-is-fast-your-code-might-not-be/">Java Is Fast. Your Code Might Not Be.&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>&lt;img src="/images/java-performance-optimization-hero.jpg" alt="Java 性能优化系列封面">&lt;/p>
+&lt;p>Java 性能优化系列文章第一部分。第二部分和第三部分即将推出。&lt;/p>
+&lt;p>几周前，我为在 DevNexus 的一次演讲构建了一个 Java 订单处理应用。应用能运行，测试通过。我运行了负载测试并收集了 Java Flight Recording (JFR) 数据。&lt;/p>
+&lt;p>&lt;strong>优化前：&lt;/strong> 1,198ms 耗时，每秒 85,000 订单，堆内存峰值略超 1GB，19 次 GC 停顿。&lt;/p>
+&lt;p>&lt;strong>优化后：&lt;/strong> 239ms。每秒 419,000 订单。139MB 堆内存。4 次 GC 停顿。&lt;/p>
+&lt;p>同一个应用。同样的测试。同样的 JDK。没有架构变更。当考虑到这类代码在生产环境中并非运行在单机上，而是部署在整个集群时，这些数据就更有意义了。&lt;/p>
+&lt;p>在第二部分，我将逐步讲解这些数据背后的性能剖析信息：火焰图、哪些方法真正消耗 CPU，以及修复后发生了什么变化。在此之前，你需要了解我们实际修复了哪些问题。&lt;/p>
+&lt;p>这些问题是真实代码库中常见的模式。它们编译通过，能混过代码审查，而且如果没有性能剖析数据指引，很容易被忽略。以下是其中八个问题。&lt;/p>
+&lt;hr>
+&lt;h2 id="tldr">TL;DR&lt;/h2>
+&lt;p>修复这类反模式将一个耗时 1,198ms 的 Java 应用优化到 239ms。以下是一些需要查找并修复的问题：&lt;/p>
+&lt;ol>
+&lt;li>&lt;strong>循环中的字符串拼接&lt;/strong> —— 不可变性导致的 O(n²) 复制&lt;/li>
+&lt;li>&lt;strong>循环内的 O(n²) Stream 迭代&lt;/strong> —— 每个元素都遍历整个列表&lt;/li>
+&lt;li>&lt;strong>热点路径中的 String.format()&lt;/strong> —— 最慢的字符串构建方式，每次调用都解析格式&lt;/li>
+&lt;li>&lt;strong>热点路径中的自动装箱&lt;/strong> —— 数百万个临时包装对象&lt;/li>
+&lt;li>&lt;strong>用异常控制流程&lt;/strong> —— fillInStackTrace() 遍历整个调用栈&lt;/li>
+&lt;li>&lt;strong>过宽的同步范围&lt;/strong> —— 单个锁成为瓶颈&lt;/li>
+&lt;li>&lt;strong>重复创建可复用对象&lt;/strong> —— 每次调用都创建 ObjectMapper、DateTimeFormatter、Gson&lt;/li>
+&lt;li>&lt;strong>虚拟线程钉住（JDK 21–23）&lt;/strong> —— synchronized 加阻塞 I/O 钉住载体线程&lt;/li>
+&lt;/ol>
+&lt;p>修复后：吞吐量提升 5 倍，堆内存减少 87%，GC 停顿减少 79%。同一个应用，同样的测试，同样的 JDK。&lt;/p></description></item><item><title>堆栈分配优化</title><link>/post/allocation-optimizations/</link><pubDate>Sat, 07 Mar 2026 00:00:00 +0000</pubDate><guid>/post/allocation-optimizations/</guid><description>&lt;p>本文翻译自 &lt;a href="https://go.dev/blog/allocation-optimizations">Allocating on the Stack - The Go Programming Language&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>我们一直在寻找让 Go 程序更快运行的方法。在过去的两次发布中，我们专注于缓解一个特定的性能瓶颈来源——堆分配。每次 Go 程序从堆上分配内存时，都需要运行相当大一段代码来满足该分配请求。此外，堆分配还会给垃圾回收器带来额外负担。即使有了像 &lt;a href="https://go.dev/blog/greenteagc">Green Tea&lt;/a> 这样的近期改进，垃圾回收器仍然会产生相当可观的开销。&lt;/p>
+&lt;p>因此，我们一直在研究如何将更多分配操作放在堆栈上而非堆上执行。堆栈分配的开销要小得多（有时甚至完全免费）。此外，它们不会给垃圾回收器带来任何负担，因为堆栈分配可以连同堆栈帧本身一起自动回收。堆栈分配还能实现快速的内存重用，这对缓存非常友好。&lt;/p>
+&lt;h2 id="固定大小切片的堆栈分配">固定大小切片的堆栈分配&lt;/h2>
+&lt;p>考虑构建一个待处理任务切片的场景：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">func&lt;/span> &lt;span style="color:#a6e22e">process&lt;/span>(&lt;span style="color:#a6e22e">c&lt;/span> &lt;span style="color:#66d9ef">chan&lt;/span> &lt;span style="color:#a6e22e">task&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#66d9ef">var&lt;/span> &lt;span style="color:#a6e22e">tasks&lt;/span> []&lt;span style="color:#a6e22e">task&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#66d9ef">for&lt;/span> &lt;span style="color:#a6e22e">t&lt;/span> &lt;span style="color:#f92672">:=&lt;/span> &lt;span style="color:#66d9ef">range&lt;/span> &lt;span style="color:#a6e22e">c&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		&lt;span style="color:#a6e22e">tasks&lt;/span> = append(&lt;span style="color:#a6e22e">tasks&lt;/span>, &lt;span style="color:#a6e22e">t&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#a6e22e">processAll&lt;/span>(&lt;span style="color:#a6e22e">tasks&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>让我们逐步分析从通道 &lt;code>c&lt;/code> 拉取任务并添加到切片 &lt;code>tasks&lt;/code> 时，运行时发生了什么。&lt;/p>
+&lt;p>在第一次循环迭代时，&lt;code>tasks&lt;/code> 没有底层存储，因此 &lt;code>append&lt;/code> 必须分配一个。由于它不知道切片最终会多大，所以不能过于激进。当前，它分配一个大小为 1 的底层存储。&lt;/p>
+&lt;p>在第二次循环迭代时，底层存储已存在，但已满。&lt;code>append&lt;/code> 再次需要分配新的底层存储，这次大小为 2。大小为 1 的旧底层存储现在变成了垃圾。&lt;/p>
+&lt;p>在第三次循环迭代时，大小为 2 的底层存储已满。&lt;code>append&lt;/code> &lt;strong>再次&lt;/strong>需要分配新的底层存储，这次大小为 4。大小为 2 的旧底层存储现在变成了垃圾。&lt;/p>
+&lt;p>在第四次循环迭代时，大小为 4 的底层存储中只有 3 个元素。&lt;code>append&lt;/code> 只需将元素放入现有的底层存储并增加切片长度即可。太好了！这次迭代无需调用分配器。&lt;/p>
+&lt;p>在第五次循环迭代时，大小为 4 的底层存储已满，&lt;code>append&lt;/code> 再次需要分配新的底层存储，这次大小为 8。&lt;/p>
+&lt;p>依此类推。我们通常在每次底层存储填满时将分配大小翻倍，这样最终可以在不分配的情况下将大多数新任务追加到切片中。但在切片较小时，&amp;ldquo;启动&amp;quot;阶段存在相当多的开销。在这个启动阶段，我们花费大量时间在分配器上，并产生一堆垃圾，这看起来相当浪费。而在你的程序中，切片可能永远不会真正变大。启动阶段可能是你唯一会遇到的情况。&lt;/p>
+&lt;p>如果这段代码是你程序中非常热的部分，你可能会想从更大的大小开始初始化切片，以避免所有这些分配。&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-go" data-lang="go">&lt;span style="display:flex;">&lt;span>&lt;span style="color:#66d9ef">func&lt;/span> &lt;span style="color:#a6e22e">process2&lt;/span>(&lt;span style="color:#a6e22e">c&lt;/span> &lt;span style="color:#66d9ef">chan&lt;/span> &lt;span style="color:#a6e22e">task&lt;/span>) {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#a6e22e">tasks&lt;/span> &lt;span style="color:#f92672">:=&lt;/span> make([]&lt;span style="color:#a6e22e">task&lt;/span>, &lt;span style="color:#ae81ff">0&lt;/span>, &lt;span style="color:#ae81ff">10&lt;/span>) &lt;span style="color:#75715e">// 可能最多 10 个任务&lt;/span>
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#66d9ef">for&lt;/span> &lt;span style="color:#a6e22e">t&lt;/span> &lt;span style="color:#f92672">:=&lt;/span> &lt;span style="color:#66d9ef">range&lt;/span> &lt;span style="color:#a6e22e">c&lt;/span> {
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>		&lt;span style="color:#a6e22e">tasks&lt;/span> = append(&lt;span style="color:#a6e22e">tasks&lt;/span>, &lt;span style="color:#a6e22e">t&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	}
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>	&lt;span style="color:#a6e22e">processAll&lt;/span>(&lt;span style="color:#a6e22e">tasks&lt;/span>)
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>}
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这是一个合理的优化。它永远不会出错；你的程序仍然能正确运行。如果估计太小，你会像以前一样从 &lt;code>append&lt;/code> 获得分配。如果估计太大，你会浪费一些内存。&lt;/p></description></item><item><title>深入解析 JVM 启动过程</title><link>/post/jvm-start-up/</link><pubDate>Tue, 09 Dec 2025 00:00:00 +0000</pubDate><guid>/post/jvm-start-up/</guid><description>&lt;p>本文翻译自 &lt;a href="https://inside.java/2025/01/28/jvm-start-up/">A Deep Dive into JVM Start-up&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>当你启动一个 Java 应用程序时，你可能会认为唯一执行的代码就是传递给 JVM 的 Java 字节码，即由 &lt;code>javac&lt;/code> 编译生成的 &lt;code>.class&lt;/code> 文件。但实际上，在启动过程中，JVM 会经历一系列复杂的步骤，为运行 Java 应用程序创建一个完整的运行环境。在本文中，我们将详细介绍 JVM 从执行 &lt;code>$ java&lt;/code> 到打印 &lt;code>Hello World&lt;/code> 所经历的步骤。如果你更喜欢视频形式，也可以在 Java YouTube 频道观看这个视频：&lt;/p>
+&lt;div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+ &lt;iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" loading="eager" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube-nocookie.com/embed/ED1oc7gn5uY?autoplay=0&amp;amp;controls=1&amp;amp;end=0&amp;amp;loop=0&amp;amp;mute=0&amp;amp;start=0" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" title="YouTube video">&lt;/iframe>
+ &lt;/div>
+
+&lt;h2 id="前言">前言&lt;/h2>
+&lt;p>为了让这次对 JVM 启动过程的讲解不至于过于庞大，我将使用以下几个约束条件来描述这个过程：&lt;/p>
+&lt;ul>
+&lt;li>我将描述 JVM 启动过程在 JDK 23 中的行为。你可以在&lt;a href="https://docs.oracle.com/javase/specs/jvms/se23/html/index.html">这里&lt;/a>查看 Java SE 23 的 JVM 规范。&lt;/li>
+&lt;li>我将使用 &lt;a href="https://en.wikipedia.org/wiki/HotSpot_(virtual_machine)">HotSpot JVM&lt;/a> 实现作为示例。这是目前使用最广泛的 JVM 实现，许多流行的 JDK 发行版都使用 HotSpot JVM 或其衍生版本。其他 JVM 实现可能在内部行为上略有不同。&lt;/li>
+&lt;li>最后，我将使用的主要代码示例是 &lt;code>HelloWorld&lt;/code>，尽管这是一个非常简单的应用程序，但它仍然会触发 JVM 启动过程的所有关键环节。&lt;/li>
+&lt;/ul>
+&lt;p>尽管有这些约束条件，但在阅读完本文后，你应该能够对 JVM 在启动过程中所经历的流程以及它们为何必要有一个相当全面的理解。这些知识在调试应用程序启动时遇到的问题时会很有帮助，在某些特定情况下还能帮助改善启动性能。不过，我们会在文章末尾更详细地讨论这一点。&lt;/p></description></item></channel></rss>

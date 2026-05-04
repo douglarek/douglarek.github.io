@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Memory on Code talks</title><link>/tags/memory/</link><description>Recent content in Memory on Code talks</description><generator>Hugo</generator><language>zh-CN</language><copyright> Copyright © 2025 Leo Douglas</copyright><lastBuildDate>Sat, 14 Mar 2026 15:15:00 +0800</lastBuildDate><atom:link href="/tags/memory/index.xml" rel="self" type="application/rss+xml"/><item><title>Go 内存分配器</title><link>/post/go-memory-allocator/</link><pubDate>Sat, 14 Mar 2026 15:15:00 +0800</pubDate><guid>/post/go-memory-allocator/</guid><description>&lt;p>本文翻译自 &lt;a href="https://internals-for-interns.com/posts/go-memory-allocator/">The Memory Allocator&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;hr>
+&lt;p>在 &lt;a href="/post/understanding-go-runtime/">上一篇文章&lt;/a> 中，我们探索了 Go runtime 如何引导启动自己——一个 Go 二进制文件如何从操作系统移交控制权到你的 &lt;code>func main()&lt;/code> 运行。在那个 bootstrap 过程中，runtime 设置的第一件事之一就是 &lt;strong>内存分配器&lt;/strong>。这也是我们今天将要探讨的内容。&lt;/p>
+&lt;p>把内存分配器想象成一个仓库管理员。你的程序不断需要不同大小的盒子——有时很小，有时很大——而且需要 &lt;strong>很快&lt;/strong>。分配器的工作是尽可能快地分发这些盒子，保持仓库井井有条以免浪费，并与垃圾回收器合作回收不再使用的盒子。&lt;/p>
+&lt;p>但在进入仓库本身之前，让我们先谈谈东西什么时候会真正放到那里。&lt;/p>
+&lt;h2 id="内存分配何时发生">内存分配何时发生？&lt;/h2>
+&lt;p>并非你程序中的每个变量都会经过内存分配器。Go 有两个放置数据的地方：&lt;strong>栈&lt;/strong> 和 &lt;strong>堆&lt;/strong>。&lt;/p>
+&lt;p>栈比较简单。每个函数调用在栈上获得自己的小块临时空间，当函数返回时，该空间自动消失。它快速且简单——无需记账。&lt;/p>
+&lt;p>但有时数据需要在创建它的函数结束后继续存在。也许你要返回一个指向某物的指针，或者存储一个程序其他部分稍后要使用的值。这些数据不能活在栈上——函数返回时它会消失。所以它们去 &lt;strong>堆&lt;/strong>，这是一个寿命更长的内存区域。&lt;/p>
+&lt;p>Go 编译器在这方面其实很聪明。它在编译时分析你的代码，决定什么可以留在栈上，什么需要去堆上——这称为 &lt;strong>逃逸分析&lt;/strong>（我们在 &lt;a href="https://internals-for-interns.com/posts/the-go-ir/">IR 文章&lt;/a> 中详细讨论过）。&lt;/p>
+&lt;p>每当有东西最终落在堆上，内存分配器就开始发挥作用。它是负责在堆上找到空闲空间并移交的系统。本文其余部分就是关于这个的。&lt;/p>
+&lt;blockquote>
+&lt;p>&lt;strong>一个小简化&lt;/strong>：上面的图不是完整的故事。在 Go 中，goroutine 栈实际上是从堆分配的——所以内存分配器提供栈存在的空间。但一旦栈被分配，上面的变量管理方式与堆对象非常不同：它们只是栈帧内的偏移量，每个变量没有分配器参与。所以虽然分配器负责栈 &lt;strong>内存&lt;/strong>，但它不参与将单个变量放置在栈上。对于本文，我们将关注堆方面。&lt;/p>&lt;/blockquote>
+&lt;p>所以分配器管理堆内存。但这些内存最初从哪里来？&lt;/p>
+&lt;h2 id="为什么不直接向-os-请求">为什么不直接向 OS 请求？&lt;/h2>
+&lt;p>当你的程序需要内存时，必须有人提供。最终，那个人是操作系统。OS 管理你机器上的所有物理 RAM，任何想要内存的进程都必须通过系统调用向 OS 请求，比如 Linux/macOS 上的 &lt;code>mmap&lt;/code> 或 Windows 上的 &lt;code>VirtualAlloc&lt;/code>。&lt;/p>
+&lt;p>问题是系统调用很慢。它们涉及从用户空间切换到内核空间，OS 进行自己的记账，然后再切换回来。如果 Go 每次你写 &lt;code>make([]byte, 100)&lt;/code> 或 &lt;code>&amp;amp;MyStruct{}&lt;/code> 时都进行系统调用，性能会很糟糕——尤其是在一种为高并发设计的语言中，可能有成千上万个 goroutine 同时在分配内存。&lt;/p>
+&lt;p>所以 Go runtime 采用不同的方法：它向 OS &lt;strong>预先请求大块内存&lt;/strong>（稍后我们会看到在大多数 64 位系统上是 64MB），然后在内部管理分配。当你的代码需要 100 字节时，分配器不去 OS——它从已有的内存中切出 100 字节。只有当用完时才会回到 OS。&lt;/p></description></item></channel></rss>

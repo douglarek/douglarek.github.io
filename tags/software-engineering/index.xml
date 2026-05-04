@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Software-Engineering on Code talks</title><link>/tags/software-engineering/</link><description>Recent content in Software-Engineering on Code talks</description><generator>Hugo</generator><language>zh-CN</language><copyright> Copyright © 2025 Leo Douglas</copyright><lastBuildDate>Sun, 29 Mar 2026 10:00:00 +0800</lastBuildDate><atom:link href="/tags/software-engineering/index.xml" rel="self" type="application/rss+xml"/><item><title>Java 很快，但你的代码可能不然</title><link>/post/java-performance-optimization-antipatterns/</link><pubDate>Sun, 29 Mar 2026 10:00:00 +0800</pubDate><guid>/post/java-performance-optimization-antipatterns/</guid><description>&lt;p>本文翻译自 &lt;a href="https://jvogel.me/posts/2026/java-is-fast-your-code-might-not-be/">Java Is Fast. Your Code Might Not Be.&lt;/a>，版权归原作者所有。&lt;/p>
+&lt;p>&lt;img src="/images/java-performance-optimization-hero.jpg" alt="Java 性能优化系列封面">&lt;/p>
+&lt;p>Java 性能优化系列文章第一部分。第二部分和第三部分即将推出。&lt;/p>
+&lt;p>几周前，我为在 DevNexus 的一次演讲构建了一个 Java 订单处理应用。应用能运行，测试通过。我运行了负载测试并收集了 Java Flight Recording (JFR) 数据。&lt;/p>
+&lt;p>&lt;strong>优化前：&lt;/strong> 1,198ms 耗时，每秒 85,000 订单，堆内存峰值略超 1GB，19 次 GC 停顿。&lt;/p>
+&lt;p>&lt;strong>优化后：&lt;/strong> 239ms。每秒 419,000 订单。139MB 堆内存。4 次 GC 停顿。&lt;/p>
+&lt;p>同一个应用。同样的测试。同样的 JDK。没有架构变更。当考虑到这类代码在生产环境中并非运行在单机上，而是部署在整个集群时，这些数据就更有意义了。&lt;/p>
+&lt;p>在第二部分，我将逐步讲解这些数据背后的性能剖析信息：火焰图、哪些方法真正消耗 CPU，以及修复后发生了什么变化。在此之前，你需要了解我们实际修复了哪些问题。&lt;/p>
+&lt;p>这些问题是真实代码库中常见的模式。它们编译通过，能混过代码审查，而且如果没有性能剖析数据指引，很容易被忽略。以下是其中八个问题。&lt;/p>
+&lt;hr>
+&lt;h2 id="tldr">TL;DR&lt;/h2>
+&lt;p>修复这类反模式将一个耗时 1,198ms 的 Java 应用优化到 239ms。以下是一些需要查找并修复的问题：&lt;/p>
+&lt;ol>
+&lt;li>&lt;strong>循环中的字符串拼接&lt;/strong> —— 不可变性导致的 O(n²) 复制&lt;/li>
+&lt;li>&lt;strong>循环内的 O(n²) Stream 迭代&lt;/strong> —— 每个元素都遍历整个列表&lt;/li>
+&lt;li>&lt;strong>热点路径中的 String.format()&lt;/strong> —— 最慢的字符串构建方式，每次调用都解析格式&lt;/li>
+&lt;li>&lt;strong>热点路径中的自动装箱&lt;/strong> —— 数百万个临时包装对象&lt;/li>
+&lt;li>&lt;strong>用异常控制流程&lt;/strong> —— fillInStackTrace() 遍历整个调用栈&lt;/li>
+&lt;li>&lt;strong>过宽的同步范围&lt;/strong> —— 单个锁成为瓶颈&lt;/li>
+&lt;li>&lt;strong>重复创建可复用对象&lt;/strong> —— 每次调用都创建 ObjectMapper、DateTimeFormatter、Gson&lt;/li>
+&lt;li>&lt;strong>虚拟线程钉住（JDK 21–23）&lt;/strong> —— synchronized 加阻塞 I/O 钉住载体线程&lt;/li>
+&lt;/ol>
+&lt;p>修复后：吞吐量提升 5 倍，堆内存减少 87%，GC 停顿减少 79%。同一个应用，同样的测试，同样的 JDK。&lt;/p></description></item></channel></rss>
