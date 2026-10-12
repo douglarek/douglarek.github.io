@@ -1,0 +1,384 @@
+/* hack — a minimal terminal-flavored theme. No webfonts, no external assets.
+   Three-state color scheme (auto / dark / light): <html data-theme="dark|light">;
+   without the attribute the palette follows prefers-color-scheme. */
+
+:root {
+    color-scheme: light;
+    --bg: #fafafa;
+    --fg: #24292f;
+    --muted: #6e7781;
+    --accent: #1a7f37;
+    --border: #e4e7e8;
+    --code-bg: #f0f1f0;
+    --selection: #cdeedd;
+}
+
+html[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0d0f0e;
+    --fg: #c9d1c9;
+    --muted: #6a756b;
+    --accent: #5af78e;
+    --border: #242927;
+    --code-bg: #161a18;
+    --selection: #2d4a38;
+}
+
+@media (prefers-color-scheme: dark) {
+    html:not([data-theme="light"]) {
+        color-scheme: dark;
+        --bg: #0d0f0e;
+        --fg: #c9d1c9;
+        --muted: #6a756b;
+        --accent: #5af78e;
+        --border: #242927;
+        --code-bg: #161a18;
+        --selection: #2d4a38;
+    }
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    margin: 1rem auto 0;
+    padding: 0 2.5vw 3rem;
+    width: 100%;
+    max-width: 66rem;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: ui-monospace, "JetBrains Mono", "Fira Code", Menlo, Consolas,
+        "Liberation Mono", "Noto Sans Mono CJK SC", monospace;
+    font-size: 0.95rem;
+    line-height: 1.75;
+}
+
+::selection {
+    background: var(--selection);
+}
+
+/* Header */
+
+.site-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem 1.5rem;
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.site-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    text-decoration: none;
+    color: var(--fg);
+}
+
+.site-title .prompt {
+    margin-right: 0.4em;
+    color: var(--accent);
+}
+
+.site-nav a {
+    margin-left: 1.25em;
+    color: var(--muted);
+    text-decoration: none;
+}
+
+.site-nav a:hover,
+.site-nav a.active {
+    color: var(--accent);
+}
+
+/* Theme toggle */
+
+.theme-toggle {
+    margin-left: 1.25em;
+    padding: 0.1rem 0.65rem;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: none;
+    color: var(--muted);
+    font: inherit;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+.theme-toggle:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.theme-toggle::after {
+    content: "auto";
+}
+
+html[data-theme="dark"] .theme-toggle::after {
+    content: "dark";
+}
+
+html[data-theme="light"] .theme-toggle::after {
+    content: "light";
+}
+
+.theme-toggle svg {
+    display: none;
+    width: 0.9em;
+    height: 0.9em;
+    margin-right: 0.4em;
+    vertical-align: -0.1em;
+}
+
+html:not([data-theme="dark"]):not([data-theme="light"]) .theme-toggle .icon-auto,
+html[data-theme="dark"] .theme-toggle .icon-dark,
+html[data-theme="light"] .theme-toggle .icon-light {
+    display: inline-block;
+}
+
+/* Post list */
+
+.section-label {
+    margin: 0 0 1.5rem;
+    color: var(--muted);
+}
+
+.post-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.post-list li {
+    padding: 0.15rem 0;
+}
+
+.post-list .date {
+    margin-right: 1em;
+    color: var(--muted);
+}
+
+.post-list a {
+    text-decoration: none;
+}
+
+.year {
+    margin: 2rem 0 0.5rem;
+    font-size: 1rem;
+    color: var(--accent);
+}
+
+.more {
+    margin-top: 2rem;
+}
+
+.tag-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.tag-list li {
+    padding: 0.15rem 0;
+}
+
+.tag-list .count {
+    margin-left: 0.75em;
+    color: var(--muted);
+}
+
+.tag-list .count::before {
+    content: "[";
+}
+
+.tag-list .count::after {
+    content: "]";
+}
+
+/* Single post */
+
+.post-header h1 {
+    margin: 0 0 0.5rem;
+    font-size: 1.35rem;
+    line-height: 1.4;
+}
+
+.post-meta {
+    margin-bottom: 2rem;
+}
+
+.post-meta .meta-row {
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.post-meta .sep {
+    margin: 0 0.6em;
+}
+
+.post-meta .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.post-meta .tag {
+    padding: 0.1rem 0.65rem;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--muted);
+    font-size: 0.8rem;
+    text-decoration: none;
+}
+
+.post-meta .tag:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+/* TOC */
+
+.toc {
+    margin-bottom: 2rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.toc summary {
+    padding: 0.4rem 0.75rem;
+    cursor: pointer;
+    color: var(--muted);
+}
+
+.toc #TableOfContents {
+    padding: 0 0.75rem 0.5rem;
+}
+
+.toc #TableOfContents ul {
+    margin: 0;
+    padding-left: 1.25em;
+}
+
+/* Content */
+
+.post-content h2,
+.post-content h3,
+.post-content h4 {
+    margin: 2rem 0 0.75rem;
+    line-height: 1.4;
+}
+
+.post-content h2 {
+    font-size: 1.15rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.3rem;
+}
+
+.post-content h3 {
+    font-size: 1.05rem;
+}
+
+.post-content img {
+    max-width: 100%;
+    height: auto;
+}
+
+.post-content blockquote {
+    margin: 1rem 0;
+    padding: 0 1rem;
+    border-left: 2px solid var(--accent);
+    color: var(--muted);
+}
+
+.post-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 0.85rem;
+}
+
+.post-content th,
+.post-content td {
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--border);
+    text-align: left;
+}
+
+.post-content th {
+    background: var(--code-bg);
+}
+
+.post-content hr {
+    border: 0;
+    border-top: 1px solid var(--border);
+    margin: 2rem 0;
+}
+
+/* Code */
+
+.post-content code {
+    font-family: inherit;
+    font-size: 0.9em;
+    background: var(--code-bg);
+    padding: 0.1em 0.35em;
+    border-radius: 3px;
+}
+
+.post-content pre {
+    overflow-x: auto;
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+    line-height: 1.55;
+}
+
+.post-content pre code {
+    padding: 0;
+    background: none;
+    font-size: 0.88em;
+}
+
+/* Links */
+
+a {
+    color: var(--fg);
+    text-decoration: underline;
+    text-decoration-color: var(--muted);
+    text-underline-offset: 3px;
+}
+
+a:hover {
+    color: var(--accent);
+    text-decoration-color: var(--accent);
+}
+
+/* Footer */
+
+.site-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.8rem;
+}
+
+.site-footer a {
+    color: var(--muted);
+}
+
+.site-footer a:hover {
+    color: var(--accent);
+}
